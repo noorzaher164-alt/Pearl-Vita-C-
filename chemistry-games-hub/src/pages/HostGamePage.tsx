@@ -93,6 +93,10 @@ export default function HostGamePage({ gameId, onBack }: Props) {
     const s: LiveSession = {
       gameId: game.id, templateId: game.templateId || 'periodic-table',
       gameType: game.gameType, title: game.title, questionCount: game.questions.length,
+      questions: game.questions.map(q => ({
+        id: q.id, text: q.text, choices: q.choices,
+        correctIndex: q.correctIndex, explanation: q.explanation, timeSeconds: q.timeSeconds,
+      })),
       status: 'waiting', currentQuestion: 0, questionStartedAt: 0, students: {},
     };
     try {

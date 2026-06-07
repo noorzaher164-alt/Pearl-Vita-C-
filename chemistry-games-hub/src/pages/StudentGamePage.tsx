@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getGameById } from '../storage';
 import { getTemplate, type GameTemplate } from '../templates';
-import { subscribeSession, submitAnswer, joinSession, type LiveSession, type StudentSlot } from '../realtime';
+import { subscribeSession, submitAnswer, joinSession, type LiveSession, type LiveQuestion, type StudentSlot } from '../realtime';
 
 interface Props {
   pin: string;
@@ -146,9 +145,8 @@ function RacingGame({ session, nickname, tpl, onAnswer, myScore, answered }: {
   session: LiveSession; nickname: string; tpl: GameTemplate;
   onAnswer: (idx: number) => void; myScore: number; answered: boolean;
 }) {
-  const game = getGameById(session.gameId);
-  if (!game) return null;
-  const q = game.questions[session.currentQuestion];
+  const q: LiveQuestion | undefined = session.questions?.[session.currentQuestion];
+  if (!q) return null;
   const students = Object.values(session.students).sort((a, b) => b.score - a.score);
   const maxScore = Math.max(...students.map(s => s.score), 100);
 
@@ -225,9 +223,8 @@ function RacingGame({ session, nickname, tpl, onAnswer, myScore, answered }: {
 function FishingGame({ session, tpl, onAnswer, answered }: {
   session: LiveSession; tpl: GameTemplate; onAnswer: (idx: number) => void; answered: boolean;
 }) {
-  const game = getGameById(session.gameId);
-  if (!game) return null;
-  const q = game.questions[session.currentQuestion];
+  const q: LiveQuestion | undefined = session.questions?.[session.currentQuestion];
+  if (!q) return null;
   const [fishPos, setFishPos] = useState(() =>
     q?.choices.map((_, i) => ({ x: 10 + Math.random() * 60, y: 25 + i * 20 + Math.random() * 8, dir: i % 2 === 0 ? 1 : -1 })) || []
   );
@@ -272,9 +269,8 @@ function FishingGame({ session, tpl, onAnswer, answered }: {
 
 // ── Reveal Screen ──────────────────────────────────────────────────────────
 function RevealScreen({ session, tpl, myAnswerIdx }: { session: LiveSession; tpl: GameTemplate; myAnswerIdx: number | null }) {
-  const game = getGameById(session.gameId);
-  if (!game) return null;
-  const q = game.questions[session.currentQuestion];
+  const q: LiveQuestion | undefined = session.questions?.[session.currentQuestion];
+  if (!q) return null;
   const isCorrect = myAnswerIdx !== null && myAnswerIdx === q?.correctIndex;
   useEffect(() => { if (isCorrect) playChallengeCorrect(); else playChallengeWrong(); }, []);
 
@@ -535,9 +531,8 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
 
   const handleAnswer = useCallback(async (choiceIdx: number) => {
     if (!session || myAnswers[session.currentQuestion] !== undefined) return;
-    const game = getGameById(session.gameId);
-    if (!game) return;
-    const q = game.questions[session.currentQuestion];
+    const q = session.questions?.[session.currentQuestion];
+    if (!q) return;
     const isCorrect = choiceIdx === q.correctIndex;
     const newStreak = isCorrect ? myStreak + 1 : 0;
     const pts = isCorrect ? 100 + newStreak * 30 : 0;

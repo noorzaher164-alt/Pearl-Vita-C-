@@ -14,12 +14,22 @@ export interface StudentSlot {
   answeredAt: Record<string, number>;
 }
 
+export interface LiveQuestion {
+  id: string;
+  text: string;
+  choices: string[];
+  correctIndex: number;
+  explanation?: string;
+  timeSeconds?: number;
+}
+
 export interface LiveSession {
   gameId: string;
   templateId: string;
   gameType: string;
   title: string;
   questionCount: number;
+  questions: LiveQuestion[];
   status: 'waiting' | 'playing' | 'reveal' | 'leaderboard' | 'finished';
   currentQuestion: number;
   questionStartedAt: number;
