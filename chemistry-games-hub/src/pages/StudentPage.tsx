@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getGames } from '../storage';
-import { getSession, FIREBASE_CONFIGURED } from '../firebase';
+import { getSession, FIREBASE_CONFIGURED } from '../realtime';
 import type { Game } from '../types';
 
 interface Props {

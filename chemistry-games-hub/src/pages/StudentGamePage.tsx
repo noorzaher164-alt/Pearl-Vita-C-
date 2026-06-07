@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getGameById } from '../storage';
 import { getTemplate, type GameTemplate } from '../templates';
-import { subscribeSession, submitAnswer, joinSession, type LiveSession, type StudentSlot } from '../firebase';
+import { subscribeSession, submitAnswer, joinSession, type LiveSession, type StudentSlot } from '../realtime';
 
 interface Props {
   pin: string;

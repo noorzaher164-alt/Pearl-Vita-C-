@@ -6,7 +6,7 @@ import { getTemplate } from '../templates';
 import {
   FIREBASE_CONFIGURED, createSession, subscribeSession, updateSession,
   deleteSession, type LiveSession,
-} from '../firebase';
+} from '../realtime';
 
 interface Props {
   gameId: string;
