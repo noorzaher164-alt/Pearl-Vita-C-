@@ -8,7 +8,7 @@ interface Props {
 const features = [
   { icon: '🧪', title: 'Interactive Games', desc: '10 unique game types for competitive & self-paced learning' },
   { icon: '📁', title: 'Folder System', desc: 'Organize games by topic and lesson for easy access' },
-  { icon: '🏆', title: 'Leaderboards', desc: 'Kahoot-style competition with live scores and rankings' },
+  { icon: '🏆', title: 'Leaderboards', desc: 'Live competition with real-time scores and rankings' },
   { icon: '✏️', title: 'Easy Creation', desc: 'Build MCQ questions with explanations in minutes' },
   { icon: '💾', title: 'Auto-Save', desc: 'All games saved automatically in your browser' },
   { icon: '📱', title: 'Responsive', desc: 'Works perfectly on laptops, tablets, and phones' },
@@ -74,7 +74,7 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
           </h1>
 
           <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.7)', maxWidth: 600, margin: '0 auto 48px', lineHeight: 1.6 }}>
-            The ultimate interactive chemistry platform for Grade 12 students.
+            The ultimate interactive chemistry platform for students.
             Create, organize, and play engaging chemistry games!
           </p>
 
@@ -178,7 +178,7 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
           10 Unique Game Types
         </h2>
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', marginBottom: 48 }}>
-          5 competitive Kahoot-style + 5 self-paced practice games
+          5 competitive live games + 5 self-paced practice games
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
           {gameTypes.map(g => (

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import type { Game } from '../types';
-import { getGameById } from '../storage';
+import type { Game, GameResult } from '../types';
+import { getGameById, saveResult } from '../storage';
 import { getTemplate } from '../templates';
 import {
   FIREBASE_CONFIGURED, createSession, subscribeSession, updateSession,
@@ -149,6 +149,15 @@ export default function HostGamePage({ gameId, onBack }: Props) {
       playHostSound('finish');
       await updateSession(pin, { status: 'finished' });
       setPhase('finished');
+      if (session && game) {
+        const finalStudents = Object.values(session.students).sort((a, b) => b.score - a.score);
+        const result: GameResult = {
+          gameId: game.id,
+          leaderboard: finalStudents.map(s => ({ nickname: s.nickname, score: s.score, time: 0 })),
+          playedAt: new Date().toISOString(),
+        };
+        saveResult(result);
+      }
       return;
     }
     playHostSound('next');

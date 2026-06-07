@@ -10,17 +10,17 @@ interface Props {
   onSaved: () => void;
 }
 
-const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean }[] = [
-  { value: 'quiz-battle', label: 'Chemistry Quiz Battle', icon: '⚔️', competitive: true },
-  { value: 'fastest-molecule', label: 'Fastest Molecule', icon: '⚡', competitive: true },
-  { value: 'periodic-challenge', label: 'Periodic Table Challenge', icon: '🔬', competitive: true },
-  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃', competitive: true },
-  { value: 'energy-points', label: 'Energy Points Quiz', icon: '💎', competitive: true },
-  { value: 'match-terms', label: 'Match the Terms', icon: '🔗', competitive: false },
-  { value: 'word-search', label: 'Word Search Chemistry', icon: '🔍', competitive: false },
-  { value: 'drag-drop', label: 'Drag and Drop Classification', icon: '🧩', competitive: false },
-  { value: 'true-false', label: 'True or False Cards', icon: '✅', competitive: false },
-  { value: 'flashcards', label: 'Flashcards Review', icon: '🃏', competitive: false },
+const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean; desc: string }[] = [
+  { value: 'quiz-battle', label: 'Quiz Battle', icon: '⚔️', competitive: true, desc: 'Classic live MCQ duel — all students answer at the same time, fastest correct answer wins the most points.' },
+  { value: 'fastest-molecule', label: 'Fastest Molecule', icon: '⚡', competitive: true, desc: 'Speed matters! Bonus points are awarded to whoever answers first. Great for quick-recall chemistry facts.' },
+  { value: 'periodic-challenge', label: 'Periodic Challenge', icon: '🔬', competitive: true, desc: 'Timed periodic-table themed round. Students race the clock and each other on element and compound questions.' },
+  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃', competitive: true, desc: 'Short time limit per question — keeps the energy high. Perfect for reaction equations and balancing practice.' },
+  { value: 'energy-points', label: 'Energy Points', icon: '💎', competitive: true, desc: 'Diamond scoring — earn big energy bonuses for streaks of correct answers. Risk-reward gameplay.' },
+  { value: 'match-terms', label: 'Match the Terms', icon: '🔗', competitive: false, desc: 'Students match key chemistry terms to their definitions at their own pace. Great for vocabulary review.' },
+  { value: 'word-search', label: 'Word Search', icon: '🔍', competitive: false, desc: 'Find hidden chemistry words in a grid. Fun, low-pressure review for any topic.' },
+  { value: 'drag-drop', label: 'Drag & Drop', icon: '🧩', competitive: false, desc: 'Drag substances or labels into the correct category. Ideal for classification and sorting tasks.' },
+  { value: 'true-false', label: 'True or False', icon: '✅', competitive: false, desc: 'Quick true/false statements to reinforce concepts. Excellent for checking understanding after a lesson.' },
+  { value: 'flashcards', label: 'Flashcards Review', icon: '🃏', competitive: false, desc: 'Self-paced flip-card review. Students study at their own speed before a test or exam.' },
 ];
 
 function emptyQuestion(): Question {
@@ -166,8 +166,8 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 20 }}>Choose how students will interact with the questions</p>
 
         <div style={{ marginBottom: 16 }}>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>⚔️ COMPETITIVE (Kahoot-style)</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>⚔️ COMPETITIVE — Live multiplayer, teacher-hosted</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
             {GAME_TYPES.filter(t => t.competitive).map(t => (
               <button
                 key={t.value}
@@ -178,17 +178,19 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
                   borderRadius: 12, padding: '12px 16px', color: 'white',
                   cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                   fontSize: 14, fontWeight: gameType === t.value ? 600 : 400,
+                  display: 'flex', flexDirection: 'column', gap: 4,
                 }}
               >
-                {t.icon} {t.label}
+                <span style={{ fontSize: 16 }}>{t.icon} {t.label}</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 400, lineHeight: 1.4 }}>{t.desc}</span>
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>📚 PRACTICE (Self-paced)</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>📚 PRACTICE — Self-paced, solo mode</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
             {GAME_TYPES.filter(t => !t.competitive).map(t => (
               <button
                 key={t.value}
@@ -199,9 +201,11 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
                   borderRadius: 12, padding: '12px 16px', color: 'white',
                   cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
                   fontSize: 14, fontWeight: gameType === t.value ? 600 : 400,
+                  display: 'flex', flexDirection: 'column', gap: 4,
                 }}
               >
-                {t.icon} {t.label}
+                <span style={{ fontSize: 16 }}>{t.icon} {t.label}</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 400, lineHeight: 1.4 }}>{t.desc}</span>
               </button>
             ))}
           </div>
