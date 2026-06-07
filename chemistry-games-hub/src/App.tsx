@@ -12,16 +12,19 @@ import StudentGamePage from './pages/StudentGamePage';
 import BubbleBackground from './components/BubbleBackground';
 
 function App() {
+  // Pre-fill PIN if URL has ?join=XXXXXX
+  const urlPin = new URLSearchParams(window.location.search).get('join')?.toUpperCase() || null;
+
   const [state, setState] = useState<AppState>({
-    page: 'home',
+    page: urlPin ? 'student' : 'home',
     selectedFolderId: null,
     selectedGameId: null,
     editGameId: null,
-    studentPin: null,
+    studentPin: urlPin,
     studentNickname: null,
   });
   const [lastResult, setLastResult] = useState<{ entries: LeaderboardEntry[]; gameId: string } | null>(null);
-  const [fromStudent, setFromStudent] = useState(false);
+  const [fromStudent, setFromStudent] = useState(!!urlPin);
 
   const navigate = (page: Page, extra?: Partial<AppState>) => {
     setState(prev => ({ ...prev, page, ...extra }));
@@ -54,6 +57,7 @@ function App() {
         )}
         {state.page === 'student' && (
           <StudentPage
+            initialPin={state.studentPin || undefined}
             onPlayGame={(gameId) => {
               setFromStudent(true);
               navigate('play-game', { selectedGameId: gameId });

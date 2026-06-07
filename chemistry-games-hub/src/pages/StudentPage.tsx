@@ -4,6 +4,7 @@ import { getSession, FIREBASE_CONFIGURED } from '../firebase';
 import type { Game } from '../types';
 
 interface Props {
+  initialPin?: string;
   onPlayGame: (gameId: string) => void;
   onJoinLive: (pin: string, nickname: string) => void;
   onBack: () => void;
@@ -24,13 +25,14 @@ const GAME_TYPE_LABELS: Record<string, string> = {
 
 type Step = 'enter' | 'nickname' | 'confirm-solo';
 
-export default function StudentPage({ onPlayGame, onJoinLive, onBack }: Props) {
-  const [code, setCode] = useState('');
+export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack }: Props) {
+  const [code, setCode] = useState(initialPin || '');
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
-  const [step, setStep] = useState<Step>('enter');
+  // If a PIN was pre-filled via URL, go straight to nickname step
+  const [step, setStep] = useState<Step>(initialPin ? 'nickname' : 'enter');
   const [foundGame, setFoundGame] = useState<Game | null>(null);
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(!!initialPin); // assume live if URL pin
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {

@@ -250,51 +250,83 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
                 </div>
               </div>
 
-              <div style={{ marginBottom: 14 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>Question Text *</label>
                 <textarea
                   value={q.text}
                   onChange={e => updateQuestion(qi, 'text', e.target.value)}
-                  placeholder="Enter your question..."
-                  rows={2}
-                  style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }}
+                  placeholder="Enter your question here..."
+                  rows={3}
+                  style={{ ...inputStyle, resize: 'vertical', minHeight: 90, fontSize: 16, lineHeight: 1.5 }}
                 />
               </div>
 
-              <div style={{ marginBottom: 14 }}>
-                <label style={labelStyle}>Answer Choices * (click radio to mark correct)</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {q.choices.map((choice, ci) => (
-                    <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <button
-                        onClick={() => updateQuestion(qi, 'correctIndex', ci)}
-                        style={{
-                          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                          background: q.correctIndex === ci ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'rgba(255,255,255,0.08)',
-                          border: q.correctIndex === ci ? 'none' : '2px solid rgba(255,255,255,0.2)',
-                          cursor: 'pointer', color: 'white', fontSize: 14, fontFamily: 'inherit',
-                        }}
-                      >
-                        {q.correctIndex === ci ? '✓' : String.fromCharCode(65 + ci)}
-                      </button>
-                      <input
-                        value={choice}
-                        onChange={e => updateChoice(qi, ci, e.target.value)}
-                        placeholder={`Choice ${String.fromCharCode(65 + ci)}`}
-                        style={{ ...inputStyle, flex: 1, margin: 0 }}
-                      />
-                    </div>
+              {/* Per-question timer */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>⏱️ Question Timer</label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[null, 5, 10, 15, 20, 30, 45, 60].map(sec => (
+                    <button
+                      key={sec ?? 'default'}
+                      onClick={() => updateQuestion(qi, 'timeSeconds', sec as number)}
+                      style={{
+                        background: (q.timeSeconds ?? null) === sec ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.06)',
+                        border: `1px solid ${(q.timeSeconds ?? null) === sec ? '#c084fc' : 'rgba(255,255,255,0.12)'}`,
+                        color: (q.timeSeconds ?? null) === sec ? '#c084fc' : 'rgba(255,255,255,0.6)',
+                        borderRadius: 8, padding: '6px 14px', cursor: 'pointer',
+                        fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
+                      }}
+                    >
+                      {sec === null ? 'Default' : `${sec}s`}
+                    </button>
                   ))}
                 </div>
               </div>
 
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Answer Choices * — click the circle to mark the correct answer</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {q.choices.map((choice, ci) => {
+                    const choiceColors = ['#e74c3c', '#2980e4', '#f1c40f', '#27ae60'];
+                    const isCorrect = q.correctIndex === ci;
+                    return (
+                      <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <button
+                          onClick={() => updateQuestion(qi, 'correctIndex', ci)}
+                          style={{
+                            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                            background: isCorrect ? choiceColors[ci] : 'rgba(255,255,255,0.08)',
+                            border: isCorrect ? 'none' : `2px solid ${choiceColors[ci]}60`,
+                            cursor: 'pointer', color: 'white', fontSize: 15, fontFamily: 'inherit',
+                            fontWeight: 800,
+                          }}
+                        >
+                          {isCorrect ? '✓' : String.fromCharCode(65 + ci)}
+                        </button>
+                        <input
+                          value={choice}
+                          onChange={e => updateChoice(qi, ci, e.target.value)}
+                          placeholder={`Choice ${String.fromCharCode(65 + ci)} — enter answer here`}
+                          style={{
+                            ...inputStyle, flex: 1, margin: 0, fontSize: 15,
+                            borderColor: isCorrect ? `${choiceColors[ci]}60` : 'rgba(255,255,255,0.15)',
+                            background: isCorrect ? `${choiceColors[ci]}12` : 'rgba(255,255,255,0.07)',
+                            padding: '13px 14px',
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
-                <label style={labelStyle}>Explanation (optional)</label>
+                <label style={labelStyle}>💡 Explanation (shown after answer — optional)</label>
                 <input
                   value={q.explanation || ''}
                   onChange={e => updateQuestion(qi, 'explanation', e.target.value)}
-                  placeholder="Explain why the answer is correct..."
-                  style={inputStyle}
+                  placeholder="Explain why this answer is correct..."
+                  style={{ ...inputStyle, fontSize: 14 }}
                 />
               </div>
             </div>

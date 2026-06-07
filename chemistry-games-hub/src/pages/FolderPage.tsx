@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { Game, Folder, Page, GameType } from '../types';
 import { getFolders, getGamesByFolder, deleteGame, duplicateGame, assignPinToGame } from '../storage';
+
+function studentJoinUrl(pin: string) {
+  return `${window.location.origin}${window.location.pathname}?join=${pin}`;
+}
 
 interface Props {
   folderId: string;
@@ -298,24 +303,34 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
               {pinModal.game.title}
             </p>
 
+            {/* QR Code */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ background: 'white', padding: 12, borderRadius: 16 }}>
+                <QRCodeSVG value={studentJoinUrl(pinModal.pin)} size={150} />
+              </div>
+            </div>
+
             {/* Big PIN display */}
             <div style={{
               background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.5)',
-              borderRadius: 20, padding: '24px 20px', marginBottom: 20,
+              borderRadius: 20, padding: '20px', marginBottom: 12,
             }}>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 8, letterSpacing: 2 }}>GAME PIN</div>
-              <div style={{
-                fontSize: 52, fontWeight: 900, letterSpacing: 10,
-                color: '#6ee7b7',
-                textShadow: '0 0 30px rgba(110,231,183,0.5)',
-              }}>
+              <div style={{ fontSize: 52, fontWeight: 900, letterSpacing: 10, color: '#6ee7b7', textShadow: '0 0 30px rgba(110,231,183,0.5)' }}>
                 {pinModal.pin}
               </div>
             </div>
 
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24 }}>
-              Share this PIN with your students.<br />
-              They go to the website → click <strong style={{ color: 'white' }}>"I'm a Student"</strong> → enter this PIN.
+            {/* Direct link */}
+            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '10px 14px', marginBottom: 20, wordBreak: 'break-all' }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>Direct link for students:</div>
+              <a href={studentJoinUrl(pinModal.pin)} target="_blank" rel="noreferrer" style={{ color: '#7dd3fc', fontSize: 12, textDecoration: 'none' }}>
+                {studentJoinUrl(pinModal.pin)}
+              </a>
+            </div>
+
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20 }}>
+              Students scan the QR code or open the link — the PIN is pre-filled automatically.
             </p>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>

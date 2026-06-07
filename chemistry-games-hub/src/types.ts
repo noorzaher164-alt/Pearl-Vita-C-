@@ -17,6 +17,7 @@ export interface Question {
   correctIndex: number;
   explanation?: string;
   imageUrl?: string;
+  timeSeconds?: number; // per-question timer override
 }
 
 export interface Game {

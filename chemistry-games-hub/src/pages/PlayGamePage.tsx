@@ -193,7 +193,9 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   }, [gameId]);
 
   const isCompetitive = game ? COMPETITIVE_TYPES.includes(game.gameType) : false;
-  const maxTime = game ? (TIMER_SECS[game.gameType] || 20) : 20;
+  // Per-question timer: use question override if set, else fall back to game type default
+  const currentQuestion = game?.questions[currentQ];
+  const maxTime = currentQuestion?.timeSeconds || (game ? (TIMER_SECS[game.gameType] || 20) : 20);
 
   // timerColor adapts based on time remaining
   const urgencyColor = timeLeft / maxTime > 0.5 ? tpl.timerColor : timeLeft / maxTime > 0.25 ? '#fde68a' : '#ef4444';
@@ -453,12 +455,16 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
 
         <div style={{
           background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`,
-          borderRadius: 20, padding: '24px 20px', maxWidth: 700, margin: '0 auto',
+          borderRadius: 24, padding: '28px 28px', maxWidth: 760, margin: '0 auto',
+          boxShadow: `0 8px 40px rgba(0,0,0,0.3)`,
         }}>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 8, letterSpacing: 1 }}>
+          <p style={{ color: tpl.accentColor, fontSize: 13, marginBottom: 10, letterSpacing: 2, fontWeight: 700 }}>
             QUESTION {currentQ + 1}
+            {currentQuestion?.timeSeconds && (
+              <span style={{ marginLeft: 12, color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>⏱️ {currentQuestion.timeSeconds}s</span>
+            )}
           </p>
-          <h2 style={{ fontSize: 'clamp(18px, 3.5vw, 28px)', fontWeight: 700, color: 'white', lineHeight: 1.4, margin: 0 }}>
+          <h2 style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 700, color: 'white', lineHeight: 1.5, margin: 0 }}>
             {q.text}
           </h2>
         </div>
@@ -466,11 +472,11 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
 
       {/* Answer choices — Kahoot style */}
       <div style={{
-        flex: 1, padding: '16px 20px 24px',
+        flex: 1, padding: '20px 24px 32px',
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 12,
-        maxWidth: 800,
+        gap: 16,
+        maxWidth: 860,
         margin: '0 auto',
         width: '100%',
         alignContent: 'start',
@@ -501,31 +507,31 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
               style={{
                 background: bg,
                 border,
-                borderRadius: 16,
-                padding: '20px 16px',
+                borderRadius: 20,
+                padding: '22px 20px',
                 color: 'white',
                 cursor: phase === 'playing' ? 'pointer' : 'default',
                 fontFamily: 'inherit',
-                fontSize: 'clamp(14px, 2.5vw, 18px)',
+                fontSize: 'clamp(15px, 2.5vw, 20px)',
                 fontWeight: 700,
                 textAlign: 'left',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 12,
+                gap: 14,
                 transition: 'all 0.25s ease',
                 opacity,
                 transform: scale,
-                boxShadow: revealed && isCorrect ? '0 0 30px rgba(34,197,94,0.6)' : `0 4px 15px ${choiceColor}60`,
-                minHeight: 70,
+                boxShadow: revealed && isCorrect ? '0 0 40px rgba(34,197,94,0.7)' : `0 6px 20px ${choiceColor}50`,
+                minHeight: 90,
               }}
               onMouseEnter={e => phase === 'playing' && (e.currentTarget.style.transform = 'scale(1.03)')}
               onMouseLeave={e => phase === 'playing' && (e.currentTarget.style.transform = 'scale(1)')}
             >
               <span style={{
-                width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                background: 'rgba(0,0,0,0.2)',
+                width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                background: 'rgba(0,0,0,0.25)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, fontWeight: 900,
+                fontSize: 22, fontWeight: 900,
               }}>
                 {revealed && isCorrect ? '✓' : revealed && isSelected && !isCorrect ? '✗' : cfg.shape}
               </span>

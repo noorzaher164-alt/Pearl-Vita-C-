@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import type { Game } from '../types';
 import { getGameById } from '../storage';
 import { getTemplate } from '../templates';
@@ -6,6 +7,10 @@ import {
   FIREBASE_CONFIGURED, createSession, subscribeSession, updateSession,
   deleteSession, type LiveSession,
 } from '../firebase';
+
+function joinUrl(pin: string) {
+  return `${window.location.origin}${window.location.pathname}?join=${pin}`;
+}
 
 interface Props {
   gameId: string;
@@ -162,10 +167,15 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           <div style={{ fontSize: 56, marginBottom: 12 }}>🎮</div>
           <h1 style={{ color: 'white', fontSize: 28, fontWeight: 800, marginBottom: 8 }}>{game?.title}</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>{game?.lessonName} • {game?.questions.length} questions</p>
-          <div style={{ background: `${tpl.accentColor}20`, border: `1px solid ${tpl.accentColor}50`, borderRadius: 14, padding: '16px', marginBottom: 28, marginTop: 20 }}>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 4 }}>Student PIN code:</p>
+          <div style={{ background: `${tpl.accentColor}20`, border: `1px solid ${tpl.accentColor}50`, borderRadius: 14, padding: '20px', marginBottom: 28, marginTop: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <div style={{ background: 'white', padding: 10, borderRadius: 12 }}>
+                <QRCodeSVG value={joinUrl(pin)} size={110} />
+              </div>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, marginBottom: 4 }}>📱 Scan to join — or enter PIN:</p>
             <p style={{ color: tpl.accentColor, fontSize: 42, fontWeight: 900, letterSpacing: 8, fontFamily: 'monospace' }}>{pin}</p>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Students enter this code to join</p>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, wordBreak: 'break-all' }}>{joinUrl(pin)}</p>
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '14px 24px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
@@ -194,12 +204,20 @@ export default function HostGamePage({ gameId, onBack }: Props) {
         <div style={{ flex: 1, display: 'flex', gap: 24, padding: 24, maxWidth: 960, margin: '0 auto', width: '100%' }}>
           {/* PIN display */}
           <div style={{ flex: 1 }}>
-            <div style={{ background: tpl.cardBg, borderRadius: 20, padding: 32, textAlign: 'center', border: `2px solid ${tpl.accentColor}40`, marginBottom: 20 }}>
-              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, marginBottom: 8 }}>📱 Students go to the site and enter:</div>
-              <div style={{ color: tpl.accentColor, fontSize: 64, fontWeight: 900, letterSpacing: 12, fontFamily: 'monospace', textShadow: `0 0 40px ${tpl.accentColor}60` }}>
+            <div style={{ background: tpl.cardBg, borderRadius: 20, padding: 28, textAlign: 'center', border: `2px solid ${tpl.accentColor}40`, marginBottom: 20 }}>
+              {/* QR code */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                <div style={{ background: 'white', padding: 12, borderRadius: 16 }}>
+                  <QRCodeSVG value={joinUrl(pin)} size={140} />
+                </div>
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 6 }}>📱 Scan QR code or enter PIN:</div>
+              <div style={{ color: tpl.accentColor, fontSize: 56, fontWeight: 900, letterSpacing: 10, fontFamily: 'monospace', textShadow: `0 0 40px ${tpl.accentColor}60` }}>
                 {pin}
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 8 }}>then pick their nickname</div>
+              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginTop: 8, wordBreak: 'break-all' }}>
+                {joinUrl(pin)}
+              </div>
             </div>
 
             <button
