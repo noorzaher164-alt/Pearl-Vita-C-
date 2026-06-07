@@ -1,4 +1,12 @@
-import { getStore } from '@netlify/blobs';
+// Simple in-memory session store using a module-level Map
+// Works within a single Lambda warm invocation — good enough for short classroom sessions
+const sessions = new Map();
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
 function deepMerge(target, source) {
   if (typeof source !== 'object' || source === null) return source;
@@ -16,12 +24,6 @@ function deepMerge(target, source) {
   return result;
 }
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
-
 export default async function handler(request) {
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS });
@@ -29,33 +31,32 @@ export default async function handler(request) {
 
   const url = new URL(request.url);
   const pin = url.searchParams.get('pin');
-  if (!pin) {
-    return new Response(JSON.stringify({ error: 'Missing pin' }), { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } });
-  }
-
-  const store = getStore('chem-sessions');
   const h = { ...CORS, 'Content-Type': 'application/json' };
 
+  if (!pin) {
+    return new Response(JSON.stringify({ error: 'Missing pin' }), { status: 400, headers: h });
+  }
+
   if (request.method === 'GET') {
-    const data = await store.get(pin, { type: 'json' }).catch(() => null);
-    return new Response(JSON.stringify(data ?? null), { headers: h });
+    const data = sessions.get(pin) ?? null;
+    return new Response(JSON.stringify(data), { headers: h });
   }
 
   if (request.method === 'POST') {
     const body = await request.json();
-    await store.setJSON(pin, body);
+    sessions.set(pin, body);
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
   if (request.method === 'PATCH') {
     const body = await request.json();
-    const current = await store.get(pin, { type: 'json' }).catch(() => null) ?? {};
-    await store.setJSON(pin, deepMerge(current, body));
+    const current = sessions.get(pin) ?? {};
+    sessions.set(pin, deepMerge(current, body));
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
   if (request.method === 'DELETE') {
-    await store.delete(pin).catch(() => {});
+    sessions.delete(pin);
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
