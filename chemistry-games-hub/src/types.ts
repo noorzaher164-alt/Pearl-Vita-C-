@@ -28,6 +28,7 @@ export interface Game {
   questions: Question[];
   createdAt: string;
   isCompetitive: boolean;
+  pin?: string; // 6-char student access code
 }
 
 export interface Folder {
@@ -52,6 +53,7 @@ export interface GameResult {
 
 export type Page =
   | 'home'
+  | 'student'
   | 'dashboard'
   | 'folder'
   | 'create-game'

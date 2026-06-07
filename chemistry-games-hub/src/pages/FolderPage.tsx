@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Game, Folder, Page, GameType } from '../types';
-import { getFolders, getGamesByFolder, deleteGame, duplicateGame } from '../storage';
+import { getFolders, getGamesByFolder, deleteGame, duplicateGame, assignPinToGame } from '../storage';
 
 interface Props {
   folderId: string;
@@ -43,6 +43,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
+  const [pinModal, setPinModal] = useState<{ game: Game; pin: string } | null>(null);
 
   const load = () => {
     const all = getFolders();
@@ -61,6 +62,12 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
   const handleDuplicate = (id: string) => {
     duplicateGame(id);
     load();
+  };
+
+  const handleGetPin = (game: Game) => {
+    const pin = game.pin || assignPinToGame(game.id);
+    load();
+    setPinModal({ game, pin });
   };
 
   const filtered = games.filter(g => {
@@ -199,6 +206,18 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
                   <span>📅 {new Date(game.createdAt).toLocaleDateString()}</span>
                 </div>
 
+                {/* PIN badge */}
+                {game.pin && (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 12,
+                    background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)',
+                    borderRadius: 8, padding: '4px 10px', fontSize: 12,
+                  }}>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>PIN:</span>
+                    <span style={{ fontWeight: 800, color: '#6ee7b7', letterSpacing: 2 }}>{game.pin}</span>
+                  </div>
+                )}
+
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button
@@ -210,6 +229,15 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
                       fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     }}
                   >▶️ Play</button>
+                  <button
+                    onClick={() => handleGetPin(game)}
+                    style={{
+                      background: 'rgba(34,197,94,0.15)', color: '#6ee7b7',
+                      border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
+                    }}
+                    title="Get student PIN"
+                  >🔑</button>
                   <button
                     onClick={() => onEditGame(game.id)}
                     style={{
@@ -238,6 +266,70 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* PIN Modal */}
+      {pinModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        }} onClick={() => setPinModal(null)}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1a0933, #0d1f3c)',
+            border: '1px solid rgba(34,197,94,0.4)',
+            borderRadius: 28, padding: '40px 36px', maxWidth: 420, width: '100%', textAlign: 'center',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 56, marginBottom: 12 }}>🔑</div>
+            <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Student Game PIN</h2>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 28 }}>
+              {pinModal.game.title}
+            </p>
+
+            {/* Big PIN display */}
+            <div style={{
+              background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.5)',
+              borderRadius: 20, padding: '24px 20px', marginBottom: 20,
+            }}>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 8, letterSpacing: 2 }}>GAME PIN</div>
+              <div style={{
+                fontSize: 52, fontWeight: 900, letterSpacing: 10,
+                color: '#6ee7b7',
+                textShadow: '0 0 30px rgba(110,231,183,0.5)',
+              }}>
+                {pinModal.pin}
+              </div>
+            </div>
+
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24 }}>
+              Share this PIN with your students.<br />
+              They go to the website → click <strong style={{ color: 'white' }}>"I'm a Student"</strong> → enter this PIN.
+            </p>
+
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={() => {
+                  const newPin = assignPinToGame(pinModal.game.id);
+                  load();
+                  setPinModal({ game: pinModal.game, pin: newPin });
+                }}
+                style={{
+                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.7)', borderRadius: 12, padding: '11px 20px',
+                  fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >🔄 New PIN</button>
+              <button
+                onClick={() => setPinModal(null)}
+                style={{
+                  background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                  color: 'white', border: 'none', borderRadius: 12, padding: '11px 28px',
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >✓ Done</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

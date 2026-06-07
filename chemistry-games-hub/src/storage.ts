@@ -95,3 +95,20 @@ export function saveResult(result: GameResult) {
 export function getResultsByGame(gameId: string): GameResult[] {
   return getResults().filter(r => r.gameId === gameId);
 }
+
+// ── PIN SYSTEM ────────────────────────────────────────────────────────────────
+export function generatePin(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+export function assignPinToGame(gameId: string): string {
+  const games = getGames();
+  const game = games.find(g => g.id === gameId);
+  if (!game) return '';
+  const pin = generatePin();
+  game.pin = pin;
+  localStorage.setItem(GAMES_KEY, JSON.stringify(games));
+  // TODO: await supabase.from('games').update({ pin }).eq('id', gameId)
+  return pin;
+}

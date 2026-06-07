@@ -2,6 +2,7 @@ import type { Page } from '../types';
 
 interface Props {
   onNavigate: (page: Page) => void;
+  onStudentJoin: () => void;
 }
 
 const features = [
@@ -26,7 +27,7 @@ const gameTypes = [
   { name: 'Flashcards', icon: '🃏', color: '#60a5fa', type: 'practice' },
 ];
 
-export default function HomePage({ onNavigate }: Props) {
+export default function HomePage({ onNavigate, onStudentJoin }: Props) {
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -77,45 +78,44 @@ export default function HomePage({ onNavigate }: Props) {
             Create, organize, and play engaging chemistry games!
           </p>
 
+          {/* Two role cards */}
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {/* Student card */}
+            <button
+              onClick={onStudentJoin}
+              style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: 'white', border: 'none', borderRadius: 20,
+                padding: '24px 36px', fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: '0 8px 30px rgba(34,197,94,0.5)',
+                transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-4px)')}
+              onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
+            >
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🎓</div>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>I'm a Student</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Enter game PIN</div>
+            </button>
+
+            {/* Teacher card */}
             <button
               onClick={() => onNavigate('dashboard')}
               style={{
                 background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 16,
-                padding: '16px 40px',
-                fontSize: 18,
-                fontWeight: 700,
-                cursor: 'pointer',
+                color: 'white', border: 'none', borderRadius: 20,
+                padding: '24px 36px', fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'inherit',
                 boxShadow: '0 8px 30px rgba(167,139,250,0.5)',
-                fontFamily: 'inherit',
-                transition: 'all 0.3s',
+                transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
               }}
-              onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-3px)')}
+              onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-4px)')}
               onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
-              🚀 Go to Dashboard
-            </button>
-            <button
-              onClick={() => onNavigate('dashboard')}
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: 16,
-                padding: '16px 40px',
-                fontSize: 18,
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                transition: 'all 0.3s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-            >
-              ✏️ Create a Game
+              <div style={{ fontSize: 40, marginBottom: 8 }}>👩‍🏫</div>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>I'm a Teacher</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Go to Dashboard</div>
             </button>
           </div>
 

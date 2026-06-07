@@ -6,6 +6,7 @@ import FolderPage from './pages/FolderPage';
 import CreateGamePage from './pages/CreateGamePage';
 import PlayGamePage from './pages/PlayGamePage';
 import ResultsPage from './pages/ResultsPage';
+import StudentPage from './pages/StudentPage';
 import BubbleBackground from './components/BubbleBackground';
 
 function App() {
@@ -16,6 +17,8 @@ function App() {
     editGameId: null,
   });
   const [lastResult, setLastResult] = useState<{ entries: LeaderboardEntry[]; gameId: string } | null>(null);
+  // Track whether student came from student page (so back goes back to student page)
+  const [fromStudent, setFromStudent] = useState(false);
 
   const navigate = (page: Page, extra?: Partial<AppState>) => {
     setState(prev => ({ ...prev, page, ...extra }));
@@ -25,23 +28,35 @@ function App() {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && state.page !== 'home') {
-        if (state.page === 'play-game') navigate('folder', { selectedFolderId: state.selectedFolderId });
-        else if (state.page === 'results') navigate('folder', { selectedFolderId: state.selectedFolderId });
+        if (state.page === 'play-game') navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId });
+        else if (state.page === 'results') navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId });
         else if (state.page === 'folder') navigate('dashboard');
         else if (state.page === 'create-game') navigate('folder', { selectedFolderId: state.selectedFolderId });
-        else navigate('dashboard');
+        else navigate('home');
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [state]);
+  }, [state, fromStudent]);
 
   return (
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' }}>
       <BubbleBackground />
       <div className="relative z-10">
         {state.page === 'home' && (
-          <HomePage onNavigate={navigate} />
+          <HomePage
+            onNavigate={navigate}
+            onStudentJoin={() => navigate('student')}
+          />
+        )}
+        {state.page === 'student' && (
+          <StudentPage
+            onPlayGame={(gameId) => {
+              setFromStudent(true);
+              navigate('play-game', { selectedGameId: gameId });
+            }}
+            onBack={() => navigate('home')}
+          />
         )}
         {state.page === 'dashboard' && (
           <DashboardPage
@@ -53,7 +68,7 @@ function App() {
           <FolderPage
             folderId={state.selectedFolderId}
             onNavigate={navigate}
-            onPlayGame={(gameId) => navigate('play-game', { selectedGameId: gameId })}
+            onPlayGame={(gameId) => { setFromStudent(false); navigate('play-game', { selectedGameId: gameId }); }}
             onCreateGame={() => navigate('create-game', { editGameId: null })}
             onEditGame={(gameId) => navigate('create-game', { editGameId: gameId })}
           />
@@ -73,7 +88,7 @@ function App() {
               setLastResult({ entries, gameId: state.selectedGameId! });
               navigate('results', { selectedGameId: state.selectedGameId });
             }}
-            onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
+            onBack={() => navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId })}
           />
         )}
         {state.page === 'results' && lastResult && (
@@ -81,7 +96,7 @@ function App() {
             gameId={lastResult.gameId}
             entries={lastResult.entries}
             onPlayAgain={() => navigate('play-game', { selectedGameId: lastResult.gameId })}
-            onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
+            onBack={() => navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId })}
           />
         )}
       </div>
