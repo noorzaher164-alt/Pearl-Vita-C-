@@ -1,0 +1,245 @@
+import { useState, useEffect } from 'react';
+import type { Game, Folder, Page, GameType } from '../types';
+import { getFolders, getGamesByFolder, deleteGame, duplicateGame } from '../storage';
+
+interface Props {
+  folderId: string;
+  onNavigate: (page: Page) => void;
+  onPlayGame: (gameId: string) => void;
+  onCreateGame: () => void;
+  onEditGame: (gameId: string) => void;
+}
+
+const GAME_LABELS: Record<GameType, string> = {
+  'quiz-battle': '⚔️ Quiz Battle',
+  'fastest-molecule': '⚡ Fastest Molecule',
+  'periodic-challenge': '🔬 Periodic Challenge',
+  'reaction-race': '🏃 Reaction Race',
+  'energy-points': '💎 Energy Points',
+  'match-terms': '🔗 Match Terms',
+  'word-search': '🔍 Word Search',
+  'drag-drop': '🧩 Drag & Drop',
+  'true-false': '✅ True or False',
+  'flashcards': '🃏 Flashcards',
+};
+
+const GAME_COLORS: Record<GameType, string> = {
+  'quiz-battle': '#c084fc',
+  'fastest-molecule': '#7dd3fc',
+  'periodic-challenge': '#fde68a',
+  'reaction-race': '#6ee7b7',
+  'energy-points': '#fca5a5',
+  'match-terms': '#a78bfa',
+  'word-search': '#ff6eb4',
+  'drag-drop': '#34d399',
+  'true-false': '#fb923c',
+  'flashcards': '#60a5fa',
+};
+
+type FilterType = 'all' | 'competitive' | 'practice';
+
+export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateGame, onEditGame }: Props) {
+  const [folder, setFolder] = useState<Folder | null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
+
+  const load = () => {
+    const all = getFolders();
+    setFolder(all.find(f => f.id === folderId) || null);
+    setGames(getGamesByFolder(folderId));
+  };
+
+  useEffect(() => { load(); }, [folderId]);
+
+  const handleDelete = (id: string) => {
+    if (!confirm('Delete this game?')) return;
+    deleteGame(id);
+    load();
+  };
+
+  const handleDuplicate = (id: string) => {
+    duplicateGame(id);
+    load();
+  };
+
+  const filtered = games.filter(g => {
+    const matchSearch = g.title.toLowerCase().includes(search.toLowerCase()) ||
+      g.lessonName.toLowerCase().includes(search.toLowerCase());
+    const matchFilter = filter === 'all' || (filter === 'competitive' ? g.isCompetitive : !g.isCompetitive);
+    return matchSearch && matchFilter;
+  });
+
+  if (!folder) return <div style={{ color: 'white', padding: 40 }}>Folder not found.</div>;
+
+  return (
+    <div style={{ minHeight: '100vh', padding: 24 }}>
+      {/* Header */}
+      <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
+          >
+            ← Dashboard
+          </button>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 36 }}>{folder.icon}</span>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: 'white', margin: 0 }}>{folder.name}</h1>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: 0 }}>{games.length} game{games.length !== 1 ? 's' : ''}</p>
+          </div>
+        </div>
+        <button
+          onClick={onCreateGame}
+          style={{
+            background: 'linear-gradient(135deg, #c084fc, #a78bfa)',
+            color: 'white', border: 'none', borderRadius: 12, padding: '12px 24px',
+            fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 4px 20px rgba(192,132,252,0.4)',
+          }}
+        >
+          + Create Game
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="🔍 Search games..."
+          style={{
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 14,
+            outline: 'none', fontFamily: 'inherit', flex: '1', minWidth: 200, maxWidth: 350,
+          }}
+        />
+        {(['all', 'competitive', 'practice'] as FilterType[]).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            style={{
+              background: filter === f ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.05)',
+              border: filter === f ? '1px solid #c084fc' : '1px solid rgba(255,255,255,0.1)',
+              color: filter === f ? '#c084fc' : 'rgba(255,255,255,0.5)',
+              borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
+            }}
+          >
+            {f === 'all' ? 'All' : f === 'competitive' ? '⚔️ Competitive' : '📚 Practice'}
+          </button>
+        ))}
+      </div>
+
+      {/* Games */}
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 24px', color: 'rgba(255,255,255,0.4)' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>🎮</div>
+          <h3 style={{ fontSize: 20, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>No games found</h3>
+          <p style={{ marginBottom: 24 }}>
+            {games.length === 0 ? 'Create your first game in this folder!' : 'Try a different search or filter.'}
+          </p>
+          {games.length === 0 && (
+            <button
+              onClick={onCreateGame}
+              style={{
+                background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white',
+                border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 15,
+                fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >+ Create First Game</button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+          {filtered.map(game => {
+            const color = GAME_COLORS[game.gameType];
+            return (
+              <div key={game.id} style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: `1px solid ${color}30`,
+                borderRadius: 20,
+                padding: 24,
+                transition: 'all 0.3s',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = `${color}10`;
+                  e.currentTarget.style.borderColor = `${color}50`;
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.boxShadow = `0 12px 40px ${color}25`;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.borderColor = `${color}30`;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                {/* Type badge */}
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 12,
+                  background: `${color}25`, border: `1px solid ${color}50`,
+                  borderRadius: 100, padding: '4px 12px', fontSize: 12, fontWeight: 600, color,
+                }}>
+                  {GAME_LABELS[game.gameType]}
+                </div>
+                {game.isCompetitive && (
+                  <span style={{ marginLeft: 8, fontSize: 11, color: '#fde68a', background: 'rgba(253,230,138,0.15)', padding: '2px 8px', borderRadius: 100 }}>
+                    Competitive
+                  </span>
+                )}
+
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 4 }}>{game.title}</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>📚 {game.lessonName}</p>
+                <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>
+                  <span>❓ {game.questions.length} questions</span>
+                  <span>📅 {new Date(game.createdAt).toLocaleDateString()}</span>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => onPlayGame(game.id)}
+                    style={{
+                      flex: 1, minWidth: 80,
+                      background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white',
+                      border: 'none', borderRadius: 10, padding: '9px 12px', fontSize: 13,
+                      fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >▶️ Play</button>
+                  <button
+                    onClick={() => onEditGame(game.id)}
+                    style={{
+                      background: 'rgba(125,211,252,0.15)', color: '#7dd3fc',
+                      border: '1px solid rgba(125,211,252,0.3)', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >✏️</button>
+                  <button
+                    onClick={() => handleDuplicate(game.id)}
+                    style={{
+                      background: 'rgba(253,230,138,0.15)', color: '#fde68a',
+                      border: '1px solid rgba(253,230,138,0.3)', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >📋</button>
+                  <button
+                    onClick={() => handleDelete(game.id)}
+                    style={{
+                      background: 'rgba(239,68,68,0.15)', color: '#fca5a5',
+                      border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >🗑️</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
