@@ -6,6 +6,7 @@ interface Props {
   folderId: string;
   onNavigate: (page: Page) => void;
   onPlayGame: (gameId: string) => void;
+  onHostGame: (gameId: string) => void;
   onCreateGame: () => void;
   onEditGame: (gameId: string) => void;
 }
@@ -38,7 +39,7 @@ const GAME_COLORS: Record<GameType, string> = {
 
 type FilterType = 'all' | 'competitive' | 'practice';
 
-export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateGame, onEditGame }: Props) {
+export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGame, onCreateGame, onEditGame }: Props) {
   const [folder, setFolder] = useState<Folder | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
@@ -223,12 +224,22 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onCreateG
                   <button
                     onClick={() => onPlayGame(game.id)}
                     style={{
-                      flex: 1, minWidth: 80,
                       background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white',
                       border: 'none', borderRadius: 10, padding: '9px 12px', fontSize: 13,
                       fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     }}
-                  >▶️ Play</button>
+                  >▶️ Solo</button>
+                  {game.pin && (
+                    <button
+                      onClick={() => onHostGame(game.id)}
+                      style={{
+                        background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white',
+                        border: 'none', borderRadius: 10, padding: '9px 12px', fontSize: 13,
+                        fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                      title="Host live game for students"
+                    >🎮 Host Live</button>
+                  )}
                   <button
                     onClick={() => handleGetPin(game)}
                     style={{

@@ -7,6 +7,8 @@ import CreateGamePage from './pages/CreateGamePage';
 import PlayGamePage from './pages/PlayGamePage';
 import ResultsPage from './pages/ResultsPage';
 import StudentPage from './pages/StudentPage';
+import HostGamePage from './pages/HostGamePage';
+import StudentGamePage from './pages/StudentGamePage';
 import BubbleBackground from './components/BubbleBackground';
 
 function App() {
@@ -15,9 +17,10 @@ function App() {
     selectedFolderId: null,
     selectedGameId: null,
     editGameId: null,
+    studentPin: null,
+    studentNickname: null,
   });
   const [lastResult, setLastResult] = useState<{ entries: LeaderboardEntry[]; gameId: string } | null>(null);
-  // Track whether student came from student page (so back goes back to student page)
   const [fromStudent, setFromStudent] = useState(false);
 
   const navigate = (page: Page, extra?: Partial<AppState>) => {
@@ -55,7 +58,18 @@ function App() {
               setFromStudent(true);
               navigate('play-game', { selectedGameId: gameId });
             }}
+            onJoinLive={(pin, nickname) => {
+              navigate('student-game', { studentPin: pin, studentNickname: nickname });
+            }}
             onBack={() => navigate('home')}
+          />
+        )}
+        {state.page === 'student-game' && state.studentPin && state.studentNickname && (
+          <StudentGamePage
+            pin={state.studentPin}
+            nickname={state.studentNickname}
+            onFinish={() => navigate('home')}
+            onBack={() => navigate('student')}
           />
         )}
         {state.page === 'dashboard' && (
@@ -69,8 +83,15 @@ function App() {
             folderId={state.selectedFolderId}
             onNavigate={navigate}
             onPlayGame={(gameId) => { setFromStudent(false); navigate('play-game', { selectedGameId: gameId }); }}
+            onHostGame={(gameId) => navigate('host-game', { selectedGameId: gameId })}
             onCreateGame={() => navigate('create-game', { editGameId: null })}
             onEditGame={(gameId) => navigate('create-game', { editGameId: gameId })}
+          />
+        )}
+        {state.page === 'host-game' && state.selectedGameId && (
+          <HostGamePage
+            gameId={state.selectedGameId}
+            onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
           />
         )}
         {state.page === 'create-game' && state.selectedFolderId && (

@@ -59,6 +59,8 @@ export type Page =
   | 'folder'
   | 'create-game'
   | 'play-game'
+  | 'host-game'
+  | 'student-game'
   | 'results'
   | 'review';
 
@@ -67,4 +69,6 @@ export interface AppState {
   selectedFolderId: string | null;
   selectedGameId: string | null;
   editGameId: string | null;
+  studentPin: string | null;
+  studentNickname: string | null;
 }
