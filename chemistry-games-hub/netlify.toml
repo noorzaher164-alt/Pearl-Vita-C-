@@ -1,0 +1,4 @@
+[build]
+  base = "chemistry-games-hub"
+  command = "npm run build"
+  publish = "chemistry-games-hub/dist"
