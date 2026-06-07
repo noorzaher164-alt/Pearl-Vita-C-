@@ -63,6 +63,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   const [phase, setPhase] = useState<'setup' | 'waiting' | 'hosting' | 'finished'>('setup');
   const [timeLeft, setTimeLeft] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [firebaseError, setFirebaseError] = useState('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
 
@@ -88,12 +89,23 @@ export default function HostGamePage({ gameId, onBack }: Props) {
 
   const startHosting = async () => {
     if (!game) return;
+    setFirebaseError('');
     const s: LiveSession = {
       gameId: game.id, templateId: game.templateId || 'periodic-table',
       gameType: game.gameType, title: game.title, questionCount: game.questions.length,
       status: 'waiting', currentQuestion: 0, questionStartedAt: 0, students: {},
     };
-    await createSession(pin, s);
+    try {
+      await createSession(pin, s);
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      if (msg.includes('permission') || msg.includes('PERMISSION')) {
+        setFirebaseError('⚠️ Firebase permission denied — go to Firebase Console → Realtime Database → Rules → set ".read" and ".write" to true → Publish');
+      } else {
+        setFirebaseError(`⚠️ Firebase error: ${msg}`);
+      }
+      return;
+    }
     setSession(s);
     setPhase('waiting');
   };
@@ -190,6 +202,11 @@ export default function HostGamePage({ gameId, onBack }: Props) {
             <p style={{ color: tpl.accentColor, fontSize: 44, fontWeight: 900, letterSpacing: 8, fontFamily: 'monospace' }}>{pin}</p>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, wordBreak: 'break-all', marginTop: 6 }}>{joinUrl(pin)}</p>
           </div>
+          {firebaseError && (
+            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, color: '#fca5a5', fontSize: 13, lineHeight: 1.6, textAlign: 'left' }}>
+              {firebaseError}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '14px 24px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
             <button onClick={startHosting} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 12, padding: '14px 36px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 17, fontWeight: 800, boxShadow: `0 4px 24px ${tpl.accentColor}50` }}>
