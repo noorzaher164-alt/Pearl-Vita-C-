@@ -1,7 +1,7 @@
 [build]
   base = "chemistry-games-hub"
   command = "npm run build"
-  publish = "chemistry-games-hub/dist"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "22"
