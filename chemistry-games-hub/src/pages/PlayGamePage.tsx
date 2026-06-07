@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Game, LeaderboardEntry } from '../types';
 import { getGameById, saveResult } from '../storage';
+import { getTemplate, type GameTemplate } from '../templates';
 
 interface Props {
   gameId: string;
@@ -73,6 +74,35 @@ function playSound(type: 'correct' | 'wrong' | 'tick' | 'start' | 'finish') {
   } catch { /* audio not supported */ }
 }
 
+// Floating chemistry particles background
+function FloatingParticles({ particles, color }: { particles: string[]; color: string }) {
+  const items = Array.from({ length: 18 }, (_, i) => ({
+    id: i,
+    text: particles[i % particles.length],
+    x: (i * 37 + Math.sin(i * 1.7) * 20 + 50) % 95,
+    y: (i * 23 + Math.cos(i * 1.3) * 15 + 10) % 90,
+    size: 9 + (i % 5) * 3,
+    duration: 6 + (i % 4) * 2,
+    delay: -(i * 0.8),
+  }));
+
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
+      <style>{`
+        @keyframes floatUp { 0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.15; } 50% { transform: translateY(-18px) rotate(8deg); opacity: 0.35; } }
+      `}</style>
+      {items.map(p => (
+        <span key={p.id} style={{
+          position: 'absolute', left: `${p.x}%`, top: `${p.y}%`,
+          fontSize: p.size, color, fontWeight: 700, fontFamily: 'monospace',
+          animation: `floatUp ${p.duration}s ${p.delay}s ease-in-out infinite`,
+          userSelect: 'none',
+        }}>{p.text}</span>
+      ))}
+    </div>
+  );
+}
+
 // Confetti particle component
 function Confetti({ active }: { active: boolean }) {
   if (!active) return null;
@@ -141,6 +171,7 @@ function TimerCircle({ timeLeft, maxTime, color }: { timeLeft: number; maxTime: 
 
 export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   const [game, setGame] = useState<Game | null>(null);
+  const [tpl, setTpl] = useState<GameTemplate>(getTemplate('periodic-table'));
   const [phase, setPhase] = useState<Phase>('nickname');
   const [nickname, setNickname] = useState('');
   const [currentQ, setCurrentQ] = useState(0);
@@ -158,13 +189,14 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
 
   useEffect(() => {
     const g = getGameById(gameId);
-    if (g) { setGame(g); setAllAnswers(new Array(g.questions.length).fill(null)); }
+    if (g) { setGame(g); setTpl(getTemplate(g.templateId || 'periodic-table')); setAllAnswers(new Array(g.questions.length).fill(null)); }
   }, [gameId]);
 
   const isCompetitive = game ? COMPETITIVE_TYPES.includes(game.gameType) : false;
   const maxTime = game ? (TIMER_SECS[game.gameType] || 20) : 20;
 
-  const timerColor = timeLeft / maxTime > 0.5 ? '#22c55e' : timeLeft / maxTime > 0.25 ? '#fde68a' : '#ef4444';
+  // timerColor adapts based on time remaining
+  const urgencyColor = timeLeft / maxTime > 0.5 ? tpl.timerColor : timeLeft / maxTime > 0.25 ? '#fde68a' : '#ef4444';
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -265,7 +297,10 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   // ── NICKNAME SCREEN ──────────────────────────────────────────────────────────
   if (phase === 'nickname') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, background: tpl.bg, position: 'relative', overflow: 'hidden' }}>
+        {/* Template floating particles */}
+        <FloatingParticles particles={tpl.particles} color={tpl.accentColor} />
+
         <div style={{ textAlign: 'center', maxWidth: 500, width: '100%' }}>
           <div style={{ fontSize: 72, marginBottom: 16, animation: 'bounce 1s infinite' }}>🎮</div>
           <h1 style={{ fontSize: 36, fontWeight: 800, color: 'white', marginBottom: 8 }}>{game.title}</h1>
@@ -336,11 +371,13 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   // ── COUNTDOWN SCREEN ─────────────────────────────────────────────────────────
   if (phase === 'countdown') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: tpl.bg, position: 'relative', overflow: 'hidden' }}>
+        <FloatingParticles particles={tpl.particles} color={tpl.accentColor} />
         <div style={{
-          fontSize: 160, fontWeight: 900, color: 'white',
-          textShadow: '0 0 60px rgba(192,132,252,0.8)',
+          fontSize: 160, fontWeight: 900, color: tpl.accentColor,
+          textShadow: `0 0 60px ${tpl.accentColor}80`,
           animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+          position: 'relative', zIndex: 1,
         }}>
           {countdown}
         </div>
@@ -354,12 +391,12 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   const progress = ((currentQ) / game.questions.length) * 100;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: tpl.bg }}>
       <Confetti active={showConfetti} />
 
       {/* Top bar */}
       <div style={{
-        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)',
+        background: tpl.headerBg, backdropFilter: 'blur(10px)',
         padding: '12px 20px', display: 'flex', alignItems: 'center',
         justifyContent: 'space-between', gap: 12,
         borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -375,7 +412,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
           <div style={{ height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 100, overflow: 'hidden' }}>
             <div style={{
               height: '100%', width: `${progress}%`,
-              background: 'linear-gradient(90deg, #c084fc, #7dd3fc)',
+              background: `linear-gradient(90deg, ${tpl.accentColor}, ${tpl.choiceColors[2] || tpl.accentColor})`,
               borderRadius: 100, transition: 'width 0.5s ease',
             }} />
           </div>
@@ -397,7 +434,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
           {isCompetitive && (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>SCORE</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: '#fde68a' }}>{score}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: tpl.accentColor }}>{score}</div>
             </div>
           )}
         </div>
@@ -405,17 +442,17 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
 
       {/* Timer + Question */}
       <div style={{
-        background: 'linear-gradient(180deg, rgba(192,132,252,0.15) 0%, transparent 100%)',
+        background: `linear-gradient(180deg, ${tpl.accentColor}18 0%, transparent 100%)`,
         padding: '24px 20px', textAlign: 'center',
       }}>
         {isCompetitive && phase === 'playing' && (
           <div style={{ marginBottom: 16 }}>
-            <TimerCircle timeLeft={timeLeft} maxTime={maxTime} color={timerColor} />
+            <TimerCircle timeLeft={timeLeft} maxTime={maxTime} color={urgencyColor} />
           </div>
         )}
 
         <div style={{
-          background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+          background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`,
           borderRadius: 20, padding: '24px 20px', maxWidth: 700, margin: '0 auto',
         }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginBottom: 8, letterSpacing: 1 }}>
@@ -440,11 +477,12 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
       }}>
         {q.choices.map((choice, idx) => {
           const cfg = CHOICES[idx];
+          const choiceColor = tpl.choiceColors[idx] || cfg.color;
           const isSelected = selected === idx;
           const isCorrect = idx === q.correctIndex;
           const revealed = phase === 'answer-reveal';
 
-          let bg = cfg.color;
+          let bg = choiceColor;
           let opacity = 1;
           let scale = 'scale(1)';
           let border = 'none';
@@ -477,7 +515,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
                 transition: 'all 0.25s ease',
                 opacity,
                 transform: scale,
-                boxShadow: revealed && isCorrect ? '0 0 30px rgba(34,197,94,0.6)' : `0 4px 15px ${cfg.color}60`,
+                boxShadow: revealed && isCorrect ? '0 0 30px rgba(34,197,94,0.6)' : `0 4px 15px ${choiceColor}60`,
                 minHeight: 70,
               }}
               onMouseEnter={e => phase === 'playing' && (e.currentTarget.style.transform = 'scale(1.03)')}
@@ -501,7 +539,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
       {phase === 'answer-reveal' && (
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: 'rgba(15,10,30,0.97)', backdropFilter: 'blur(20px)',
+          background: tpl.cardBg, backdropFilter: 'blur(20px)',
           borderTop: '1px solid rgba(255,255,255,0.1)',
           padding: '20px 24px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
@@ -535,10 +573,10 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
           <button
             onClick={handleNext}
             style={{
-              background: 'linear-gradient(135deg, #c084fc, #a78bfa)',
+              background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[1] || tpl.accentColor})`,
               color: 'white', border: 'none', borderRadius: 14, padding: '14px 48px',
               fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 4px 20px rgba(192,132,252,0.5)',
+              boxShadow: `0 4px 20px ${tpl.accentColor}50`,
             }}
           >
             {currentQ + 1 >= game.questions.length ? '🏁 See Results' : 'Next →'}
