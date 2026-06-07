@@ -255,20 +255,17 @@ export default function HostGamePage({ gameId, onBack }: Props) {
 
             <button
               onClick={startGame}
-              disabled={students.length < 1}
               style={{
                 width: '100%', padding: '20px', fontSize: 22, fontWeight: 900,
-                background: students.length >= 1
-                  ? `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`
-                  : 'rgba(255,255,255,0.08)',
-                color: students.length >= 1 ? 'white' : 'rgba(255,255,255,0.25)',
-                border: 'none', borderRadius: 18, cursor: students.length >= 1 ? 'pointer' : 'default',
+                background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`,
+                color: 'white',
+                border: 'none', borderRadius: 18, cursor: 'pointer',
                 fontFamily: 'inherit', transition: 'all 0.3s',
-                boxShadow: students.length >= 1 ? `0 8px 32px ${tpl.accentColor}50` : 'none',
+                boxShadow: `0 8px 32px ${tpl.accentColor}50`,
                 letterSpacing: 1,
               }}
             >
-              {students.length < 1 ? '⏳ Waiting for students...' : `🚀 START GAME (${students.length} ready)`}
+              {students.length < 1 ? '🚀 START GAME' : `🚀 START GAME (${students.length} ready)`}
             </button>
           </div>
 
