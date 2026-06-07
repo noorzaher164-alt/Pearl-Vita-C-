@@ -27,7 +27,9 @@ type Step = 'enter' | 'nickname' | 'confirm-solo';
 
 export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack }: Props) {
   const [code, setCode] = useState(initialPin || '');
-  const [nickname, setNickname] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   // If a PIN was pre-filled via URL, go straight to nickname step
   const [step, setStep] = useState<Step>(initialPin ? 'nickname' : 'enter');
@@ -66,17 +68,20 @@ export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack
   };
 
   const handleJoin = () => {
-    const nick = nickname.trim();
-    if (!nick) { setError('Please enter your nickname'); return; }
+    const first = firstName.trim();
+    const last = lastName.trim();
+    if (!first || !last) { setError('Please enter your first and last name'); return; }
+    const fullName = [first, middleName.trim(), last].filter(Boolean).join(' ');
     if (isLive) {
-      onJoinLive(code.trim().toUpperCase(), nick);
+      onJoinLive(code.trim().toUpperCase(), fullName);
     } else if (foundGame) {
       onPlayGame(foundGame.id);
     }
   };
 
-  // Step: enter nickname (for live session or competitive solo)
+  // Step: enter full name (for live session or competitive solo)
   if (step === 'nickname') {
+    const canJoin = firstName.trim() && lastName.trim();
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 28, padding: 40, maxWidth: 460, width: '100%', textAlign: 'center' }}>
@@ -84,36 +89,43 @@ export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack
           <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 4 }}>
             {isLive ? 'Live Game — Join!' : foundGame?.title}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 28, fontSize: 14 }}>
-            {isLive ? `PIN: ${code.toUpperCase()} — Teacher is waiting for students` : `Game PIN: ${code.toUpperCase()}`}
+          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 24, fontSize: 14 }}>
+            {isLive ? `PIN: ${code.toUpperCase()} — Enter your full name` : `Game PIN: ${code.toUpperCase()}`}
           </p>
 
-          <label style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, display: 'block', marginBottom: 10 }}>
-            🎭 Your nickname
-          </label>
-          <input
-            value={nickname}
-            onChange={e => { setNickname(e.target.value.slice(0, 16)); setError(''); }}
-            onKeyDown={e => e.key === 'Enter' && nickname.trim() && handleJoin()}
-            placeholder="Enter your name..."
-            autoFocus
-            style={{
-              width: '100%', background: 'rgba(255,255,255,0.08)',
-              border: '2px solid rgba(192,132,252,0.5)', borderRadius: 12,
-              padding: '14px 16px', color: 'white', fontSize: 18,
-              outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-              textAlign: 'center', fontWeight: 700, marginBottom: 8,
-            }}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
+            <input
+              value={firstName}
+              onChange={e => { setFirstName(e.target.value.slice(0, 20)); setError(''); }}
+              onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
+              placeholder="First name *"
+              autoFocus
+              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.4)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+            />
+            <input
+              value={middleName}
+              onChange={e => { setMiddleName(e.target.value.slice(0, 20)); setError(''); }}
+              onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
+              placeholder="Middle name (optional)"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.25)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+            />
+            <input
+              value={lastName}
+              onChange={e => { setLastName(e.target.value.slice(0, 20)); setError(''); }}
+              onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
+              placeholder="Last name *"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.4)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+            />
+          </div>
           {error && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 8 }}>{error}</div>}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
             <button onClick={() => { setStep('enter'); setError(''); }} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
-            <button onClick={handleJoin} disabled={!nickname.trim()} style={{
-              flex: 1, background: nickname.trim() ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'rgba(255,255,255,0.1)',
+            <button onClick={handleJoin} disabled={!canJoin} style={{
+              flex: 1, background: canJoin ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'rgba(255,255,255,0.1)',
               color: 'white', border: 'none', borderRadius: 12, padding: '13px',
-              fontSize: 18, fontWeight: 800, cursor: nickname.trim() ? 'pointer' : 'default', fontFamily: 'inherit',
-              boxShadow: nickname.trim() ? '0 4px 20px rgba(34,197,94,0.4)' : 'none',
+              fontSize: 18, fontWeight: 800, cursor: canJoin ? 'pointer' : 'default', fontFamily: 'inherit',
+              boxShadow: canJoin ? '0 4px 20px rgba(34,197,94,0.4)' : 'none',
             }}>
               {isLive ? '🚀 Join Live Game!' : '🚀 Play!'}
             </button>

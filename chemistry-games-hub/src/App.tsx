@@ -10,10 +10,13 @@ import StudentPage from './pages/StudentPage';
 import HostGamePage from './pages/HostGamePage';
 import StudentGamePage from './pages/StudentGamePage';
 import BubbleBackground from './components/BubbleBackground';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   // Pre-fill PIN if URL has ?join=XXXXXX
-  const urlPin = new URLSearchParams(window.location.search).get('join')?.toUpperCase() || null;
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPin = urlParams.get('join')?.toUpperCase() || null;
+  const isAdmin = urlParams.get('admin') === 'true';
 
   const [state, setState] = useState<AppState>({
     page: urlPin ? 'student' : 'home',
@@ -49,6 +52,9 @@ function App() {
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' }}>
       <BubbleBackground />
       <div className="relative z-10">
+        {isAdmin ? (
+          <AdminPage onBack={() => { window.history.replaceState({}, '', window.location.pathname); navigate('home'); }} />
+        ) : (<>
         {state.page === 'home' && (
           <HomePage
             onNavigate={navigate}
@@ -124,6 +130,7 @@ function App() {
             onBack={() => navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId })}
           />
         )}
+        </>)}
       </div>
     </div>
   );

@@ -436,11 +436,25 @@ export default function HostGamePage({ gameId, onBack }: Props) {
 
   // ── Final results for teacher ──────────────────────────────────────────
   if (phase === 'finished') {
+    const downloadResults = () => {
+      const rows = [['Rank', 'Full Name', 'Score', 'Streak']];
+      sorted.forEach((s, i) => rows.push([String(i + 1), s.nickname, String(s.score), String(s.streak)]));
+      const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `${game?.title || 'results'}-results.csv`; a.click();
+      URL.revokeObjectURL(url);
+    };
+
     return (
       <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column' }}>
         <div style={{ background: tpl.headerBg, padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>🏁 Game Over — {game?.title}</div>
-          <button onClick={endSession} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 10, padding: '9px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>✓ Done</button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={downloadResults} style={{ background: 'rgba(34,197,94,0.2)', border: '1px solid rgba(34,197,94,0.5)', color: '#6ee7b7', borderRadius: 10, padding: '9px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>📥 Download Excel</button>
+            <button onClick={endSession} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 10, padding: '9px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>✓ Done</button>
+          </div>
         </div>
 
         <div style={{ flex: 1, padding: '28px 24px', maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
