@@ -28,7 +28,8 @@ export interface Game {
   questions: Question[];
   createdAt: string;
   isCompetitive: boolean;
-  pin?: string; // 6-char student access code
+  pin?: string;        // 6-char student access code
+  templateId?: string; // visual theme template
 }
 
 export interface Folder {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Game, GameType, Question } from '../types';
 import { getGameById, saveGame } from '../storage';
+import TemplatePicker from '../components/TemplatePicker';
 
 interface Props {
   folderId: string;
@@ -36,6 +37,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
   const [title, setTitle] = useState('');
   const [lessonName, setLessonName] = useState('');
   const [gameType, setGameType] = useState<GameType>('quiz-battle');
+  const [templateId, setTemplateId] = useState('periodic-table');
   const [questions, setQuestions] = useState<Question[]>([emptyQuestion()]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -47,6 +49,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
         setTitle(game.title);
         setLessonName(game.lessonName);
         setGameType(game.gameType);
+        setTemplateId(game.templateId || 'periodic-table');
         setQuestions(game.questions);
       }
     }
@@ -103,6 +106,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
       gameType,
       questions,
       isCompetitive: selectedType.competitive,
+      templateId,
       createdAt: editGameId ? (getGameById(editGameId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
     };
     saveGame(game);
@@ -202,6 +206,15 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Template Picker */}
+      <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 28, marginBottom: 24 }}>
+        <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 6 }}>🎨 Game Theme</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 20 }}>
+          Choose a visual template that matches your chemistry topic
+        </p>
+        <TemplatePicker selected={templateId} onChange={setTemplateId} />
       </div>
 
       {/* Questions */}
