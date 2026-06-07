@@ -1,9 +1,7 @@
-// Real-time multiplayer via Gun.js — no setup, no rules, works instantly
-// Public relay servers sync data across all connected browsers
-// @ts-ignore
-import Gun from 'gun';
+// Real-time multiplayer via Netlify Functions + Netlify Blobs
+// Polls every 2 seconds — no external services, no setup, always works
 
-export const FIREBASE_CONFIGURED = true; // always available
+export const FIREBASE_CONFIGURED = true;
 
 export interface StudentSlot {
   nickname: string;
@@ -25,107 +23,75 @@ export interface LiveSession {
   students: Record<string, StudentSlot>;
 }
 
-// ── Gun instance (lazy) ──────────────────────────────────────────────────
-let _gun: any = null;
-
-function gun() {
-  if (_gun) return _gun;
-  _gun = Gun([
-    'https://peer.wallie.io/gun',
-    'https://gundb-relay-mlv5.onrender.com/gun',
-    'https://gun.eco/gun',
-  ]);
-  return _gun;
-}
-
-// Namespace all keys so we don't clash with other Gun users
-const NS = 'chem-hub-v1';
+const API = '/.netlify/functions/session';
 
 // ── CRUD helpers ─────────────────────────────────────────────────────────
 
 export async function createSession(pin: string, session: LiveSession): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const g = gun();
-    if (!g) { reject(new Error('Gun not ready')); return; }
-    const { students, ...meta } = session;
-    g.get(NS).get(pin).put(meta, (ack: any) => {
-      if (ack.err) reject(new Error(ack.err));
-      else resolve();
-    });
+  const res = await fetch(`${API}?pin=${pin}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...session, students: {} }),
   });
+  if (!res.ok) throw new Error(`Session create failed: ${res.status}`);
 }
 
 export async function deleteSession(pin: string): Promise<void> {
-  gun()?.get(NS)?.get(pin)?.put(null);
+  await fetch(`${API}?pin=${pin}`, { method: 'DELETE' });
 }
 
 export async function getSession(pin: string): Promise<LiveSession | null> {
-  return new Promise(resolve => {
-    const g = gun();
-    if (!g) { resolve(null); return; }
-    let done = false;
-    g.get(NS).get(pin).once((data: any) => {
-      if (done) return;
-      if (!data || !data.gameId) return; // Gun null fire — keep waiting
-      done = true;
-      resolve(buildSession(data, {}));
-    });
-    setTimeout(() => { if (!done) { done = true; resolve(null); } }, 8000);
-  });
+  try {
+    const res = await fetch(`${API}?pin=${pin}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.gameId ? buildSession(data) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function subscribeSession(
   pin: string,
   callback: (session: LiveSession | null) => void,
 ): () => void {
-  const g = gun();
-  if (!g) return () => {};
+  let active = true;
+  let lastHash = '';
 
-  // Cache of last-known data
-  let lastMeta: any = {};
-  let lastStudents: Record<string, StudentSlot> = {};
+  async function poll() {
+    if (!active) return;
+    try {
+      const res = await fetch(`${API}?pin=${pin}`);
+      const data = res.ok ? await res.json() : null;
+      const hash = JSON.stringify(data);
+      if (hash !== lastHash) {
+        lastHash = hash;
+        callback(data && data.gameId ? buildSession(data) : null);
+      }
+    } catch { /* ignore network blips */ }
+    if (active) setTimeout(poll, 2000);
+  }
 
-  const emit = () => callback(buildSession(lastMeta, lastStudents));
-
-  // Subscribe to session meta
-  const sessionNode = g.get(NS).get(pin);
-  sessionNode.on((data: any) => {
-    if (!data || !data.gameId) return; // ignore null/partial Gun.js fires
-    lastMeta = { ...data };
-    emit();
-  });
-
-  // Subscribe to all students
-  sessionNode.get('students').map().on((data: any, key: string) => {
-    if (!key || key === '_' || !data || typeof data !== 'object') return;
-    if (data.nickname) {
-      lastStudents = { ...lastStudents, [key]: sanitizeStudent(data) };
-      emit();
-    }
-  });
-
-  return () => {
-    try { sessionNode.off(); } catch { /* */ }
-  };
+  poll();
+  return () => { active = false; };
 }
 
 export async function updateSession(pin: string, updates: Partial<LiveSession>): Promise<void> {
-  return new Promise((resolve) => {
-    const { students, ...meta } = updates as any;
-    const g = gun();
-    if (!g) { resolve(); return; }
-    g.get(NS).get(pin).put(meta, () => resolve());
+  const { students, ...rest } = updates as any;
+  await fetch(`${API}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rest),
   });
 }
 
 export async function joinSession(pin: string, slot: StudentSlot): Promise<void> {
-  return new Promise((resolve) => {
-    const g = gun();
-    if (!g) { resolve(); return; }
-    g.get(NS).get(pin).get('students').get(slot.nickname).put(
-      { nickname: slot.nickname, score: 0, streak: 0 },
-      () => resolve(),
-    );
+  await fetch(`${API}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      students: { [slot.nickname]: { nickname: slot.nickname, score: 0, streak: 0 } },
+    }),
   });
 }
 
@@ -137,45 +103,45 @@ export async function submitAnswer(
   score: number,
   streak: number,
 ): Promise<void> {
-  return new Promise((resolve) => {
-    const g = gun();
-    if (!g) { resolve(); return; }
-    const update: any = { score, streak };
-    update[`ans_${questionIndex}`] = choiceIndex;
-    g.get(NS).get(pin).get('students').get(nickname).put(update, () => resolve());
+  const studentUpdate: Record<string, unknown> = { score, streak };
+  studentUpdate[`ans_${questionIndex}`] = choiceIndex;
+  await fetch(`${API}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ students: { [nickname]: studentUpdate } }),
   });
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────
 
-function sanitizeStudent(data: any): StudentSlot {
-  const answers: Record<string, number> = {};
-  const answeredAt: Record<string, number> = {};
-  Object.keys(data).forEach(k => {
-    if (k.startsWith('ans_')) {
-      const qi = k.replace('ans_', '');
-      answers[qi] = data[k];
+function buildSession(data: any): LiveSession {
+  const students: Record<string, StudentSlot> = {};
+  if (data.students && typeof data.students === 'object') {
+    for (const [key, val] of Object.entries(data.students)) {
+      const v = val as any;
+      if (!v || !v.nickname) continue;
+      const answers: Record<string, number> = {};
+      for (const k of Object.keys(v)) {
+        if (k.startsWith('ans_')) answers[k.replace('ans_', '')] = v[k];
+      }
+      students[key] = {
+        nickname: v.nickname,
+        score: v.score || 0,
+        streak: v.streak || 0,
+        answers,
+        answeredAt: {},
+      };
     }
-  });
+  }
   return {
-    nickname: data.nickname || '?',
-    score: data.score || 0,
-    streak: data.streak || 0,
-    answers,
-    answeredAt,
-  };
-}
-
-function buildSession(meta: any, students: Record<string, StudentSlot>): LiveSession {
-  return {
-    gameId: meta.gameId || '',
-    templateId: meta.templateId || 'periodic-table',
-    gameType: meta.gameType || 'quiz-battle',
-    title: meta.title || '',
-    questionCount: meta.questionCount || 0,
-    status: meta.status || 'waiting',
-    currentQuestion: meta.currentQuestion ?? 0,
-    questionStartedAt: meta.questionStartedAt || 0,
+    gameId: data.gameId || '',
+    templateId: data.templateId || 'periodic-table',
+    gameType: data.gameType || 'quiz-battle',
+    title: data.title || '',
+    questionCount: data.questionCount || 0,
+    status: data.status || 'waiting',
+    currentQuestion: data.currentQuestion ?? 0,
+    questionStartedAt: data.questionStartedAt || 0,
     students,
   };
 }
