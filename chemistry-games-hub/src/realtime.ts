@@ -31,8 +31,9 @@ let _gun: any = null;
 function gun() {
   if (_gun) return _gun;
   _gun = Gun([
-    'https://gun-manhattan.herokuapp.com/gun',
-    'https://gunjs.herokuapp.com/gun',
+    'https://peer.wallie.io/gun',
+    'https://gundb-relay-mlv5.onrender.com/gun',
+    'https://gun.eco/gun',
   ]);
   return _gun;
 }
@@ -65,12 +66,11 @@ export async function getSession(pin: string): Promise<LiveSession | null> {
     let done = false;
     g.get(NS).get(pin).once((data: any) => {
       if (done) return;
+      if (!data || !data.gameId) return; // Gun null fire — keep waiting
       done = true;
-      if (!data || !data.gameId) { resolve(null); return; }
-      const session = buildSession(data, {});
-      resolve(session);
+      resolve(buildSession(data, {}));
     });
-    setTimeout(() => { if (!done) { done = true; resolve(null); } }, 5000);
+    setTimeout(() => { if (!done) { done = true; resolve(null); } }, 8000);
   });
 }
 
@@ -90,14 +90,14 @@ export function subscribeSession(
   // Subscribe to session meta
   const sessionNode = g.get(NS).get(pin);
   sessionNode.on((data: any) => {
-    if (!data || !data.gameId) { callback(null); return; }
+    if (!data || !data.gameId) return; // ignore null/partial Gun.js fires
     lastMeta = { ...data };
     emit();
   });
 
   // Subscribe to all students
   sessionNode.get('students').map().on((data: any, key: string) => {
-    if (!key || key === '_' || !data) return;
+    if (!key || key === '_' || !data || typeof data !== 'object') return;
     if (data.nickname) {
       lastStudents = { ...lastStudents, [key]: sanitizeStudent(data) };
       emit();
