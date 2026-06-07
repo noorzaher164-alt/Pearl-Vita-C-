@@ -358,21 +358,19 @@ export default function HostGamePage({ gameId, onBack }: Props) {
               <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>ANSWER DISTRIBUTION</div>
               {currentQ?.choices.map((choice, ci) => {
                 const count = choiceAnswerCounts[ci] || 0;
-                const isCorrect = ci === currentQ.correctIndex;
-                const showCorrect = status === 'reveal' || status === 'leaderboard';
                 const color = tpl.choiceColors[ci];
                 return (
                   <div key={ci} style={{
-                    background: showCorrect && isCorrect ? 'rgba(34,197,94,0.15)' : `${color}15`,
-                    border: `2px solid ${showCorrect && isCorrect ? '#22c55e' : color + '50'}`,
+                    background: `${color}15`,
+                    border: `2px solid ${color}50`,
                     borderRadius: 14, padding: '12px 14px', marginBottom: 8, position: 'relative', overflow: 'hidden',
                   }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: color + '25', width: `${(count / maxCount) * 100}%`, transition: 'width 0.6s ease', borderRadius: 12 }} />
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 28, height: 28, borderRadius: 6, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
-                        {showCorrect && isCorrect ? '✓' : CHOICE_LABELS[ci]}
+                        {CHOICE_LABELS[ci]}
                       </span>
-                      <span style={{ color: showCorrect && isCorrect ? '#6ee7b7' : 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>{choice}</span>
+                      <span style={{ color: 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>{choice}</span>
                       <span style={{ color: tpl.accentColor, fontWeight: 900, fontSize: 18 }}>{count}</span>
                     </div>
                   </div>
@@ -425,7 +423,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
             {status === 'playing' && (
               <button onClick={revealAnswer} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 14, padding: '16px 44px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 4px 24px ${tpl.accentColor}50` }}>
-                ⏩ Show Answer
+                ⏩ Next
               </button>
             )}
             {(status === 'leaderboard' || status === 'reveal') && (
