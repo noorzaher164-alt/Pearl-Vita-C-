@@ -61,11 +61,11 @@ export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
   const [renameValue, setRenameValue] = useState('');
   const [search, setSearch] = useState('');
 
-  if (!authed) return <LoginGate onAuthed={() => setAuthed(true)} onBack={() => onNavigate('home')} />;
-
   const load = () => setFolders(getFolders());
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (authed) load(); }, [authed]);
+
+  if (!authed) return <LoginGate onAuthed={() => setAuthed(true)} onBack={() => onNavigate('home')} />;
 
   const handleCreate = () => {
     if (!newName.trim()) return;
