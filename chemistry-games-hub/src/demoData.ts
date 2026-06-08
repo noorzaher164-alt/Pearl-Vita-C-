@@ -174,10 +174,10 @@ export const DEMO_GAMES: Game[] = [
     questions: [
       {
         id: 'q1',
-        text: 'Increasing temperature always increases reaction rate.',
+        text: 'For most reactions, increasing temperature increases the reaction rate.',
         choices: ['True', 'False', 'Sometimes', 'Never'],
         correctIndex: 0,
-        explanation: 'True! Higher temperature increases kinetic energy, so more collisions have sufficient energy.'
+        explanation: 'True! For most reactions, higher temperature increases kinetic energy so more collisions exceed the activation energy. (Exceptions such as enzyme-catalysed reactions at very high temperatures exist but are not the general case.)'
       },
       {
         id: 'q2',
