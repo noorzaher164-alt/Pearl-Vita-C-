@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Folder, Page } from '../types';
 import { getFolders, saveFolder, deleteFolder } from '../storage';
+import { isAuthed, login, clearAuth } from '../auth';
 
 interface Props {
   onNavigate: (page: Page) => void;
@@ -9,49 +10,48 @@ interface Props {
 
 const FOLDER_COLORS = ['#c084fc', '#7dd3fc', '#fde68a', '#6ee7b7', '#fca5a5', '#a78bfa', '#ff6eb4', '#34d399', '#fb923c', '#60a5fa'];
 const FOLDER_ICONS = ['📁', '🧪', '⚗️', '🔬', '🧬', '⚖️', '🔥', '🧫', '⚡', '🌡️', '💊', '🧲'];
-const DASHBOARD_PASSWORD = 'Nourhan@2025';
-const DASH_AUTH_KEY = 'chem_dash_auth';
 
-export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
-  const [authed, setAuthed] = useState(() => localStorage.getItem(DASH_AUTH_KEY) === '1');
-  const [pwInput, setPwInput] = useState('');
-  const [pwError, setPwError] = useState('');
+function LoginGate({ onAuthed, onBack }: { onAuthed: () => void; onBack: () => void }) {
+  const [pw, setPw] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  if (!authed) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 28, padding: 40, maxWidth: 400, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>🔐</div>
-          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Teacher Dashboard</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 28 }}>Enter your teacher password to continue</p>
-          <input
-            type="password"
-            value={pwInput}
-            onChange={e => { setPwInput(e.target.value); setPwError(''); }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                if (pwInput === DASHBOARD_PASSWORD) { localStorage.setItem(DASH_AUTH_KEY, '1'); setAuthed(true); }
-                else setPwError('Incorrect password');
-              }
-            }}
-            placeholder="Password"
-            autoFocus
-            style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: `2px solid ${pwError ? '#ef4444' : 'rgba(192,132,252,0.4)'}`, borderRadius: 12, padding: '13px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 8 }}
-          />
-          {pwError && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 8 }}>{pwError}</div>}
-          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            <button onClick={() => onNavigate('home')} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Back</button>
-            <button onClick={() => {
-              if (pwInput === DASHBOARD_PASSWORD) { localStorage.setItem(DASH_AUTH_KEY, '1'); setAuthed(true); }
-              else setPwError('Incorrect password');
-            }} style={{ flex: 1, background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 12, padding: '12px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-              🔓 Enter
-            </button>
-          </div>
+  const attempt = async () => {
+    if (!pw.trim()) return;
+    setLoading(true); setError('');
+    const result = await login(pw);
+    setLoading(false);
+    if (result.ok) onAuthed();
+    else setError(result.error || 'Incorrect password');
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 28, padding: 40, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+        <div style={{ fontSize: 56, marginBottom: 16 }}>🔐</div>
+        <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Teacher Dashboard</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 28 }}>Enter your teacher password to continue</p>
+        <input
+          type="password" value={pw} autoFocus
+          onChange={e => { setPw(e.target.value); setError(''); }}
+          onKeyDown={e => e.key === 'Enter' && attempt()}
+          placeholder="Password"
+          style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: `2px solid ${error ? '#ef4444' : 'rgba(192,132,252,0.4)'}`, borderRadius: 12, padding: '13px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 8 }}
+        />
+        {error && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 8 }}>{error}</div>}
+        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Back</button>
+          <button onClick={attempt} disabled={loading} style={{ flex: 1, background: loading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 12, padding: '12px', fontSize: 16, fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+            {loading ? '⏳ Checking...' : '🔓 Enter'}
+          </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
+  const [authed, setAuthed] = useState(isAuthed);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -60,6 +60,8 @@ export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [search, setSearch] = useState('');
+
+  if (!authed) return <LoginGate onAuthed={() => setAuthed(true)} onBack={() => onNavigate('home')} />;
 
   const load = () => setFolders(getFolders());
 
@@ -114,6 +116,18 @@ export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
             style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
           >
             ← Home
+          </button>
+          <button
+            onClick={() => onNavigate('admin')}
+            style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', color: '#c084fc', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}
+          >
+            ⚙️ Admin
+          </button>
+          <button
+            onClick={() => { clearAuth(); setAuthed(false); }}
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}
+          >
+            🔒 Logout
           </button>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 800, background: 'linear-gradient(135deg, #f093fb, #a78bfa, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>

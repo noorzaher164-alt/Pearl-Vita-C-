@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { getFolders, getGames, deleteGame, deleteFolder } from '../storage';
 import type { Folder, Game } from '../types';
-
-const ADMIN_PASSWORD = 'Nourhan@2025';
-const ADMIN_KEY = 'chem_admin_auth';
+import { isAuthed, login, clearAuth } from '../auth';
 
 interface Props { onBack: () => void; }
 
 export default function AdminPage({ onBack }: Props) {
-  const [authed, setAuthed] = useState(() => localStorage.getItem(ADMIN_KEY) === '1');
+  const [authed, setAuthed] = useState(isAuthed);
   const [pw, setPw] = useState('');
   const [pwError, setPwError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [tab, setTab] = useState<'overview' | 'games' | 'export'>('overview');
@@ -20,12 +19,16 @@ export default function AdminPage({ onBack }: Props) {
     if (authed) { setFolders(getFolders()); setGames(getGames()); }
   }, [authed]);
 
-  const handleLogin = () => {
-    if (pw === ADMIN_PASSWORD) { localStorage.setItem(ADMIN_KEY, '1'); setAuthed(true); }
-    else { setPwError('Wrong password'); setPw(''); }
+  const handleLogin = async () => {
+    if (!pw.trim()) return;
+    setLoginLoading(true); setPwError('');
+    const result = await login(pw);
+    setLoginLoading(false);
+    if (result.ok) setAuthed(true);
+    else { setPwError(result.error || 'Wrong password'); setPw(''); }
   };
 
-  const handleLogout = () => { localStorage.removeItem(ADMIN_KEY); setAuthed(false); };
+  const handleLogout = () => { clearAuth(); setAuthed(false); };
 
   const handleDeleteGame = (id: string) => {
     deleteGame(id);
@@ -77,8 +80,8 @@ export default function AdminPage({ onBack }: Props) {
             style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: `2px solid ${pwError ? '#ef4444' : 'rgba(239,68,68,0.4)'}`, borderRadius: 12, padding: '13px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: 8 }}
           />
           {pwError && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 10 }}>{pwError}</div>}
-          <button onClick={handleLogin} style={{ width: '100%', background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: 'white', border: 'none', borderRadius: 12, padding: '14px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 16 }}>
-            🔓 Login
+          <button onClick={handleLogin} disabled={loginLoading} style={{ width: '100%', background: loginLoading ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg,#ef4444,#dc2626)', color: 'white', border: 'none', borderRadius: 12, padding: '14px', fontSize: 17, fontWeight: 800, cursor: loginLoading ? 'default' : 'pointer', fontFamily: 'inherit', marginBottom: 16 }}>
+            {loginLoading ? '⏳ Checking...' : '🔓 Login'}
           </button>
           <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Back</button>
         </div>

@@ -68,7 +68,8 @@ export type Page =
   | 'host-game'
   | 'student-game'
   | 'results'
-  | 'review';
+  | 'review'
+  | 'admin';
 
 export interface AppState {
   page: Page;
