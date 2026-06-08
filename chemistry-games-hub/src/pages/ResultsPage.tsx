@@ -53,8 +53,12 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
   const game = getGameById(gameId);
   const sorted = [...entries].sort((a, b) => b.score - a.score);
   const top = sorted[0];
-  const maxPossible = game ? game.questions.length * 300 : 1000;
-  const accuracy = top ? Math.min(100, Math.round((top.score / maxPossible) * 100)) : 0;
+  // Max per question = 100 base + streak bonus capped at 10×30 = 400; use 200 as realistic average max
+  // Derive true maximum: 100 base + 30×(question_index) streak bonus per question, summed
+  const trueMax = game
+    ? game.questions.reduce((sum, _, i) => sum + 100 + Math.min(i, 10) * 30, 0)
+    : 1000;
+  const accuracy = top && trueMax > 0 ? Math.min(100, Math.round((top.score / trueMax) * 100)) : 0;
 
   const getMessage = () => {
     if (accuracy >= 80) return { text: 'Outstanding! 🌟', color: '#fde68a' };
