@@ -27,12 +27,10 @@ export default async function handler(request) {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (request.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: h });
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  const tokenSecret = process.env.TOKEN_SECRET || process.env.ADMIN_PASSWORD || 'fallback-secret-change-me';
-
-  if (!adminPassword) {
-    return new Response(JSON.stringify({ error: 'Server misconfigured — ADMIN_PASSWORD env var not set' }), { status: 500, headers: h });
-  }
+  // Use env var if set; fall back to default so the site works out of the box.
+  // Override ADMIN_PASSWORD in Netlify dashboard (Site settings → Environment variables) for better security.
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Nourhan@2025';
+  const tokenSecret = process.env.TOKEN_SECRET || adminPassword;
 
   let body;
   try { body = await request.json(); } catch { return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: h }); }
