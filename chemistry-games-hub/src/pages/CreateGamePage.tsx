@@ -57,6 +57,17 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
 
   const selectedType = GAME_TYPES.find(t => t.value === gameType)!;
 
+  const changeGameType = (val: GameType) => {
+    setGameType(val);
+    if (val === 'true-false') {
+      setQuestions(prev => prev.map(q => ({
+        ...q,
+        choices: ['True', 'False', '', ''],
+        correctIndex: q.correctIndex > 1 ? 0 : q.correctIndex,
+      })));
+    }
+  };;
+
   const updateQuestion = (idx: number, field: keyof Question, value: string | number | string[]) => {
     setQuestions(prev => prev.map((q, i) => i === idx ? { ...q, [field]: value } : q));
   };
@@ -85,9 +96,11 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
     const errs: string[] = [];
     if (!title.trim()) errs.push('Game title is required');
     if (!lessonName.trim()) errs.push('Lesson name is required');
+    const isTF = gameType === 'true-false';
     questions.forEach((q, i) => {
       if (!q.text.trim()) errs.push(`Question ${i + 1}: text is required`);
-      q.choices.forEach((c, j) => {
+      const choicesToCheck = isTF ? q.choices.slice(0, 2) : q.choices;
+      choicesToCheck.forEach((c, j) => {
         if (!c.trim()) errs.push(`Question ${i + 1}: Choice ${j + 1} is required`);
       });
     });
@@ -171,7 +184,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
             {GAME_TYPES.filter(t => t.competitive).map(t => (
               <button
                 key={t.value}
-                onClick={() => setGameType(t.value)}
+                onClick={() => changeGameType(t.value)}
                 style={{
                   background: gameType === t.value ? 'rgba(192,132,252,0.25)' : 'rgba(255,255,255,0.05)',
                   border: gameType === t.value ? '2px solid #c084fc' : '1px solid rgba(255,255,255,0.1)',
@@ -194,7 +207,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
             {GAME_TYPES.filter(t => !t.competitive).map(t => (
               <button
                 key={t.value}
-                onClick={() => setGameType(t.value)}
+                onClick={() => changeGameType(t.value)}
                 style={{
                   background: gameType === t.value ? 'rgba(110,231,183,0.2)' : 'rgba(255,255,255,0.05)',
                   border: gameType === t.value ? '2px solid #6ee7b7' : '1px solid rgba(255,255,255,0.1)',
@@ -288,40 +301,43 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
               </div>
 
               <div style={{ marginBottom: 16 }}>
-                <label style={labelStyle}>Answer Choices * — click the circle to mark the correct answer</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {q.choices.map((choice, ci) => {
-                    const choiceColors = ['#e74c3c', '#2980e4', '#f1c40f', '#27ae60'];
-                    const isCorrect = q.correctIndex === ci;
-                    return (
-                      <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <button
-                          onClick={() => updateQuestion(qi, 'correctIndex', ci)}
-                          style={{
-                            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                            background: isCorrect ? choiceColors[ci] : 'rgba(255,255,255,0.08)',
-                            border: isCorrect ? 'none' : `2px solid ${choiceColors[ci]}60`,
-                            cursor: 'pointer', color: 'white', fontSize: 15, fontFamily: 'inherit',
-                            fontWeight: 800,
-                          }}
-                        >
-                          {isCorrect ? '✓' : String.fromCharCode(65 + ci)}
+                <label style={labelStyle}>
+                  {gameType === 'true-false' ? '✅ Correct Answer — click to mark True or False' : 'Answer Choices * — click the circle to mark the correct answer'}
+                </label>
+                {gameType === 'true-false' ? (
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {['True', 'False'].map((label, ci) => {
+                      const isCorrect = q.correctIndex === ci;
+                      const col = ci === 0 ? '#22c55e' : '#ef4444';
+                      const icon = ci === 0 ? '✅' : '❌';
+                      return (
+                        <button key={ci} onClick={() => updateQuestion(qi, 'correctIndex', ci)}
+                          style={{ flex: 1, background: isCorrect ? `${col}25` : 'rgba(255,255,255,0.06)', border: `2px solid ${isCorrect ? col : 'rgba(255,255,255,0.15)'}`, borderRadius: 14, padding: '18px', color: isCorrect ? col : 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.2s' }}>
+                          <span style={{ fontSize: 28 }}>{icon}</span> {label}
+                          {isCorrect && <span style={{ fontSize: 20 }}>✓</span>}
                         </button>
-                        <input
-                          value={choice}
-                          onChange={e => updateChoice(qi, ci, e.target.value)}
-                          placeholder={`Choice ${String.fromCharCode(65 + ci)} — enter answer here`}
-                          style={{
-                            ...inputStyle, flex: 1, margin: 0, fontSize: 15,
-                            borderColor: isCorrect ? `${choiceColors[ci]}60` : 'rgba(255,255,255,0.15)',
-                            background: isCorrect ? `${choiceColors[ci]}12` : 'rgba(255,255,255,0.07)',
-                            padding: '13px 14px',
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {q.choices.map((choice, ci) => {
+                      const choiceColors = ['#e74c3c', '#2980e4', '#f1c40f', '#27ae60'];
+                      const isCorrect = q.correctIndex === ci;
+                      return (
+                        <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <button onClick={() => updateQuestion(qi, 'correctIndex', ci)}
+                            style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: isCorrect ? choiceColors[ci] : 'rgba(255,255,255,0.08)', border: isCorrect ? 'none' : `2px solid ${choiceColors[ci]}60`, cursor: 'pointer', color: 'white', fontSize: 15, fontFamily: 'inherit', fontWeight: 800 }}>
+                            {isCorrect ? '✓' : String.fromCharCode(65 + ci)}
+                          </button>
+                          <input value={choice} onChange={e => updateChoice(qi, ci, e.target.value)}
+                            placeholder={`Choice ${String.fromCharCode(65 + ci)} — enter answer here`}
+                            style={{ ...inputStyle, flex: 1, margin: 0, fontSize: 15, borderColor: isCorrect ? `${choiceColors[ci]}60` : 'rgba(255,255,255,0.15)', background: isCorrect ? `${choiceColors[ci]}12` : 'rgba(255,255,255,0.07)', padding: '13px 14px' }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               <div>

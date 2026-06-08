@@ -217,6 +217,24 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', padding: '0 20px' }}>
+        {sorted.length > 0 && (
+          <button onClick={() => {
+            const rows = [['Rank', 'Name', 'Score', 'Streak']];
+            sorted.forEach((e, i) => rows.push([String(i + 1), e.nickname, String(e.score), String(e.streak)]));
+            const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url;
+            a.download = `${game?.title || 'results'}-results.csv`; a.click();
+            URL.revokeObjectURL(url);
+          }} style={{
+            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+            color: 'white', border: 'none', borderRadius: 14,
+            padding: '14px 28px', fontSize: 15, fontWeight: 700,
+            cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 4px 20px rgba(34,197,94,0.4)',
+          }}>📥 Download Results</button>
+        )}
         <button onClick={onPlayAgain} style={{
           background: 'linear-gradient(135deg, #22c55e, #16a34a)',
           color: 'white', border: 'none', borderRadius: 14,

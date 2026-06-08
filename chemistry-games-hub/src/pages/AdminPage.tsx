@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getFolders, getGames, deleteGame, deleteFolder } from '../storage';
+import { useState, useEffect, useRef } from 'react';
+import { getFolders, getGames, deleteGame, deleteFolder, saveFolder, saveGame } from '../storage';
 import type { Folder, Game } from '../types';
 import { isAuthed, login, clearAuth } from '../auth';
 
@@ -14,6 +14,8 @@ export default function AdminPage({ onBack }: Props) {
   const [games, setGames] = useState<Game[]>([]);
   const [tab, setTab] = useState<'overview' | 'games' | 'export'>('overview');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (authed) { setFolders(getFolders()); setGames(getGames()); }
@@ -50,6 +52,27 @@ export default function AdminPage({ onBack }: Props) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'chemistry-hub-backup.json'; a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const importBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string);
+        let fCount = 0, gCount = 0;
+        if (Array.isArray(data.folders)) { data.folders.forEach((f: Folder) => { saveFolder(f); fCount++; }); }
+        if (Array.isArray(data.games)) { data.games.forEach((g: Game) => { saveGame(g); gCount++; }); }
+        setFolders(getFolders()); setGames(getGames());
+        setImportMsg({ ok: true, text: `✓ Imported ${fCount} folders and ${gCount} games successfully!` });
+      } catch {
+        setImportMsg({ ok: false, text: '✗ Invalid backup file. Make sure it is a valid JSON backup.' });
+      }
+      setTimeout(() => setImportMsg(null), 5000);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const exportGamesCSV = () => {
@@ -201,7 +224,14 @@ export default function AdminPage({ onBack }: Props) {
             <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 24 }}>
               <h3 style={{ color: 'white', fontWeight: 800, fontSize: 17, marginBottom: 6 }}>💾 Full Backup (JSON)</h3>
               <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 16 }}>Export everything — folders, games, and questions — as a backup file.</p>
-              <button onClick={exportAllData} style={{ background: 'linear-gradient(135deg,#7dd3fc,#38bdf8)', color: '#0c1445', border: 'none', borderRadius: 12, padding: '13px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>💾 Download Backup</button>
+                  <button onClick={exportAllData} style={{ background: 'linear-gradient(135deg,#7dd3fc,#38bdf8)', color: '#0c1445', border: 'none', borderRadius: 12, padding: '13px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>💾 Download Backup</button>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 24 }}>
+              <h3 style={{ color: 'white', fontWeight: 800, fontSize: 17, marginBottom: 6 }}>📤 Restore Backup (JSON)</h3>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 16 }}>Import a previously saved backup file. Existing data will be kept — duplicates are overwritten.</p>
+              <input ref={importRef} type="file" accept=".json" onChange={importBackup} style={{ display: 'none' }} />
+              <button onClick={() => importRef.current?.click()} style={{ background: 'linear-gradient(135deg,#c084fc,#a78bfa)', color: 'white', border: 'none', borderRadius: 12, padding: '13px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>📂 Choose Backup File</button>
+              {importMsg && <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, background: importMsg.ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)', border: `1px solid ${importMsg.ok ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`, color: importMsg.ok ? '#6ee7b7' : '#fca5a5', fontSize: 13 }}>{importMsg.text}</div>}
             </div>
             <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 16, padding: 24 }}>
               <h3 style={{ color: '#fca5a5', fontWeight: 800, fontSize: 17, marginBottom: 6 }}>⚠️ Clear All Data</h3>
