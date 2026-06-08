@@ -43,13 +43,33 @@ export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack
     setLoading(true);
     setError('');
 
-    // Check Firebase for live session first
+    // Check for live session first (8 s timeout built into getSession)
     if (FIREBASE_CONFIGURED) {
-      const session = await getSession(trimmed);
+      let session = null;
+      try {
+        session = await getSession(trimmed);
+      } catch {
+        // network error — fall through to solo
+      }
       if (session && (session.status === 'waiting' || session.status === 'playing')) {
         setIsLive(true);
         setLoading(false);
         setStep('nickname');
+        return;
+      }
+      if (session === null) {
+        // Could be a network issue — let the user know and offer solo fallback
+        const games = getGames();
+        const game = games.find(g => g.pin === trimmed);
+        setLoading(false);
+        if (!game) {
+          setError('⚠️ Could not reach the live game. Check your connection or ask your teacher to share the link directly.');
+          return;
+        }
+        // solo game exists — fall through
+        setIsLive(false);
+        setFoundGame(game);
+        setStep(game.isCompetitive ? 'nickname' : 'confirm-solo');
         return;
       }
     }

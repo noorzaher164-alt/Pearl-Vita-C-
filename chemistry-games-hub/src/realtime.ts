@@ -34,6 +34,34 @@ export interface LiveSession {
   currentQuestion: number;
   questionStartedAt: number;
   students: Record<string, StudentSlot>;
+  roomSecret?: string; // included in peer ID so rooms aren't guessable from PIN alone
+}
+
+const SESSIONS_FN = '/.netlify/functions/session';
+
+async function storeRoomId(pin: string, peerId: string) {
+  try {
+    await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ peerId }),
+    });
+  } catch { /**/ }
+}
+
+async function fetchRoomId(pin: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.peerId ?? null;
+  } catch { return null; }
+}
+
+async function clearRoomId(pin: string) {
+  try {
+    await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`, { method: 'DELETE' });
+  } catch { /**/ }
 }
 
 // ── Module-level state ────────────────────────────────────────────────────
@@ -43,11 +71,22 @@ let hostPeer: any = null;
 let hostSession: LiveSession | null = null;
 let hostConns: Map<string, any> = new Map(); // nickname → DataConnection
 let hostCallbacks: Set<(s: LiveSession | null) => void> = new Set();
+let hostRoomSecret = ''; // random suffix added to peer ID so rooms aren't guessable from PIN
 
 // Student side
 let clientPeer: any = null;
 let clientConn: any = null;
 let clientCallbacks: Map<string, Set<(s: LiveSession | null) => void>> = new Map();
+
+function makePeerId(pin: string, secret: string) {
+  return `chem-hub-${pin}-${secret}`;
+}
+
+function randomSecret(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(6)))
+    .map(b => b.toString(36))
+    .join('');
+}
 
 function broadcastToStudents(session: LiveSession) {
   hostConns.forEach(conn => {
@@ -64,20 +103,22 @@ function notifyHostCallbacks() {
 // ── Teacher API ───────────────────────────────────────────────────────────
 
 export async function createSession(pin: string, session: LiveSession): Promise<void> {
-  hostSession = { ...session, students: {} };
+  hostRoomSecret = randomSecret();
+  hostSession = { ...session, students: {}, roomSecret: hostRoomSecret };
 
   return new Promise((resolve, reject) => {
     // Destroy any existing host peer
     if (hostPeer) { try { hostPeer.destroy(); } catch { /**/ } }
 
-    hostPeer = new Peer(`chem-hub-${pin}`, {
+    const peerId = makePeerId(pin, hostRoomSecret);
+    hostPeer = new Peer(peerId, {
       host: '0.peerjs.com',
       port: 443,
       path: '/',
       secure: true,
     });
 
-    hostPeer.on('open', () => resolve());
+    hostPeer.on('open', () => { storeRoomId(pin, peerId); resolve(); });
     hostPeer.on('error', (err: any) => reject(err));
 
     hostPeer.on('connection', (conn: any) => {
@@ -116,12 +157,14 @@ export async function createSession(pin: string, session: LiveSession): Promise<
   });
 }
 
-export async function deleteSession(_pin: string): Promise<void> {
+export async function deleteSession(pin: string): Promise<void> {
   if (hostPeer) { try { hostPeer.destroy(); } catch { /**/ } }
   hostPeer = null;
   hostSession = null;
+  hostRoomSecret = '';
   hostConns.clear();
   hostCallbacks.clear();
+  clearRoomId(pin);
 }
 
 export function subscribeSession(
@@ -137,14 +180,21 @@ export function subscribeSession(
   }
 
   // Student side — connect to teacher's peer
-  const peerId = `chem-hub-${pin}`;
   if (!clientCallbacks.has(pin)) clientCallbacks.set(pin, new Set());
   const cbs = clientCallbacks.get(pin)!;
   cbs.add(callback);
 
-  function connectToHost() {
+  let resolvedPeerId: string | null = null;
+
+  async function connectToHost() {
+    if (!resolvedPeerId) {
+      // First try: peer ID stored in Netlify function (has secret suffix)
+      const stored = await fetchRoomId(pin);
+      resolvedPeerId = stored ?? makePeerId(pin, ''); // fallback for old-format rooms
+    }
+
     if (clientPeer && !clientPeer.destroyed) {
-      openConnection();
+      openConnection(resolvedPeerId);
       return;
     }
     clientPeer = new Peer({
@@ -153,11 +203,11 @@ export function subscribeSession(
       path: '/',
       secure: true,
     });
-    clientPeer.on('open', openConnection);
+    clientPeer.on('open', () => openConnection(resolvedPeerId!));
     clientPeer.on('error', () => {});
   }
 
-  function openConnection() {
+  function openConnection(peerId: string) {
     if (clientConn && clientConn.open) {
       clientConn.send({ type: 'get-session' });
       return;
@@ -173,7 +223,6 @@ export function subscribeSession(
       }
     });
     clientConn.on('close', () => {
-      // Auto-reconnect after a short delay
       setTimeout(() => connectToHost(), 2000);
     });
     clientConn.on('error', () => {
@@ -201,7 +250,10 @@ export async function updateSession(_pin: string, updates: Partial<LiveSession>)
 }
 
 export async function getSession(pin: string): Promise<LiveSession | null> {
-  const peerId = `chem-hub-${pin}`;
+  // Look up the secret-bearing peer ID from the Netlify function first
+  const storedPeerId = await fetchRoomId(pin);
+  const peerId = storedPeerId ?? makePeerId(pin, ''); // fallback for rooms without secret
+
   return new Promise(resolve => {
     let done = false;
     let testPeer: any = null;
@@ -223,7 +275,6 @@ export async function getSession(pin: string): Promise<LiveSession | null> {
           if (done) return;
           if (msg.type === 'session' && msg.session?.gameId) {
             done = true;
-            // Store connection for reuse by subscribeSession
             clientPeer = testPeer;
             clientConn = conn;
             resolve(msg.session);
@@ -232,7 +283,8 @@ export async function getSession(pin: string): Promise<LiveSession | null> {
         conn.on('error', () => { if (!done) { done = true; resolve(null); } });
       });
       testPeer.on('error', () => { if (!done) { done = true; resolve(null); } });
-      setTimeout(() => { if (!done) { done = true; try { testPeer?.destroy(); } catch { /**/ } resolve(null); } }, 10000);
+      // 8-second timeout with clear failure (fix #8)
+      setTimeout(() => { if (!done) { done = true; try { testPeer?.destroy(); } catch { /**/ } resolve(null); } }, 8000);
     } catch {
       resolve(null);
     }

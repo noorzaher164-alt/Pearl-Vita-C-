@@ -530,10 +530,12 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
   const [myStreak, setMyStreak] = useState(0);
   const [myAnswers, setMyAnswers] = useState<Record<number, number>>({});
   const [studentTimer, setStudentTimer] = useState(0);
+  const [connFailed, setConnFailed] = useState(false);
   const joinedRef = useRef(false);
   const hasPlayedStartRef = useRef(false);
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionRef = useRef<LiveSession | null>(null);
+  const connTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const tpl = getTemplate(session?.templateId || 'periodic-table');
 
@@ -560,6 +562,11 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
   }, [session?.status, session?.currentQuestion, session?.questionStartedAt]);
 
   useEffect(() => {
+    // 12-second connection timeout — show error if session never arrives
+    connTimeoutRef.current = setTimeout(() => {
+      if (!sessionRef.current) setConnFailed(true);
+    }, 12000);
+
     const join = async () => {
       if (!joinedRef.current) {
         joinedRef.current = true;
@@ -570,6 +577,7 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
     join();
     const unsub = subscribeSession(pin, s => {
       if (!s) return;
+      if (connTimeoutRef.current) { clearTimeout(connTimeoutRef.current); connTimeoutRef.current = null; }
       sessionRef.current = s;
       setSession(s);
       if (s.status === 'finished') {
@@ -588,8 +596,21 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
         setLocalPhase('waiting');
       }
     });
-    return unsub;
+    return () => { unsub(); if (connTimeoutRef.current) clearTimeout(connTimeoutRef.current); };
   }, [pin, nickname]);
+
+  if (connFailed) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a1a,#1a0a2e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 56 }}>📡</div>
+        <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800 }}>Connection Failed</h2>
+        <p style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 360, lineHeight: 1.6 }}>
+          Could not reach the teacher's game. Check that the teacher's screen is still open, your device is on the same network, and try again.
+        </p>
+        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '12px 28px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
+      </div>
+    );
+  }
 
   const handleAnswer = useCallback(async (choiceIdx: number) => {
     const s = sessionRef.current;
