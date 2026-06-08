@@ -44,11 +44,16 @@ export interface Folder {
 export interface LeaderboardEntry {
   nickname: string;
   score: number;
+  streak: number;
+  rank: number;
   time: number;
 }
 
 export interface GameResult {
+  id: string;          // unique session ID
   gameId: string;
+  gameTitle: string;
+  sessionType: 'live' | 'solo';
   leaderboard: LeaderboardEntry[];
   playedAt: string;
 }

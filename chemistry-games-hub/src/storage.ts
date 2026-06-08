@@ -88,8 +88,11 @@ export function getResults(): GameResult[] {
 
 export function saveResult(result: GameResult) {
   const results = getResults();
-  results.unshift(result);
-  localStorage.setItem(RESULTS_KEY, JSON.stringify(results.slice(0, 100)));
+  // Replace existing record with same id, otherwise prepend
+  const idx = results.findIndex(r => r.id === result.id);
+  if (idx >= 0) results[idx] = result;
+  else results.unshift(result);
+  localStorage.setItem(RESULTS_KEY, JSON.stringify(results.slice(0, 200)));
 }
 
 export function getResultsByGame(gameId: string): GameResult[] {

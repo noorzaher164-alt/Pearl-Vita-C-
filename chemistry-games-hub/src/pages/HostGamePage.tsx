@@ -66,6 +66,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   const [firebaseError, setFirebaseError] = useState('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const unsubRef = useRef<(() => void) | null>(null);
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   const pin = game?.pin || '';
   const tpl = getTemplate(game?.templateId || 'periodic-table');
@@ -152,8 +153,13 @@ export default function HostGamePage({ gameId, onBack }: Props) {
       if (session && game) {
         const finalStudents = Object.values(session.students).sort((a, b) => b.score - a.score);
         const result: GameResult = {
+          id: sessionIdRef.current,
           gameId: game.id,
-          leaderboard: finalStudents.map(s => ({ nickname: s.nickname, score: s.score, time: 0 })),
+          gameTitle: game.title,
+          sessionType: 'live',
+          leaderboard: finalStudents.map((s, i) => ({
+            nickname: s.nickname, score: s.score, streak: s.streak, rank: i + 1, time: 0,
+          })),
           playedAt: new Date().toISOString(),
         };
         saveResult(result);

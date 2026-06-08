@@ -302,8 +302,8 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   const handleFinish = () => {
     setPhase('finished');
     if (soundOn) playSound('finish');
-    const entry: LeaderboardEntry = { nickname: nickname || 'Player', score, time: Date.now() };
-    saveResult({ gameId, leaderboard: [entry], playedAt: new Date().toISOString() });
+    const entry: LeaderboardEntry = { nickname: nickname || 'Player', score, streak: 0, rank: 1, time: Date.now() };
+    saveResult({ id: crypto.randomUUID(), gameId, gameTitle: game?.title ?? '', sessionType: 'solo', leaderboard: [entry], playedAt: new Date().toISOString() });
     onFinish([entry]);
   };
 
