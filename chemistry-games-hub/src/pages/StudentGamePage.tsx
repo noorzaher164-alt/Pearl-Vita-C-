@@ -165,7 +165,7 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
           Q {session.currentQuestion + 1}/{session.questionCount}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ color: tpl.accentColor, fontWeight: 800, fontSize: 17 }}>⭐ {myScore} pts</div>
+          <div aria-live="polite" aria-label={`Score: ${myScore} points`} style={{ color: tpl.accentColor, fontWeight: 800, fontSize: 17 }}>⭐ {myScore} pts</div>
           {myRank > 0 && (
             <div style={{
               background: myRank === 1 ? 'rgba(251,191,36,0.25)' : `${tpl.accentColor}20`,
@@ -193,15 +193,21 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
         }} />
       </div>
 
-      {/* Timer number */}
+      {/* Timer number — text cue added so it's not color-only */}
       <div style={{ textAlign: 'center', padding: '6px 0 0' }}>
-        <span style={{
-          fontSize: isUrgent ? 28 : 20,
-          fontWeight: 900,
-          color: isUrgent ? '#ef4444' : tpl.timerColor,
-          transition: 'all 0.3s',
-          animation: isUrgent ? 'timerPulse 0.5s ease-in-out infinite alternate' : 'none',
-        }}>{timeLeft}</span>
+        <span
+          aria-live="assertive"
+          aria-label={`${timeLeft} seconds left${isUrgent ? ', hurry!' : ''}`}
+          style={{
+            fontSize: isUrgent ? 28 : 20,
+            fontWeight: 900,
+            color: isUrgent ? '#ef4444' : tpl.timerColor,
+            transition: 'all 0.3s',
+            animation: isUrgent ? 'timerPulse 0.5s ease-in-out infinite alternate' : 'none',
+          }}
+        >
+          {timeLeft}s {isUrgent ? '⚠️' : ''}
+        </span>
       </div>
 
       {/* Question card */}
@@ -219,6 +225,8 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
             const isChosen = answered && myStudentAnswers?.[session.currentQuestion] === ci;
             return (
               <button key={ci} onClick={() => !answered && onAnswer(ci)} disabled={answered}
+                aria-label={`Choice ${['A','B','C','D'][ci]}: ${choice}`}
+                aria-pressed={isChosen}
                 style={{
                   background: answered ? (isChosen ? color : `${color}20`) : color,
                   border: `3px solid ${isChosen ? 'white' : answered ? color + '30' : color}`,
@@ -278,7 +286,7 @@ function RevealScreen({ session, tpl, myAnswerIdx, myScore }: {
       <div style={{ fontSize: 90, marginBottom: 12, animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {isCorrect ? '✅' : myAnswerIdx === null ? '⏰' : '❌'}
       </div>
-      <div style={{ fontSize: 30, fontWeight: 900, color: isCorrect ? '#6ee7b7' : myAnswerIdx === null ? '#fde68a' : '#fca5a5', marginBottom: 10 }}>
+      <div role="status" aria-live="polite" style={{ fontSize: 30, fontWeight: 900, color: isCorrect ? '#6ee7b7' : myAnswerIdx === null ? '#fde68a' : '#fca5a5', marginBottom: 10 }}>
         {isCorrect ? 'Correct!' : myAnswerIdx === null ? "Time's up!" : 'Wrong answer!'}
       </div>
 
