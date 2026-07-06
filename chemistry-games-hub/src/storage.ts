@@ -1,23 +1,31 @@
 import type { Folder, Game, GameResult } from './types';
-import { DEMO_FOLDERS, DEMO_GAMES } from './demoData';
 
 // ── KEYS ──────────────────────────────────────────────────────────────────────
 const FOLDERS_KEY = 'cgh_folders';
 const GAMES_KEY = 'cgh_games';
 const RESULTS_KEY = 'cgh_results';
+const VERSION_KEY = 'cgh_version';
+const CURRENT_VERSION = '3'; // increment when a breaking migration is needed
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-// TODO: Replace localStorage with Supabase/Firebase calls here
-function init() {
-  if (!localStorage.getItem(FOLDERS_KEY)) {
-    localStorage.setItem(FOLDERS_KEY, JSON.stringify(DEMO_FOLDERS));
-  }
-  if (!localStorage.getItem(GAMES_KEY)) {
-    localStorage.setItem(GAMES_KEY, JSON.stringify(DEMO_GAMES));
-  }
+// ── MIGRATION ─────────────────────────────────────────────────────────────────
+// v3: remove old demo folders (f1-f5) and their games; start fresh with grade structure
+function migrate() {
+  const v = localStorage.getItem(VERSION_KEY);
+  if (v === CURRENT_VERSION) return;
+
+  // Remove old demo folder IDs and their games
+  const OLD_DEMO_IDS = new Set(['f1', 'f2', 'f3', 'f4', 'f5']);
+  const folders: Folder[] = JSON.parse(localStorage.getItem(FOLDERS_KEY) || '[]');
+  const cleanFolders = folders.filter(f => !OLD_DEMO_IDS.has(f.id));
+  const games: Game[] = JSON.parse(localStorage.getItem(GAMES_KEY) || '[]');
+  const cleanGames = games.filter(g => !OLD_DEMO_IDS.has(g.folderId));
+
+  localStorage.setItem(FOLDERS_KEY, JSON.stringify(cleanFolders));
+  localStorage.setItem(GAMES_KEY, JSON.stringify(cleanGames));
+  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
 }
 
-init();
+migrate();
 
 // ── FOLDERS ───────────────────────────────────────────────────────────────────
 export function getFolders(): Folder[] {

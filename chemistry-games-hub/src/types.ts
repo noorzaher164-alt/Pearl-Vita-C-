@@ -39,6 +39,8 @@ export interface Folder {
   color: string;
   icon: string;
   createdAt: string;
+  gradeId?: string;    // 'grade10' | 'grade11' | 'grade12chem' | 'grade12sci'
+  semesterId?: string; // 's1' | 's2'
 }
 
 export interface LeaderboardEntry {
