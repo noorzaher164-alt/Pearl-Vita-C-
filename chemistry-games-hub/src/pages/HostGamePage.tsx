@@ -360,30 +360,34 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           {/* Question card */}
           {currentQ && (
             <div style={{ background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`, borderRadius: 22, padding: '24px 28px', marginBottom: 20, textAlign: 'center', boxShadow: `0 8px 40px rgba(0,0,0,0.3)` }}>
-              <h2 style={{ color: 'white', fontSize: 'clamp(18px,2.8vw,28px)', fontWeight: 700, lineHeight: 1.5, margin: 0 }}>{currentQ.text}</h2>
+              <h2 style={{ color: 'white', fontSize: 'clamp(18px,2.8vw,28px)', fontWeight: 700, lineHeight: 1.5, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{currentQ.text}</h2>
             </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             {/* Left: answer distribution */}
             <div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>ANSWER DISTRIBUTION</div>
+              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>
+                ANSWER DISTRIBUTION {status === 'playing' && <span style={{ color: 'rgba(255,255,255,0.25)', fontWeight: 400, fontSize: 11 }}>(hidden until time's up)</span>}
+              </div>
               {currentQ?.choices.map((choice, ci) => {
                 const count = choiceAnswerCounts[ci] || 0;
                 const color = tpl.choiceColors[ci];
+                const showResults = status !== 'playing';
                 return (
                   <div key={ci} style={{
                     background: `${color}15`,
                     border: `2px solid ${color}50`,
                     borderRadius: 14, padding: '12px 14px', marginBottom: 8, position: 'relative', overflow: 'hidden',
                   }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: color + '25', width: `${(count / maxCount) * 100}%`, transition: 'width 0.6s ease', borderRadius: 12 }} />
+                    {/* Bar fill — hidden during timer */}
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: color + '25', width: showResults ? `${(count / maxCount) * 100}%` : '0%', transition: 'width 0.8s ease', borderRadius: 12 }} />
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ width: 28, height: 28, borderRadius: 6, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
                         {CHOICE_LABELS[ci]}
                       </span>
                       <span style={{ color: 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>{choice}</span>
-                      <span style={{ color: tpl.accentColor, fontWeight: 900, fontSize: 18 }}>{count}</span>
+                      {showResults && <span style={{ color: tpl.accentColor, fontWeight: 900, fontSize: 18 }}>{count}</span>}
                     </div>
                   </div>
                 );

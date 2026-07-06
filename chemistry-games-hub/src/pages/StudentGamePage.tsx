@@ -144,8 +144,19 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
   session: LiveSession; nickname: string; tpl: GameTemplate;
   onAnswer: (idx: number) => void; myScore: number; answered: boolean; timeLeft: number;
 }) {
-  const q: LiveQuestion | undefined = session.questions?.[session.currentQuestion];
-  if (!q) return null;
+  const questions = session.questions;
+  // Firebase/PeerJS may deliver questions as an object with numeric keys — normalise to array
+  const questionsArr: LiveQuestion[] = Array.isArray(questions)
+    ? questions
+    : Object.values(questions ?? {});
+  const q: LiveQuestion | undefined = questionsArr[session.currentQuestion];
+  if (!q) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: tpl.bg, flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 48, animation: 'spin 1s linear infinite' }}>⚛️</div>
+      <div style={{ color: 'white', fontSize: 18 }}>Loading question...</div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
 
   const totalTime = q.timeSeconds || 20;
   const timerPct = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
@@ -213,7 +224,7 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
       {/* Question card */}
       <div style={{ padding: '12px 16px 8px', maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         <div style={{ background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`, borderRadius: 20, padding: '20px 24px', textAlign: 'center', boxShadow: `0 8px 32px rgba(0,0,0,0.3)` }}>
-          <h2 style={{ color: 'white', fontSize: 'clamp(17px,3vw,26px)', fontWeight: 700, lineHeight: 1.4, margin: 0 }}>{q.text}</h2>
+          <h2 style={{ color: 'white', fontSize: 'clamp(17px,3vw,26px)', fontWeight: 700, lineHeight: 1.4, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{q.text}</h2>
         </div>
       </div>
 
@@ -247,7 +258,7 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
                 }}>
                   {CHOICE_SHAPES[ci]}
                 </span>
-                <span style={{ lineHeight: 1.3 }}>{choice}</span>
+                <span style={{ lineHeight: 1.3, direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
               </button>
             );
           })}
@@ -271,7 +282,10 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
 function RevealScreen({ session, tpl, myAnswerIdx, myScore }: {
   session: LiveSession; tpl: GameTemplate; myAnswerIdx: number | null; myScore: number;
 }) {
-  const q: LiveQuestion | undefined = session.questions?.[session.currentQuestion];
+  const questionsArr: LiveQuestion[] = Array.isArray(session.questions)
+    ? session.questions
+    : Object.values(session.questions ?? {});
+  const q: LiveQuestion | undefined = questionsArr[session.currentQuestion];
   if (!q) return null;
   const isCorrect = myAnswerIdx !== null && myAnswerIdx === q.correctIndex;
 

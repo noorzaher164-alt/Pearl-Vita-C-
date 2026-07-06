@@ -10,239 +10,154 @@ interface Props {
   onBack: () => void;
 }
 
-const GAME_TYPE_LABELS: Record<string, string> = {
-  'quiz-battle': '⚔️ Quiz Battle',
-  'fastest-molecule': '⚡ Fastest Molecule',
-  'periodic-challenge': '🔬 Periodic Challenge',
-  'reaction-race': '🏃 Reaction Race',
-  'energy-points': '💎 Energy Points',
-  'match-terms': '🔗 Match Terms',
-  'word-search': '🔍 Word Search',
-  'drag-drop': '🧩 Drag & Drop',
-  'true-false': '✅ True or False',
-  'flashcards': '🃏 Flashcards',
-};
-
-type Step = 'enter' | 'nickname' | 'confirm-solo';
-
 export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack }: Props) {
   const [code, setCode] = useState(initialPin || '');
   const [firstName, setFirstName] = useState('');
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
-  // If a PIN was pre-filled via URL, go straight to nickname step
-  const [step, setStep] = useState<Step>(initialPin ? 'nickname' : 'enter');
-  const [foundGame, setFoundGame] = useState<Game | null>(null);
-  const [isLive, setIsLive] = useState(!!initialPin); // assume live if URL pin
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async () => {
-    const trimmed = code.trim().toUpperCase();
-    if (trimmed.length !== 6) { setError('Please enter the 6-character PIN'); return; }
+  const pinReady = code.length === 6;
+  const nameReady = firstName.trim().length > 0 && lastName.trim().length > 0;
+  const canJoin = pinReady && nameReady;
+
+  const handleJoin = async () => {
+    if (!canJoin) return;
     setLoading(true);
     setError('');
+    const trimmedPin = code.trim().toUpperCase();
+    const fullName = [firstName.trim(), middleName.trim(), lastName.trim()].filter(Boolean).join(' ');
 
-    // Check for live session first (8 s timeout built into getSession)
+    // Try live session first
     if (FIREBASE_CONFIGURED) {
       let session = null;
-      try {
-        session = await getSession(trimmed);
-      } catch {
-        // network error — fall through to solo
-      }
+      try { session = await getSession(trimmedPin); } catch { /* network error */ }
       if (session && (session.status === 'waiting' || session.status === 'playing')) {
-        setIsLive(true);
         setLoading(false);
-        setStep('nickname');
+        onJoinLive(trimmedPin, fullName);
         return;
       }
       if (session === null) {
-        // Could be a network issue — let the user know and offer solo fallback
-        const games = getGames();
-        const game = games.find(g => g.pin === trimmed);
-        setLoading(false);
+        // Could be a network issue — check localStorage for solo game
+        const game = getGames().find((g: Game) => g.pin === trimmedPin);
         if (!game) {
+          setLoading(false);
           setError('⚠️ Could not reach the live game. Check your connection or ask your teacher to share the link directly.');
           return;
         }
-        // solo game exists — fall through
-        setIsLive(false);
-        setFoundGame(game);
-        setStep(game.isCompetitive ? 'nickname' : 'confirm-solo');
+        setLoading(false);
+        onPlayGame(game.id);
         return;
       }
     }
 
-    // Fall back to localStorage solo game
-    const games = getGames();
-    const game = games.find(g => g.pin === trimmed);
+    // Solo game fallback
+    const game = getGames().find((g: Game) => g.pin === trimmedPin);
     setLoading(false);
     if (!game) {
       setError('❌ No game found with this PIN. Ask your teacher!');
       return;
     }
-    setIsLive(false);
-    setFoundGame(game);
-    setStep(game.isCompetitive ? 'nickname' : 'confirm-solo');
+    onPlayGame(game.id);
   };
 
-  const handleJoin = () => {
-    const first = firstName.trim();
-    const last = lastName.trim();
-    if (!first || !last) { setError('Please enter your first and last name'); return; }
-    const fullName = [first, middleName.trim(), last].filter(Boolean).join(' ');
-    if (isLive) {
-      onJoinLive(code.trim().toUpperCase(), fullName);
-    } else if (foundGame) {
-      onPlayGame(foundGame.id);
-    }
-  };
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ position: 'fixed', top: '8%', left: '6%', fontSize: 60, opacity: 0.07, animation: 'spin 20s linear infinite' }}>⚛️</div>
+      <div style={{ position: 'fixed', bottom: '10%', right: '8%', fontSize: 50, opacity: 0.07, animation: 'spin 15s linear infinite reverse' }}>🧪</div>
 
-  // Step: enter full name (for live session or competitive solo)
-  if (step === 'nickname') {
-    const canJoin = firstName.trim() && lastName.trim();
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 28, padding: 40, maxWidth: 460, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>{isLive ? '🎮' : '🎭'}</div>
-          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800, marginBottom: 4 }}>
-            {isLive ? 'Live Game — Join!' : foundGame?.title}
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 24, fontSize: 14 }}>
-            {isLive ? `PIN: ${code.toUpperCase()} — Enter your full name` : `Game PIN: ${code.toUpperCase()}`}
-          </p>
+      <div style={{ textAlign: 'center', maxWidth: 480, width: '100%' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 20, fontSize: 13, color: '#c084fc' }}>
+          🧪 Teacher Nourhan Zaher
+        </div>
 
+        <h1 style={{ fontSize: 'clamp(28px, 7vw, 46px)', fontWeight: 900, marginBottom: 6, background: 'linear-gradient(135deg, #f093fb, #a78bfa, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          Join a Game!
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 28, fontSize: 15 }}>
+          Enter the game PIN and your name
+        </p>
+
+        <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, padding: '28px 24px', marginBottom: 16 }}>
+
+          {/* PIN boxes */}
+          <label style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, display: 'block', marginBottom: 10 }}>🔑 Game PIN (6 characters)</label>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} style={{
+                width: 44, height: 52,
+                background: code[i] ? 'rgba(192,132,252,0.25)' : 'rgba(255,255,255,0.05)',
+                border: `2px solid ${code[i] ? '#c084fc' : 'rgba(255,255,255,0.15)'}`,
+                borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 800, color: 'white', transition: 'all 0.2s',
+              }}>
+                {code[i] || ''}
+              </div>
+            ))}
+          </div>
+          <input
+            value={code}
+            onChange={e => { setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)); setError(''); }}
+            onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
+            placeholder="Type PIN here..."
+            autoFocus maxLength={6}
+            style={{
+              width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 17,
+              outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+              textAlign: 'center', letterSpacing: 4, fontWeight: 700, marginBottom: 20,
+            }}
+          />
+
+          {/* Name fields */}
+          <label style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, display: 'block', marginBottom: 10 }}>👤 Your Name</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
             <input
               value={firstName}
               onChange={e => { setFirstName(e.target.value.slice(0, 20)); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
               placeholder="First name *"
-              autoFocus
-              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.4)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={inputStyle}
             />
             <input
               value={middleName}
               onChange={e => { setMiddleName(e.target.value.slice(0, 20)); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
               placeholder="Middle name (optional)"
-              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.25)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ ...inputStyle, borderColor: 'rgba(255,255,255,0.1)' }}
             />
             <input
               value={lastName}
               onChange={e => { setLastName(e.target.value.slice(0, 20)); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && canJoin && handleJoin()}
               placeholder="Last name *"
-              style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.4)', borderRadius: 12, padding: '12px 16px', color: 'white', fontSize: 16, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={inputStyle}
             />
           </div>
-          {error && <div style={{ color: '#fca5a5', fontSize: 13, marginBottom: 8 }}>{error}</div>}
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-            <button onClick={() => { setStep('enter'); setError(''); }} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '13px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
-            <button onClick={handleJoin} disabled={!canJoin} style={{
-              flex: 1, background: canJoin ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'rgba(255,255,255,0.1)',
-              color: 'white', border: 'none', borderRadius: 12, padding: '13px',
-              fontSize: 18, fontWeight: 800, cursor: canJoin ? 'pointer' : 'default', fontFamily: 'inherit',
-              boxShadow: canJoin ? '0 4px 20px rgba(34,197,94,0.4)' : 'none',
-            }}>
-              {isLive ? '🚀 Join Live Game!' : '🚀 Play!'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+          {error && (
+            <div style={{ marginTop: 8, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#fca5a5', fontSize: 13, marginBottom: 8 }}>
+              {error}
+            </div>
+          )}
 
-  // Step: confirm solo game
-  if (step === 'confirm-solo' && foundGame) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 28, padding: 40, maxWidth: 480, width: '100%', textAlign: 'center' }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>🎮</div>
-          <div style={{ display: 'inline-block', background: 'rgba(192,132,252,0.2)', border: '1px solid rgba(192,132,252,0.4)', borderRadius: 100, padding: '4px 16px', fontSize: 13, color: '#c084fc', marginBottom: 16 }}>
-            {GAME_TYPE_LABELS[foundGame.gameType] || foundGame.gameType}
-          </div>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: 'white', marginBottom: 8 }}>{foundGame.title}</h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>📚 {foundGame.lessonName}</p>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginBottom: 32 }}>
-            ❓ {foundGame.questions.length} questions • 📖 Practice mode
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => { setStep('enter'); setFoundGame(null); setCode(''); }} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 14, padding: '13px 24px', fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
-            <button onClick={() => onPlayGame(foundGame.id)} style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 36px', fontSize: 18, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(34,197,94,0.5)' }}>🚀 Start!</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Step: enter PIN
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ position: 'fixed', top: '8%', left: '6%', fontSize: 60, opacity: 0.07, animation: 'spin 20s linear infinite' }}>⚛️</div>
-      <div style={{ position: 'fixed', bottom: '10%', right: '8%', fontSize: 50, opacity: 0.07, animation: 'spin 15s linear infinite reverse' }}>🧪</div>
-
-      <div style={{ textAlign: 'center', maxWidth: 460, width: '100%' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: 100, padding: '6px 18px', marginBottom: 28, fontSize: 13, color: '#c084fc' }}>
-          🧪 Teacher Nourhan Zaher
-        </div>
-
-        <h1 style={{ fontSize: 'clamp(32px, 7vw, 52px)', fontWeight: 900, marginBottom: 8, background: 'linear-gradient(135deg, #f093fb, #a78bfa, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Join a Game!
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 40, fontSize: 16 }}>
-          Enter the PIN your teacher gave you
-        </p>
-
-        <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 24, padding: '32px 28px', marginBottom: 16 }}>
-          <label style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, display: 'block', marginBottom: 14 }}>🔑 Game PIN (6 characters)</label>
-
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} style={{
-                width: 44, height: 56,
-                background: code[i] ? 'rgba(192,132,252,0.25)' : 'rgba(255,255,255,0.05)',
-                border: `2px solid ${code[i] ? '#c084fc' : 'rgba(255,255,255,0.15)'}`,
-                borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, fontWeight: 800, color: 'white', transition: 'all 0.2s',
-              }}>
-                {code[i] || ''}
-              </div>
-            ))}
-          </div>
-
-          <input
-            value={code}
-            onChange={e => { setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)); setError(''); }}
-            onKeyDown={e => e.key === 'Enter' && code.length === 6 && handleSearch()}
-            placeholder="Type PIN here..."
-            autoFocus maxLength={6}
+          <button
+            onClick={handleJoin}
+            disabled={!canJoin || loading}
             style={{
-              width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 12, padding: '14px 16px', color: 'white', fontSize: 18,
-              outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-              textAlign: 'center', letterSpacing: 4, fontWeight: 700,
+              width: '100%', marginTop: 14,
+              background: canJoin ? 'linear-gradient(135deg, #c084fc, #a78bfa, #7dd3fc)' : 'rgba(255,255,255,0.1)',
+              color: 'white', border: 'none', borderRadius: 14, padding: '16px',
+              fontSize: 18, fontWeight: 700, cursor: canJoin ? 'pointer' : 'default',
+              fontFamily: 'inherit', boxShadow: canJoin ? '0 4px 20px rgba(192,132,252,0.4)' : 'none',
+              transition: 'all 0.3s',
             }}
-          />
-
-          {error && <div style={{ marginTop: 14, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '10px 14px', color: '#fca5a5', fontSize: 14 }}>{error}</div>}
-
-          <button onClick={handleSearch} disabled={code.length !== 6 || loading} style={{
-            width: '100%', marginTop: 20,
-            background: code.length === 6 ? 'linear-gradient(135deg, #c084fc, #a78bfa, #7dd3fc)' : 'rgba(255,255,255,0.1)',
-            color: 'white', border: 'none', borderRadius: 14, padding: '16px',
-            fontSize: 18, fontWeight: 700, cursor: code.length === 6 ? 'pointer' : 'default',
-            fontFamily: 'inherit', boxShadow: code.length === 6 ? '0 4px 20px rgba(192,132,252,0.4)' : 'none', transition: 'all 0.3s',
-          }}>
-            {loading ? '🔍 Searching...' : '🎮 Find Game'}
+          >
+            {loading ? '🔍 Joining...' : '🚀 Join Game!'}
           </button>
         </div>
 
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 24 }}>
-          Ask your teacher for the game PIN to join
-        </p>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Back to Home</button>
       </div>
 
@@ -250,3 +165,16 @@ export default function StudentPage({ initialPin, onPlayGame, onJoinLive, onBack
     </div>
   );
 }
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: 'rgba(255,255,255,0.08)',
+  border: '2px solid rgba(192,132,252,0.35)',
+  borderRadius: 12,
+  padding: '12px 16px',
+  color: 'white',
+  fontSize: 15,
+  outline: 'none',
+  fontFamily: 'inherit',
+  boxSizing: 'border-box',
+};
