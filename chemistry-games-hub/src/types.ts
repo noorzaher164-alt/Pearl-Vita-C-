@@ -69,7 +69,8 @@ export type Page =
   | 'student-game'
   | 'results'
   | 'review'
-  | 'admin';
+  | 'admin'
+  | 'test-bank';
 
 export interface AppState {
   page: Page;

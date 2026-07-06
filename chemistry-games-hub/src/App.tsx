@@ -11,6 +11,7 @@ import HostGamePage from './pages/HostGamePage';
 import StudentGamePage from './pages/StudentGamePage';
 import BubbleBackground from './components/BubbleBackground';
 import AdminPage from './pages/AdminPage';
+import TestBankPage from './pages/TestBankPage';
 
 function App() {
   // Pre-fill PIN if URL has ?join=XXXXXX
@@ -55,6 +56,9 @@ function App() {
         <>
         {state.page === 'admin' && (
           <AdminPage onBack={() => navigate('home')} />
+        )}
+        {state.page === 'test-bank' && (
+          <TestBankPage onBack={() => navigate('dashboard')} />
         )}
         {state.page === 'home' && (
           <HomePage

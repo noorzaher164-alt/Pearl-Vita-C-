@@ -118,6 +118,12 @@ export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
             ← Home
           </button>
           <button
+            onClick={() => onNavigate('test-bank')}
+            style={{ background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.35)', color: '#fbbf24', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700 }}
+          >
+            🏫 بنك الأسئلة
+          </button>
+          <button
             onClick={() => onNavigate('admin')}
             style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', color: '#c084fc', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}
           >
