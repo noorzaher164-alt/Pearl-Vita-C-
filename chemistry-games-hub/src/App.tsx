@@ -58,7 +58,7 @@ function App() {
           <AdminPage onBack={() => navigate('home')} />
         )}
         {state.page === 'test-bank' && (
-          <TestBankPage onBack={() => navigate('dashboard')} />
+          <TestBankPage onBack={() => navigate('dashboard')} semester={state.testBankSemester || 's1'} />
         )}
         {state.page === 'home' && (
           <HomePage

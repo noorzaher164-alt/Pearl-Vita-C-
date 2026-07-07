@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { GameType, Page } from '../types';
 import { TEST_BANK } from '../testBank';
+import { TEST_BANK_S2 } from '../testBankS2';
 import { getFolders, saveGame } from '../storage';
 import type { Folder } from '../types';
 
 interface Props {
   onBack: () => void;
+  semester?: 's1' | 's2'; // which test bank to load
   onNavigate?: (page: Page, extra?: Record<string, unknown>) => void;
 }
 
@@ -26,7 +28,8 @@ const COMPETITIVE_TYPES: { value: GameType; label: string; icon: string }[] = [
 
 const TEMPLATES = ['periodic-table', 'lab-dark', 'neon-glow', 'deep-space', 'volcano'];
 
-export default function TestBankPage({ onBack }: Props) {
+export default function TestBankPage({ onBack, semester = 's1' }: Props) {
+  const BANK = semester === 's2' ? TEST_BANK_S2 : TEST_BANK;
   const folders = getFolders();
   const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
@@ -38,7 +41,7 @@ export default function TestBankPage({ onBack }: Props) {
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<string | null>(null);
 
-  const unit = selectedUnit !== null ? TEST_BANK[selectedUnit] : null;
+  const unit = selectedUnit !== null ? BANK[selectedUnit] : null;
   const lesson = unit && selectedLesson !== null ? unit.lessons[selectedLesson] : null;
   const availableQ = lesson?.questions.length || 0;
   const maxQ = Math.min(availableQ, 15);
@@ -102,7 +105,7 @@ export default function TestBankPage({ onBack }: Props) {
         <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 24 }}>
           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, letterSpacing: 2, fontWeight: 700, marginBottom: 12 }}>الخطوة 1 — اختر الوحدة</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {TEST_BANK.map((u, ui) => (
+            {BANK.map((u, ui) => (
               <button key={ui} onClick={() => { setSelectedUnit(ui); setSelectedLesson(null); setCreated(null); }}
                 style={{
                   background: selectedUnit === ui ? 'rgba(192,132,252,0.2)' : 'rgba(255,255,255,0.05)',

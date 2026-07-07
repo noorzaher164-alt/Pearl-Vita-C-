@@ -81,4 +81,5 @@ export interface AppState {
   editGameId: string | null;
   studentPin: string | null;
   studentNickname: string | null;
+  testBankSemester?: 's1' | 's2';
 }

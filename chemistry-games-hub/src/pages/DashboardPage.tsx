@@ -24,8 +24,9 @@ const SEMESTERS = [
 type GradeId = (typeof GRADES)[number]['id'];
 type SemId   = (typeof SEMESTERS)[number]['id'];
 
-// Test bank exists only for Grade 12 Chemistry — First Semester
-function hasTestBank(g: GradeId, s: SemId) { return g === 'grade12chem' && s === 's1'; }
+// Test bank available for Grade 12 Chemistry — both semesters
+function hasTestBank(g: GradeId, s: SemId) { return g === 'grade12chem' && (s === 's1' || s === 's2'); }
+function testBankSemester(s: SemId): 's1' | 's2' { return s === 's2' ? 's2' : 's1'; }
 
 // ── FOLDER COLORS / ICONS for picker ─────────────────────────────────────────
 const FOLDER_COLORS = ['#c084fc','#7dd3fc','#fde68a','#6ee7b7','#fca5a5','#a78bfa','#ff6eb4','#34d399','#fb923c','#60a5fa'];
@@ -259,7 +260,7 @@ export default function DashboardPage({ onNavigate, onSelectFolder }: Props) {
 
         {/* Generate from Test Bank */}
         {isTestBankAvailable && (
-          <button onClick={() => onNavigate('test-bank')}
+          <button onClick={() => onNavigate('test-bank', { testBankSemester: testBankSemester(activeSem as SemId) })}
             style={{ background: 'rgba(251,191,36,0.15)', border: '2px solid rgba(251,191,36,0.4)', color: '#fbbf24', borderRadius: 14, padding: '14px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8 }}>
             🏫 Generate from Test Bank
           </button>
