@@ -10,17 +10,17 @@ interface Props {
   onSaved: () => void;
 }
 
-const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean; desc: string }[] = [
-  { value: 'quiz-battle', label: 'Quiz Battle', icon: '⚔️', competitive: true, desc: 'Classic live MCQ duel — all students answer at the same time, fastest correct answer wins the most points.' },
-  { value: 'fastest-molecule', label: 'Fastest Molecule', icon: '⚡', competitive: true, desc: 'Speed matters! Bonus points are awarded to whoever answers first. Great for quick-recall chemistry facts.' },
-  { value: 'periodic-challenge', label: 'Periodic Challenge', icon: '🔬', competitive: true, desc: 'Timed periodic-table themed round. Students race the clock and each other on element and compound questions.' },
-  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃', competitive: true, desc: 'Short time limit per question — keeps the energy high. Perfect for reaction equations and balancing practice.' },
-  { value: 'energy-points', label: 'Energy Points', icon: '💎', competitive: true, desc: 'Diamond scoring — earn big energy bonuses for streaks of correct answers. Risk-reward gameplay.' },
-  { value: 'match-terms', label: 'Match the Terms', icon: '🔗', competitive: false, desc: 'Students match key chemistry terms to their definitions at their own pace. Great for vocabulary review.' },
-  { value: 'word-search', label: 'Word Search', icon: '🔍', competitive: false, desc: 'Find hidden chemistry words in a grid. Fun, low-pressure review for any topic.' },
-  { value: 'drag-drop', label: 'Drag & Drop', icon: '🧩', competitive: false, desc: 'Drag substances or labels into the correct category. Ideal for classification and sorting tasks.' },
-  { value: 'true-false', label: 'True or False', icon: '✅', competitive: false, desc: 'Quick true/false statements to reinforce concepts. Excellent for checking understanding after a lesson.' },
-  { value: 'flashcards', label: 'Flashcards Review', icon: '🃏', competitive: false, desc: 'Self-paced flip-card review. Students study at their own speed before a test or exam.' },
+const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean; desc: string; disney: string; disneyName: string; color: string }[] = [
+  { value: 'quiz-battle', label: 'Quiz Battle', icon: '⚔️', competitive: true, desc: 'Everyone answers at the same time — fastest correct answer wins the most points!', disney: '🦁', disneyName: 'Simba', color: '#e21b3c' },
+  { value: 'fastest-molecule', label: 'Speed Round', icon: '⚡', competitive: true, desc: 'Super fast! Bonus points for whoever answers first. Great for quick chemistry facts.', disney: '🐇', disneyName: 'Judy Hopps', color: '#1368ce' },
+  { value: 'periodic-challenge', label: 'Element Challenge', icon: '🔬', competitive: true, desc: 'Race the clock on periodic table questions — elements, compounds & more!', disney: '🧪', disneyName: 'Hiro Hamada', color: '#d89e00' },
+  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃', competitive: true, desc: 'Short timer per question keeps the energy HIGH. Perfect for reaction equations.', disney: '⚡', disneyName: 'Lightning McQueen', color: '#26890c' },
+  { value: 'energy-points', label: 'Streak Bonus', icon: '💎', competitive: true, desc: 'Earn HUGE bonuses for answer streaks. Risk-reward scoring — can you keep your streak?', disney: '✨', disneyName: 'Tinker Bell', color: '#9c27b0' },
+  { value: 'match-terms', label: 'Match the Terms', icon: '🔗', competitive: false, desc: 'Match chemistry terms to their definitions at your own pace. Great for vocabulary!', disney: '🐟', disneyName: 'Dory', color: '#1368ce' },
+  { value: 'word-search', label: 'Word Search', icon: '🔍', competitive: false, desc: 'Find hidden chemistry words in a grid. Fun and relaxing review activity.', disney: '🦉', disneyName: 'Archimedes', color: '#26890c' },
+  { value: 'drag-drop', label: 'Drag & Drop', icon: '🧩', competitive: false, desc: 'Drag labels into the right categories. Perfect for classification tasks.', disney: '🍄', disneyName: 'Pascal', color: '#d89e00' },
+  { value: 'true-false', label: 'True or False', icon: '✅', competitive: false, desc: 'Simple true/false statements. Great for checking understanding after a lesson.', disney: '🐧', disneyName: 'Skipper', color: '#e21b3c' },
+  { value: 'flashcards', label: 'Flashcards', icon: '🃏', competitive: false, desc: 'Self-paced flip-card study. Students review at their own speed before a test.', disney: '📚', disneyName: 'Belle', color: '#9c27b0' },
 ];
 
 function emptyQuestion(): Question {
@@ -175,52 +175,78 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved }
 
       {/* Game Type */}
       <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 28, marginBottom: 24 }}>
-        <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>🎮 Game Type</h2>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 20 }}>Choose how students will interact with the questions</p>
+        <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>🎮 Pick a Game Type</h2>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 24 }}>Each game has a Disney friend to guide your students!</p>
 
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>⚔️ COMPETITIVE — Live multiplayer, teacher-hosted</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
-            {GAME_TYPES.filter(t => t.competitive).map(t => (
-              <button
-                key={t.value}
-                onClick={() => changeGameType(t.value)}
-                style={{
-                  background: gameType === t.value ? 'rgba(192,132,252,0.25)' : 'rgba(255,255,255,0.05)',
-                  border: gameType === t.value ? '2px solid #c084fc' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 12, padding: '12px 16px', color: 'white',
-                  cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-                  fontSize: 14, fontWeight: gameType === t.value ? 600 : 400,
-                  display: 'flex', flexDirection: 'column', gap: 4,
-                }}
-              >
-                <span style={{ fontSize: 16 }}>{t.icon} {t.label}</span>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 400, lineHeight: 1.4 }}>{t.desc}</span>
-              </button>
-            ))}
+        {/* Selected type big banner */}
+        {(() => {
+          const sel = GAME_TYPES.find(t => t.value === gameType)!;
+          return (
+            <div style={{ background: `${sel.color}22`, border: `2px solid ${sel.color}`, borderRadius: 18, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <div style={{ fontSize: 56, lineHeight: 1, flexShrink: 0 }}>{sel.disney}</div>
+              <div>
+                <div style={{ color: sel.color, fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 2 }}>{sel.competitive ? '⚔️ LIVE MULTIPLAYER' : '📚 SOLO PRACTICE'}</div>
+                <div style={{ color: 'white', fontSize: 20, fontWeight: 800 }}>{sel.label}</div>
+                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, marginTop: 4 }}>{sel.desc}</div>
+                <div style={{ color: sel.color, fontSize: 12, marginTop: 6, fontWeight: 600 }}>✨ Hosted by {sel.disneyName}</div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Live competitive */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ background: '#e21b3c', color: 'white', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, letterSpacing: 1 }}>⚔️ LIVE</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Teacher hosts — all students compete together on the big screen</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 10 }}>
+            {GAME_TYPES.filter(t => t.competitive).map(t => {
+              const isSelected = gameType === t.value;
+              return (
+                <button key={t.value} onClick={() => changeGameType(t.value)} style={{
+                  background: isSelected ? `${t.color}30` : 'rgba(255,255,255,0.06)',
+                  border: `2px solid ${isSelected ? t.color : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: 16, padding: '16px 12px', color: 'white',
+                  cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  transition: 'all 0.2s', transform: isSelected ? 'scale(1.04)' : 'scale(1)',
+                }}>
+                  <div style={{ fontSize: 34 }}>{t.disney}</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: isSelected ? 'white' : 'rgba(255,255,255,0.85)' }}>{t.label}</div>
+                  <div style={{ fontSize: 10, color: isSelected ? t.color : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{t.disneyName}</div>
+                  {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Solo practice */}
         <div>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginBottom: 8, fontWeight: 600, letterSpacing: 1 }}>📚 PRACTICE — Self-paced, solo mode</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
-            {GAME_TYPES.filter(t => !t.competitive).map(t => (
-              <button
-                key={t.value}
-                onClick={() => changeGameType(t.value)}
-                style={{
-                  background: gameType === t.value ? 'rgba(110,231,183,0.2)' : 'rgba(255,255,255,0.05)',
-                  border: gameType === t.value ? '2px solid #6ee7b7' : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 12, padding: '12px 16px', color: 'white',
-                  cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-                  fontSize: 14, fontWeight: gameType === t.value ? 600 : 400,
-                  display: 'flex', flexDirection: 'column', gap: 4,
-                }}
-              >
-                <span style={{ fontSize: 16 }}>{t.icon} {t.label}</span>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 400, lineHeight: 1.4 }}>{t.desc}</span>
-              </button>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{ background: '#1368ce', color: 'white', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800, letterSpacing: 1 }}>📚 SOLO</span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Students practice on their own device at their own pace</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 10 }}>
+            {GAME_TYPES.filter(t => !t.competitive).map(t => {
+              const isSelected = gameType === t.value;
+              return (
+                <button key={t.value} onClick={() => changeGameType(t.value)} style={{
+                  background: isSelected ? `${t.color}30` : 'rgba(255,255,255,0.06)',
+                  border: `2px solid ${isSelected ? t.color : 'rgba(255,255,255,0.12)'}`,
+                  borderRadius: 16, padding: '16px 12px', color: 'white',
+                  cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  transition: 'all 0.2s', transform: isSelected ? 'scale(1.04)' : 'scale(1)',
+                }}>
+                  <div style={{ fontSize: 34 }}>{t.disney}</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: isSelected ? 'white' : 'rgba(255,255,255,0.85)' }}>{t.label}</div>
+                  <div style={{ fontSize: 10, color: isSelected ? t.color : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>{t.disneyName}</div>
+                  {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
