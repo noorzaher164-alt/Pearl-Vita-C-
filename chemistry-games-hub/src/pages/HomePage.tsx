@@ -1,4 +1,6 @@
 import type { Page } from '../types';
+import { getTheme } from '../theme';
+import type { Theme } from '../theme';
 
 interface Props {
   onNavigate: (page: Page) => void;
@@ -28,6 +30,15 @@ const gameTypes = [
 ];
 
 export default function HomePage({ onNavigate, onStudentJoin }: Props) {
+  const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
+  const C = getTheme(theme);
+  const isDark = theme === 'dark';
+
+  const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'white';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb';
+  const cardHoverBg = isDark ? 'rgba(192,132,252,0.1)' : '#f5f3ff';
+  const cardHoverBorder = isDark ? 'rgba(192,132,252,0.3)' : '#c084fc';
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -44,53 +55,38 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
         `}</style>
 
         <div className="container mx-auto px-6 py-20 text-center" style={{ maxWidth: 900 }}>
-          {/* Brand */}
           <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10,
-            background: 'rgba(192,132,252,0.15)',
-            border: '1px solid rgba(192,132,252,0.4)',
-            borderRadius: 100,
-            padding: '8px 20px',
-            marginBottom: 32,
-            fontSize: 14,
-            color: '#c084fc',
+            display: 'inline-flex', alignItems: 'center', gap: 10,
+            background: isDark ? 'rgba(192,132,252,0.15)' : '#ede9fe',
+            border: `1px solid ${isDark ? 'rgba(192,132,252,0.4)' : '#c084fc'}`,
+            borderRadius: 100, padding: '8px 20px', marginBottom: 32, fontSize: 14, color: '#9333ea',
           }}>
             <span>🧪</span>
             <span>Teacher Nourhan Zaher</span>
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(48px, 8vw, 84px)',
-            fontWeight: 800,
-            lineHeight: 1.1,
-            marginBottom: 24,
+            fontSize: 'clamp(48px, 8vw, 84px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 24,
             background: 'linear-gradient(135deg, #f093fb 0%, #a78bfa 40%, #7dd3fc 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
             Chemistry<br />Games Hub
           </h1>
 
-          <p style={{ fontSize: 20, color: 'rgba(255,255,255,0.7)', maxWidth: 600, margin: '0 auto 48px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 20, color: C.textMuted, maxWidth: 600, margin: '0 auto 48px', lineHeight: 1.6 }}>
             The ultimate interactive chemistry platform for students.
             Create, organize, and play engaging chemistry games!
           </p>
 
-          {/* Two role cards */}
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {/* Student card */}
-            <button
-              onClick={onStudentJoin}
-              style={{
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                color: 'white', border: 'none', borderRadius: 20,
-                padding: '24px 36px', fontSize: 16, fontWeight: 700,
-                cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 8px 30px rgba(34,197,94,0.5)',
-                transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
-              }}
+            <button onClick={onStudentJoin} style={{
+              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+              color: 'white', border: 'none', borderRadius: 20,
+              padding: '24px 36px', fontSize: 16, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 8px 30px rgba(34,197,94,0.5)',
+              transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
+            }}
               onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-4px)')}
               onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
@@ -99,17 +95,14 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
               <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Enter game PIN</div>
             </button>
 
-            {/* Teacher card */}
-            <button
-              onClick={() => onNavigate('dashboard')}
-              style={{
-                background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
-                color: 'white', border: 'none', borderRadius: 20,
-                padding: '24px 36px', fontSize: 16, fontWeight: 700,
-                cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 8px 30px rgba(167,139,250,0.5)',
-                transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
-              }}
+            <button onClick={() => onNavigate('dashboard')} style={{
+              background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
+              color: 'white', border: 'none', borderRadius: 20,
+              padding: '24px 36px', fontSize: 16, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 8px 30px rgba(167,139,250,0.5)',
+              transition: 'all 0.3s', textAlign: 'center', minWidth: 180,
+            }}
               onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-4px)')}
               onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
@@ -119,16 +112,11 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
             </button>
           </div>
 
-          {/* Stats */}
           <div style={{ display: 'flex', gap: 40, justifyContent: 'center', marginTop: 64, flexWrap: 'wrap' }}>
-            {[
-              { num: '10', label: 'Game Types' },
-              { num: '5', label: 'Demo Topics' },
-              { num: '∞', label: 'Questions' },
-            ].map(stat => (
+            {[{ num: '10', label: 'Game Types' }, { num: '5', label: 'Demo Topics' }, { num: '∞', label: 'Questions' }].map(stat => (
               <div key={stat.label} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 40, fontWeight: 800, background: 'linear-gradient(135deg, #f093fb, #7dd3fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{stat.num}</div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14 }}>{stat.label}</div>
+                <div style={{ color: C.textMuted, fontSize: 14 }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -137,36 +125,19 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
 
       {/* Features */}
       <div style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 16, color: 'white' }}>
+        <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 16, color: C.text }}>
           Everything You Need
         </h2>
-        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', marginBottom: 48 }}>
-          Built for teachers, loved by students
-        </p>
+        <p style={{ textAlign: 'center', color: C.textMuted, marginBottom: 48 }}>Built for teachers, loved by students</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
           {features.map(f => (
-            <div key={f.title} style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 20,
-              padding: 28,
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.3s',
-            }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(192,132,252,0.1)';
-                e.currentTarget.style.borderColor = 'rgba(192,132,252,0.3)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+            <div key={f.title} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 20, padding: 28, backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = cardHoverBg; e.currentTarget.style.borderColor = cardHoverBorder; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = cardBg; e.currentTarget.style.borderColor = cardBorder; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <div style={{ fontSize: 40, marginBottom: 16 }}>{f.icon}</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, lineHeight: 1.5 }}>{f.desc}</p>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 8 }}>{f.title}</h3>
+              <p style={{ color: C.textMuted, fontSize: 14, lineHeight: 1.5 }}>{f.desc}</p>
             </div>
           ))}
         </div>
@@ -174,43 +145,24 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
 
       {/* Game Types */}
       <div style={{ padding: '60px 24px', maxWidth: 1200, margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 8, color: 'white' }}>
+        <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 8, color: C.text }}>
           10 Unique Game Types
         </h2>
-        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', marginBottom: 48 }}>
+        <p style={{ textAlign: 'center', color: C.textMuted, marginBottom: 48 }}>
           5 competitive live games + 5 self-paced practice games
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
           {gameTypes.map(g => (
-            <div key={g.name} style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: `1px solid ${g.color}33`,
-              borderRadius: 16,
-              padding: 20,
-              textAlign: 'center',
-              transition: 'all 0.3s',
-              cursor: 'default',
-            }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = `${g.color}20`;
-                e.currentTarget.style.borderColor = `${g.color}60`;
-                e.currentTarget.style.transform = 'translateY(-3px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.borderColor = `${g.color}33`;
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+            <div key={g.name} style={{ background: cardBg, border: `1px solid ${g.color}33`, borderRadius: 16, padding: 20, textAlign: 'center', transition: 'all 0.3s', cursor: 'default' }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${g.color}20`; e.currentTarget.style.borderColor = `${g.color}60`; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = cardBg; e.currentTarget.style.borderColor = `${g.color}33`; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <div style={{ fontSize: 36, marginBottom: 10 }}>{g.icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 4 }}>{g.name}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 4 }}>{g.name}</div>
               <div style={{
-                display: 'inline-block',
-                fontSize: 10,
-                padding: '2px 8px',
-                borderRadius: 100,
+                display: 'inline-block', fontSize: 10, padding: '2px 8px', borderRadius: 100,
                 background: g.type === 'competitive' ? 'rgba(192,132,252,0.2)' : 'rgba(110,231,183,0.2)',
-                color: g.type === 'competitive' ? '#c084fc' : '#6ee7b7',
+                color: g.type === 'competitive' ? '#9333ea' : '#059669',
               }}>
                 {g.type === 'competitive' ? '⚔️ Competitive' : '📚 Practice'}
               </div>
@@ -222,35 +174,23 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
       {/* CTA */}
       <div style={{ padding: '80px 24px', textAlign: 'center' }}>
         <div style={{
-          background: 'linear-gradient(135deg, rgba(192,132,252,0.2) 0%, rgba(125,211,252,0.1) 100%)',
-          border: '1px solid rgba(192,132,252,0.3)',
-          borderRadius: 32,
-          padding: '60px 40px',
-          maxWidth: 700,
-          margin: '0 auto',
+          background: isDark ? 'linear-gradient(135deg, rgba(192,132,252,0.2) 0%, rgba(125,211,252,0.1) 100%)' : 'linear-gradient(135deg, #ede9fe, #dbeafe)',
+          border: `1px solid ${isDark ? 'rgba(192,132,252,0.3)' : '#c4b5fd'}`,
+          borderRadius: 32, padding: '60px 40px', maxWidth: 700, margin: '0 auto',
         }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🧑‍🔬</div>
-          <h2 style={{ fontSize: 32, fontWeight: 700, color: 'white', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 32, fontWeight: 700, color: C.text, marginBottom: 16 }}>
             Ready to Transform Chemistry Learning?
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 32, fontSize: 16 }}>
+          <p style={{ color: C.textMuted, marginBottom: 32, fontSize: 16 }}>
             Join Teacher Nourhan Zaher's Chemistry Games Hub and make learning chemistry fun and interactive.
           </p>
-          <button
-            onClick={() => onNavigate('dashboard')}
-            style={{
-              background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 14,
-              padding: '14px 36px',
-              fontSize: 17,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              boxShadow: '0 8px 30px rgba(167,139,250,0.4)',
-            }}
-          >
+          <button onClick={() => onNavigate('dashboard')} style={{
+            background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
+            color: 'white', border: 'none', borderRadius: 14, padding: '14px 36px',
+            fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 8px 30px rgba(167,139,250,0.4)',
+          }}>
             🚀 Start Teaching Now
           </button>
         </div>
