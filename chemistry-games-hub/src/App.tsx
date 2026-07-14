@@ -3,6 +3,7 @@ import type { AppState, Page, LeaderboardEntry, User } from './types';
 import type { Theme } from './theme';
 import { THEME_KEY } from './theme';
 import { getCurrentUser, seedAdmin } from './users';
+import { getLang, setLang, type Lang } from './i18n';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
@@ -27,6 +28,13 @@ function App() {
 
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(THEME_KEY) as Theme) || 'dark');
   const [currentUser, setCurrentUser] = useState<User | null>(getCurrentUser);
+  const [lang, setLang2] = useState<Lang>(getLang);
+
+  const toggleLang = () => {
+    const next: Lang = lang === 'en' ? 'ar' : 'en';
+    setLang(next);
+    setLang2(next);
+  };
 
   const toggleTheme = () => {
     setTheme(prev => {
@@ -70,7 +78,7 @@ function App() {
   const isDark = theme === 'dark';
 
   return (
-    <div className="min-h-screen relative" style={{ background: isDark ? 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' : '#f3f0ff' }}>
+    <div className="min-h-screen relative" dir={lang === 'ar' ? 'rtl' : 'ltr'} lang={lang} style={{ background: isDark ? 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' : '#f3f0ff', fontFamily: lang === 'ar' ? "'Segoe UI', 'Arial', sans-serif" : undefined }}>
       {isDark && <BubbleBackground />}
       <div className="relative z-10">
         <>
@@ -87,7 +95,7 @@ function App() {
           <TestBankPage onBack={() => navigate('dashboard')} semester={state.testBankSemester || 's1'} />
         )}
         {state.page === 'home' && (
-          <HomePage onNavigate={navigate} onStudentJoin={() => navigate('student')} />
+          <HomePage onNavigate={navigate} onStudentJoin={() => navigate('student')} lang={lang} onToggleLang={toggleLang} />
         )}
         {state.page === 'login' && (
           <AuthPage theme={theme} onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }} onBack={() => navigate('home')} />
@@ -113,6 +121,8 @@ function App() {
               onSelectFolder={(id) => navigate('folder', { selectedFolderId: id })}
               onCreateGame={(folderId) => navigate('create-game', { selectedFolderId: folderId, editGameId: null })}
               onLogout={() => { setCurrentUser(null); navigate('home'); }}
+              lang={lang}
+              onToggleLang={toggleLang}
             />
           ) : (
             <AuthPage theme={theme} onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }} onBack={() => navigate('home')} />

@@ -4,6 +4,7 @@ import type { Theme } from '../theme';
 import { getTheme } from '../theme';
 import { getFolders, saveFolder, deleteFolder, getGamesByFolder, getGames, getResults } from '../storage';
 import { setCurrentUser } from '../users';
+import { T, getLang, type Lang } from '../i18n';
 
 interface Props {
   user: User;
@@ -13,20 +14,14 @@ interface Props {
   onSelectFolder: (id: string) => void;
   onCreateGame: (folderId: string) => void;
   onLogout: () => void;
+  lang?: Lang;
+  onToggleLang?: () => void;
 }
 
 type SidebarView = 'home' | 'library' | 'games' | 'results' | 'testbank';
 
 const FOLDER_COLORS = ['#c084fc','#7dd3fc','#fde68a','#6ee7b7','#fca5a5','#a78bfa','#ff6eb4','#34d399','#fb923c','#60a5fa'];
 const FOLDER_ICONS  = ['📁','🧪','⚗️','🔬','🧬','⚖️','🔥','🧫','⚡','🌡️','💊','🧲','📝','🎯','💡','🌊','🌿','🦋','🔭','🎨'];
-
-const NAV: { id: SidebarView; icon: string; label: string }[] = [
-  { id: 'home',     icon: '🏠', label: 'Home' },
-  { id: 'library',  icon: '📚', label: 'Library' },
-  { id: 'games',    icon: '🎮', label: 'All Games' },
-  { id: 'results',  icon: '📊', label: 'Results' },
-  { id: 'testbank', icon: '🏦', label: 'Test Bank' },
-];
 
 // Chemistry molecule decoration for light mode
 const MoleculeDecor = () => (
@@ -56,9 +51,10 @@ const CHEMISTRY_TIPS = [
   '🎯 Tip: Short games (5–8 questions) work best for daily review.',
 ];
 
-export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, onSelectFolder, onCreateGame, onLogout }: Props) {
+export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, onSelectFolder, onCreateGame, onLogout, lang, onToggleLang }: Props) {
   const th = getTheme(theme);
   const isDark = theme === 'dark';
+  const t = T[lang || getLang()];
   const [view, setView] = useState<SidebarView>('home');
   const [activeFolder, setActiveFolder] = useState<Folder | null>(null);
   const [allFolders, setAllFolders] = useState<Folder[]>([]);
@@ -100,6 +96,14 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   const card: React.CSSProperties = { background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: 20, padding: '20px 22px', boxShadow: th.shadow };
   const inp: React.CSSProperties = { width: '100%', background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '12px 16px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
 
+  const NAV: { id: SidebarView; icon: string; label: string }[] = [
+    { id: 'home',     icon: '🏠', label: t.home },
+    { id: 'library',  icon: '📚', label: t.library },
+    { id: 'games',    icon: '🎮', label: t.allGames },
+    { id: 'results',  icon: '📊', label: t.results },
+    { id: 'testbank', icon: '🏦', label: t.testBank },
+  ];
+
   // ── Sidebar ───────────────────────────────────────────────────────────────
   const Sidebar = () => (
     <div style={{ width: 248, minHeight: '100vh', background: th.sidebarBg, borderRight: `1px solid ${th.sidebarBorder}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', boxShadow: isDark ? 'none' : '2px 0 24px rgba(124,58,237,0.07)' }}>
@@ -107,8 +111,8 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       <div style={{ padding: '22px 18px 18px', borderBottom: `1px solid ${th.divider}`, position: 'relative', overflow: 'hidden' }}>
         {!isDark && <MoleculeDecor />}
         <div style={{ fontSize: 30, marginBottom: 5 }}>⚗️</div>
-        <div style={{ color: th.text, fontWeight: 900, fontSize: 15, lineHeight: 1.2 }}>Chemistry<br />Games Hub</div>
-        <div style={{ color: th.textMuted, fontSize: 11, marginTop: 4 }}>Teacher Platform</div>
+        <div style={{ color: th.text, fontWeight: 900, fontSize: 15, lineHeight: 1.2 }}>{t.appName}</div>
+        <div style={{ color: th.textMuted, fontSize: 11, marginTop: 4 }}>{t.tagline}</div>
       </div>
 
       <nav style={{ flex: 1, padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -141,6 +145,10 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
           <span style={{ fontSize: 17 }}>{isDark ? '☀️' : '🌙'}</span>
           {isDark ? 'Light Mode' : 'Dark Mode'}
         </button>
+        <button onClick={onToggleLang} style={{ display: 'flex', alignItems: 'center', gap: 11, background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 12, padding: '11px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left' }}>
+          <span style={{ fontSize: 17 }}>🌐</span>
+          {lang === 'en' ? 'عربي 🌐' : 'English 🌐'}
+        </button>
       </nav>
 
       {/* User */}
@@ -154,7 +162,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
             <div style={{ color: th.textMuted, fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
           </div>
         </div>
-        <button onClick={handleLogout} style={{ width: '100%', background: th.danger, border: `1px solid ${th.dangerText}30`, color: th.dangerText, borderRadius: 10, padding: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>🔒 Log Out</button>
+        <button onClick={handleLogout} style={{ width: '100%', background: th.danger, border: `1px solid ${th.dangerText}30`, color: th.dangerText, borderRadius: 10, padding: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>🔒 {t.logout}</button>
       </div>
     </div>
   );
@@ -174,22 +182,22 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
           <div style={{ position: 'absolute', right: 150, top: 10, fontSize: 40, opacity: isDark ? 0.1 : 0.2, userSelect: 'none', pointerEvents: 'none' }}>🔬</div>
           <div style={{ position: 'absolute', right: 240, bottom: 10, fontSize: 30, opacity: isDark ? 0.1 : 0.15, userSelect: 'none', pointerEvents: 'none' }}>🧪</div>
           <div style={{ position: 'relative' }}>
-            <div style={{ color: isDark ? 'rgba(192,132,252,0.7)' : '#7c3aed', fontSize: 12, fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>CHEMISTRY GAMES HUB · TEACHER DASHBOARD</div>
+            <div style={{ color: isDark ? 'rgba(192,132,252,0.7)' : '#7c3aed', fontSize: 12, fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>{t.appName.toUpperCase()} · TEACHER DASHBOARD</div>
             <h1 style={{ color: th.text, fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 900, margin: '0 0 10px', lineHeight: 1.2 }}>
-              Hello, {user.displayName.split(' ').slice(-1)[0]}! 👋<br />
+              {t.welcomeBack}, {user.displayName.split(' ').slice(-1)[0]}! 👋<br />
               <span style={{ background: 'linear-gradient(135deg, #c084fc, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ready to ignite curiosity?</span>
             </h1>
             <p style={{ color: th.textMuted, fontSize: 15, marginBottom: 24, maxWidth: 480 }}>
-              Create engaging chemistry games, host live competitions, and track your students' progress — all in one place.
+              {t.dashDesc}
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={() => { switchView('library'); setShowCreate(true); }}
                 style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.4)' }}>
-                ✨ Create New Game
+                {t.createNewGame}
               </button>
               <button onClick={() => switchView('library')}
                 style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'white', border: `1px solid ${th.cardBorder}`, color: th.text, borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: th.shadow }}>
-                📚 Open Library
+                {t.openLibrary}
               </button>
             </div>
           </div>
@@ -198,10 +206,10 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         {/* Stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 36 }}>
           {[
-            { icon: '🎮', label: 'Total Games', value: allGames.length, color: '#c084fc', bg: isDark ? 'rgba(192,132,252,0.08)' : '#faf5ff' },
-            { icon: '📁', label: 'Folders', value: allFolders.length, color: '#60a5fa', bg: isDark ? 'rgba(96,165,250,0.08)' : '#eff6ff' },
-            { icon: '📊', label: 'Sessions', value: allResults.length, color: '#34d399', bg: isDark ? 'rgba(52,211,153,0.08)' : '#f0fdf4' },
-            { icon: '⚡', label: 'Live Games', value: liveCount, color: '#f59e0b', bg: isDark ? 'rgba(245,158,11,0.08)' : '#fffbeb' },
+            { icon: '🎮', label: t.games, value: allGames.length, color: '#c084fc', bg: isDark ? 'rgba(192,132,252,0.08)' : '#faf5ff' },
+            { icon: '📁', label: t.folders, value: allFolders.length, color: '#60a5fa', bg: isDark ? 'rgba(96,165,250,0.08)' : '#eff6ff' },
+            { icon: '📊', label: t.sessions, value: allResults.length, color: '#34d399', bg: isDark ? 'rgba(52,211,153,0.08)' : '#f0fdf4' },
+            { icon: '⚡', label: t.live, value: liveCount, color: '#f59e0b', bg: isDark ? 'rgba(245,158,11,0.08)' : '#fffbeb' },
           ].map(s => (
             <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.color}25`, borderRadius: 18, padding: '20px 18px', borderTop: `3px solid ${s.color}` }}>
               <div style={{ fontSize: 26, marginBottom: 8 }}>{s.icon}</div>
@@ -212,13 +220,13 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         </div>
 
         {/* Quick actions */}
-        <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, marginBottom: 14 }}>QUICK ACTIONS</h3>
+        <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, marginBottom: 14 }}>{t.quickActions}</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12, marginBottom: 36 }}>
           {[
-            { icon: '✨', label: 'New Game', desc: 'Create from scratch', color: '#c084fc', action: () => { switchView('library'); setShowCreate(true); } },
-            { icon: '📚', label: 'Library', desc: 'Browse your folders', color: '#60a5fa', action: () => switchView('library') },
-            { icon: '🏦', label: 'Test Bank', desc: 'Generate from bank', color: '#f59e0b', action: () => switchView('testbank') },
-            { icon: '📊', label: 'Results', desc: 'Session history', color: '#34d399', action: () => switchView('results') },
+            { icon: '✨', label: t.createNewGame, desc: 'Create from scratch', color: '#c084fc', action: () => { switchView('library'); setShowCreate(true); } },
+            { icon: '📚', label: t.library, desc: 'Browse your folders', color: '#60a5fa', action: () => switchView('library') },
+            { icon: '🏦', label: t.testBank, desc: 'Generate from bank', color: '#f59e0b', action: () => switchView('testbank') },
+            { icon: '📊', label: t.results, desc: 'Session history', color: '#34d399', action: () => switchView('results') },
           ].map(a => (
             <button key={a.label} onClick={a.action}
               style={{ background: isDark ? `${a.color}08` : `${a.color}10`, border: `1.5px solid ${a.color}25`, borderRadius: 18, padding: '20px 16px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s' }}
@@ -240,7 +248,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         {allGames.length > 0 && (
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, margin: 0 }}>RECENT GAMES</h3>
+              <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, margin: 0 }}>{t.recentGames}</h3>
               <button onClick={() => switchView('games')} style={{ background: 'transparent', border: 'none', color: th.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>See all →</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -269,10 +277,10 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         {allGames.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 24px', background: isDark ? 'rgba(255,255,255,0.03)' : '#faf5ff', border: `2px dashed ${th.cardBorder}`, borderRadius: 24 }}>
             <div style={{ fontSize: 52, marginBottom: 12 }}>🧪</div>
-            <div style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>No games yet — let's create your first!</div>
-            <div style={{ color: th.textMuted, fontSize: 14, marginBottom: 20 }}>Start by creating a folder in your Library, then add games to it.</div>
+            <div style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>{t.noGamesYet}</div>
+            <div style={{ color: th.textMuted, fontSize: 14, marginBottom: 20 }}>{t.createFirstGame}</div>
             <button onClick={() => switchView('library')} style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.35)' }}>
-              📚 Go to Library →
+              {t.openLibrary} →
             </button>
           </div>
         )}
@@ -288,7 +296,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       return (
         <div style={{ padding: '32px 40px', maxWidth: 1000 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, flexWrap: 'wrap' }}>
-            <button onClick={() => setActiveFolder(null)} style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, color: th.text, borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Library</button>
+            <button onClick={() => setActiveFolder(null)} style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, color: th.text, borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>{t.backToLibrary}</button>
             <div style={{ width: 44, height: 44, borderRadius: 14, background: `${activeFolder.color}20`, border: `2px solid ${activeFolder.color}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>{activeFolder.icon}</div>
             <div>
               <h2 style={{ color: th.text, fontSize: 22, fontWeight: 800, margin: 0 }}>{activeFolder.name}</h2>
@@ -296,7 +304,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
             </div>
             <button onClick={() => onCreateGame(activeFolder.id)}
               style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '12px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.35)', whiteSpace: 'nowrap' }}>
-              ✨ Create Game in this Folder
+              {t.createGameInFolder}
             </button>
           </div>
 
@@ -339,22 +347,22 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       <div style={{ padding: '32px 40px', maxWidth: 1000 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, margin: 0 }}>📚 Library</h2>
-            <p style={{ color: th.textMuted, fontSize: 14, margin: '4px 0 0' }}>All your game folders in one place</p>
+            <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, margin: 0 }}>{t.myLibrary}</h2>
+            <p style={{ color: th.textMuted, fontSize: 14, margin: '4px 0 0' }}>{t.libraryDesc}</p>
           </div>
           <button onClick={() => setShowCreate(true)}
             style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '12px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.35)', whiteSpace: 'nowrap' }}>
-            ➕ New Folder
+            {t.newFolder}
           </button>
         </div>
 
         {allFolders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 24px', background: isDark ? 'rgba(255,255,255,0.03)' : '#faf5ff', border: `2px dashed ${th.cardBorder}`, borderRadius: 28 }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>📚</div>
-            <div style={{ color: th.text, fontWeight: 800, fontSize: 20, marginBottom: 8 }}>Your Library is empty</div>
-            <div style={{ color: th.textMuted, fontSize: 15, marginBottom: 24 }}>Create folders to organize your games by topic, unit, or class</div>
+            <div style={{ color: th.text, fontWeight: 800, fontSize: 20, marginBottom: 8 }}>{t.noFolders}</div>
+            <div style={{ color: th.textMuted, fontSize: 15, marginBottom: 24 }}>{t.createFolderFirst}</div>
             <button onClick={() => setShowCreate(true)} style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.35)' }}>
-              ➕ Create First Folder
+              {t.newFolder}
             </button>
           </div>
         ) : (
@@ -380,7 +388,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
                     )}
                     <div style={{ color: th.textMuted, fontSize: 13, marginBottom: 14 }}>{gameCount} game{gameCount !== 1 ? 's' : ''}</div>
                     <div style={{ background: `${f.color}15`, border: `1px solid ${f.color}35`, borderRadius: 10, padding: '8px 12px', color: f.color, fontSize: 13, fontWeight: 700, textAlign: 'center', transition: 'all 0.15s' }}>
-                      Open folder →
+                      {t.openFolder}
                     </div>
                   </div>
                   <div style={{ padding: '0 14px 14px', display: 'flex', gap: 8 }}>
@@ -412,17 +420,17 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       <div style={{ padding: '32px 40px', maxWidth: 1000 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, margin: 0 }}>🎮 All Games</h2>
-            <p style={{ color: th.textMuted, fontSize: 14, margin: '4px 0 0' }}>{allGames.length} games in your library</p>
+            <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, margin: 0 }}>{t.allGamesTitle}</h2>
+            <p style={{ color: th.textMuted, fontSize: 14, margin: '4px 0 0' }}>{allGames.length} {t.games}</p>
           </div>
           <button onClick={handleCreateFromAllGames}
             style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '12px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.35)', whiteSpace: 'nowrap' }}>
-            ✨ Create New Game
+            {t.createNewGame}
           </button>
         </div>
 
         <input value={gameSearch} onChange={e => setGameSearch(e.target.value)}
-          placeholder="🔍 Search games by title or lesson..."
+          placeholder={t.searchGames}
           style={{ ...inp, marginBottom: 20, fontSize: 15, padding: '13px 18px' }} />
 
         {filtered.length === 0 ? (
@@ -471,7 +479,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
     const results = getResults();
     return (
       <div style={{ padding: '32px 40px', maxWidth: 900 }}>
-        <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, marginBottom: 4 }}>📊 Results</h2>
+        <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, marginBottom: 4 }}>📊 {t.results}</h2>
         <p style={{ color: th.textMuted, fontSize: 14, marginBottom: 28 }}>{results.length} sessions recorded</p>
         {results.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
@@ -510,7 +518,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   // ── TEST BANK ─────────────────────────────────────────────────────────────
   const TestBankView = () => (
     <div style={{ padding: '32px 40px', maxWidth: 900 }}>
-      <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, marginBottom: 4 }}>🏦 Test Bank</h2>
+      <h2 style={{ color: th.text, fontSize: 24, fontWeight: 900, marginBottom: 4 }}>🏦 {t.testBank}</h2>
       <p style={{ color: th.textMuted, fontSize: 14, marginBottom: 32 }}>Official question banks + your custom library</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
         {[
@@ -536,26 +544,26 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   const CreateFolderModal = () => (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 24 }}>
       <div style={{ background: th.modalBg, border: `1px solid ${th.cardBorder}`, borderRadius: 24, padding: 32, maxWidth: 460, width: '100%', boxShadow: th.shadow }}>
-        <h3 style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>📁 New Folder</h3>
-        <p style={{ color: th.textMuted, fontSize: 14, marginBottom: 20 }}>Organise your games by topic, unit, or class</p>
+        <h3 style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>{t.createFolder}</h3>
+        <p style={{ color: th.textMuted, fontSize: 14, marginBottom: 20 }}>{t.libraryDesc}</p>
         <input value={newName} onChange={e => setNewName(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && handleCreateFolder()}
-          placeholder="e.g. Organic Chemistry, Unit 5, Grade 10..." style={{ ...inp, marginBottom: 18, fontSize: 15 }} />
+          placeholder={t.folderName} style={{ ...inp, marginBottom: 18, fontSize: 15 }} />
         <div style={{ marginBottom: 16 }}>
-          <div style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Icon</div>
+          <div style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>{t.icon}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
             {FOLDER_ICONS.map(ic => <button key={ic} onClick={() => setNewIcon(ic)} style={{ width: 40, height: 40, fontSize: 20, background: newIcon === ic ? th.accentLight : th.badge, border: newIcon === ic ? `2px solid ${th.accent}` : `1px solid ${th.cardBorder}`, borderRadius: 10, cursor: 'pointer' }}>{ic}</button>)}
           </div>
         </div>
         <div style={{ marginBottom: 24 }}>
-          <div style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Color</div>
+          <div style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>{t.color}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {FOLDER_COLORS.map(c => <button key={c} onClick={() => setNewColor(c)} style={{ width: 30, height: 30, borderRadius: '50%', background: c, border: newColor === c ? '3px solid white' : '2px solid transparent', cursor: 'pointer', boxShadow: newColor === c ? `0 0 0 2px ${th.accent}` : 'none' }} />)}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => { setShowCreate(false); setNewName(''); }} style={{ flex: 1, background: th.badge, border: `1px solid ${th.cardBorder}`, color: th.textMuted, borderRadius: 12, padding: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>Cancel</button>
+          <button onClick={() => { setShowCreate(false); setNewName(''); }} style={{ flex: 1, background: th.badge, border: `1px solid ${th.cardBorder}`, color: th.textMuted, borderRadius: 12, padding: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>{t.cancel}</button>
           <button onClick={handleCreateFolder} disabled={!newName.trim()} style={{ flex: 2, background: newName.trim() ? 'linear-gradient(135deg, #c084fc, #a78bfa)' : th.badge, color: newName.trim() ? 'white' : th.textFaint, border: 'none', borderRadius: 12, padding: '12px', fontSize: 15, fontWeight: 700, cursor: newName.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}>
-            ✓ Create Folder
+            {t.createFolderBtn}
           </button>
         </div>
       </div>

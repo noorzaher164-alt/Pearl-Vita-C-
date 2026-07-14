@@ -1,20 +1,14 @@
 import type { Page } from '../types';
 import { getTheme } from '../theme';
 import type { Theme } from '../theme';
+import { T, getLang, type Lang } from '../i18n';
 
 interface Props {
   onNavigate: (page: Page) => void;
   onStudentJoin: () => void;
+  lang?: Lang;
+  onToggleLang?: () => void;
 }
-
-const features = [
-  { icon: '🧪', title: 'Interactive Games', desc: '10 unique game types for competitive & self-paced learning' },
-  { icon: '📁', title: 'Folder System', desc: 'Organize games by topic and lesson for easy access' },
-  { icon: '🏆', title: 'Leaderboards', desc: 'Live competition with real-time scores and rankings' },
-  { icon: '✏️', title: 'Easy Creation', desc: 'Build MCQ questions with explanations in minutes' },
-  { icon: '💾', title: 'Auto-Save', desc: 'All games saved automatically in your browser' },
-  { icon: '📱', title: 'Responsive', desc: 'Works perfectly on laptops, tablets, and phones' },
-];
 
 const gameTypes = [
   { name: 'Quiz Battle', icon: '⚔️', color: '#c084fc', type: 'competitive' },
@@ -29,18 +23,41 @@ const gameTypes = [
   { name: 'Flashcards', icon: '🃏', color: '#60a5fa', type: 'practice' },
 ];
 
-export default function HomePage({ onNavigate, onStudentJoin }: Props) {
+export default function HomePage({ onNavigate, onStudentJoin, lang, onToggleLang }: Props) {
   const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
   const C = getTheme(theme);
   const isDark = theme === 'dark';
+  const t = T[lang || getLang()];
 
   const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'white';
   const cardBorder = isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb';
   const cardHoverBg = isDark ? 'rgba(192,132,252,0.1)' : '#f5f3ff';
   const cardHoverBorder = isDark ? 'rgba(192,132,252,0.3)' : '#c084fc';
 
+  const features = [
+    { icon: '🧪', title: 'Interactive Games', desc: '10 unique game types for competitive & self-paced learning' },
+    { icon: '📁', title: 'Folder System', desc: 'Organize games by topic and lesson for easy access' },
+    { icon: '🏆', title: 'Leaderboards', desc: 'Live competition with real-time scores and rankings' },
+    { icon: '✏️', title: 'Easy Creation', desc: 'Build MCQ questions with explanations in minutes' },
+    { icon: '💾', title: 'Auto-Save', desc: 'All games saved automatically in your browser' },
+    { icon: '📱', title: 'Responsive', desc: 'Works perfectly on laptops, tablets, and phones' },
+  ];
+
   return (
     <div className="min-h-screen">
+      {/* Language toggle */}
+      <button
+        onClick={onToggleLang}
+        style={{
+          position: 'fixed', top: 16, right: 16, zIndex: 100,
+          background: 'rgba(192,132,252,0.2)', border: '1px solid #c084fc',
+          color: '#9333ea', borderRadius: 10, padding: '6px 14px',
+          cursor: 'pointer', fontWeight: 700, fontSize: 14,
+        }}
+      >
+        {lang === 'en' ? 'عربي' : 'English'}
+      </button>
+
       {/* Hero */}
       <div className="relative overflow-hidden" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
         {/* Decorative atoms */}
@@ -62,20 +79,20 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
             borderRadius: 100, padding: '8px 20px', marginBottom: 32, fontSize: 14, color: '#9333ea',
           }}>
             <span>🧪</span>
-            <span>Teacher Nourhan Zaher</span>
+            <span>{t.tagline}</span>
           </div>
 
           <h1 style={{
             fontSize: 'clamp(48px, 8vw, 84px)', fontWeight: 800, lineHeight: 1.1, marginBottom: 24,
             background: 'linear-gradient(135deg, #f093fb 0%, #a78bfa 40%, #7dd3fc 100%)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            whiteSpace: 'pre-line',
           }}>
-            Chemistry<br />Games Hub
+            {t.heroTitle}
           </h1>
 
           <p style={{ fontSize: 20, color: C.textMuted, maxWidth: 600, margin: '0 auto 48px', lineHeight: 1.6 }}>
-            The ultimate interactive chemistry platform for students.
-            Create, organize, and play engaging chemistry games!
+            {t.heroDesc}
           </p>
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -91,8 +108,8 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
               onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               <div style={{ fontSize: 40, marginBottom: 8 }}>🎓</div>
-              <div style={{ fontSize: 20, fontWeight: 800 }}>I'm a Student</div>
-              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Enter game PIN</div>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>{t.imStudent}</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>{t.enterPin}</div>
             </button>
 
             <button onClick={() => onNavigate('dashboard')} style={{
@@ -107,8 +124,8 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
               onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
             >
               <div style={{ fontSize: 40, marginBottom: 8 }}>👩‍🏫</div>
-              <div style={{ fontSize: 20, fontWeight: 800 }}>I'm a Teacher</div>
-              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>Go to Dashboard</div>
+              <div style={{ fontSize: 20, fontWeight: 800 }}>{t.imTeacher}</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>{t.goToDashboard}</div>
             </button>
           </div>
 
@@ -126,9 +143,9 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
       {/* Features */}
       <div style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
         <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 16, color: C.text }}>
-          Everything You Need
+          {t.everythingYouNeed}
         </h2>
-        <p style={{ textAlign: 'center', color: C.textMuted, marginBottom: 48 }}>Built for teachers, loved by students</p>
+        <p style={{ textAlign: 'center', color: C.textMuted, marginBottom: 48 }}>{t.builtForTeachers}</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
           {features.map(f => (
             <div key={f.title} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 20, padding: 28, backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
@@ -146,10 +163,10 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
       {/* Game Types */}
       <div style={{ padding: '60px 24px', maxWidth: 1200, margin: '0 auto' }}>
         <h2 style={{ textAlign: 'center', fontSize: 36, fontWeight: 700, marginBottom: 8, color: C.text }}>
-          10 Unique Game Types
+          {t.gameTypes}
         </h2>
         <p style={{ textAlign: 'center', color: C.textMuted, marginBottom: 48 }}>
-          5 competitive live games + 5 self-paced practice games
+          {t.gameTypesDesc}
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
           {gameTypes.map(g => (
@@ -164,7 +181,7 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
                 background: g.type === 'competitive' ? 'rgba(192,132,252,0.2)' : 'rgba(110,231,183,0.2)',
                 color: g.type === 'competitive' ? '#9333ea' : '#059669',
               }}>
-                {g.type === 'competitive' ? '⚔️ Competitive' : '📚 Practice'}
+                {g.type === 'competitive' ? t.filterCompetitive : t.filterPractice}
               </div>
             </div>
           ))}
@@ -180,10 +197,10 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
         }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🧑‍🔬</div>
           <h2 style={{ fontSize: 32, fontWeight: 700, color: C.text, marginBottom: 16 }}>
-            Ready to Transform Chemistry Learning?
+            {t.ctaTitle}
           </h2>
           <p style={{ color: C.textMuted, marginBottom: 32, fontSize: 16 }}>
-            Join Teacher Nourhan Zaher's Chemistry Games Hub and make learning chemistry fun and interactive.
+            {t.ctaDesc}
           </p>
           <button onClick={() => onNavigate('dashboard')} style={{
             background: 'linear-gradient(135deg, #c084fc 0%, #a78bfa 50%, #7dd3fc 100%)',
@@ -191,7 +208,7 @@ export default function HomePage({ onNavigate, onStudentJoin }: Props) {
             fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             boxShadow: '0 8px 30px rgba(167,139,250,0.4)',
           }}>
-            🚀 Start Teaching Now
+            {t.startTeaching}
           </button>
         </div>
       </div>
