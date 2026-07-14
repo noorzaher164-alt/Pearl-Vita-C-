@@ -50,7 +50,7 @@ function App() {
   }, [state, fromStudent]);
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: '#46178f' }}>
       <BubbleBackground />
       <div className="relative z-10">
         <>

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Game, GameResult } from '../types';
 import { getGameById, saveResult } from '../storage';
-import { getTemplate } from '../templates';
 import {
   FIREBASE_CONFIGURED, createSession, subscribeSession, updateSession,
   deleteSession, type LiveSession,
@@ -19,6 +18,11 @@ const TIMER_SECS: Record<string, number> = {
 };
 const COMPETITIVE = ['quiz-battle', 'fastest-molecule', 'periodic-challenge', 'reaction-race', 'energy-points'];
 const MEDAL = ['🥇', '🥈', '🥉'];
+
+const KAHOOT_BG = '#46178f';
+const KAHOOT_HEADER = 'rgba(0,0,0,0.35)';
+const KAHOOT_COLORS = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
+const KAHOOT_SHAPES = ['▲', '◆', '●', '■'];
 
 function joinUrl(pin: string) {
   return `${window.location.origin}${window.location.pathname}?join=${pin}`;
@@ -69,7 +73,6 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   const sessionIdRef = useRef(crypto.randomUUID());
 
   const pin = game?.pin || '';
-  const tpl = getTemplate(game?.templateId || 'periodic-table');
   const isCompetitive = game ? COMPETITIVE.includes(game.gameType) : true;
   const defaultTimer = game ? (TIMER_SECS[game.gameType] || 20) : 20;
 
@@ -192,7 +195,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   // ── Firebase not configured ────────────────────────────────────────────
   if (!FIREBASE_CONFIGURED) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a1a,#1a0a2e)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ minHeight: '100vh', background: KAHOOT_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ maxWidth: 560, textAlign: 'center' }}>
           <div style={{ fontSize: 60, marginBottom: 16 }}>⚙️</div>
           <h2 style={{ color: 'white', fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Firebase Not Connected</h2>
@@ -206,19 +209,19 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   // ── Setup screen ───────────────────────────────────────────────────────
   if (phase === 'setup') {
     return (
-      <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ minHeight: '100vh', background: KAHOOT_BG, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ maxWidth: 500, width: '100%', textAlign: 'center' }}>
           <div style={{ fontSize: 56, marginBottom: 12 }}>🎮</div>
           <h1 style={{ color: 'white', fontSize: 26, fontWeight: 800, marginBottom: 6 }}>{game?.title}</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 24 }}>{game?.lessonName} • {game?.questions.length} questions</p>
-          <div style={{ background: `${tpl.accentColor}15`, border: `2px solid ${tpl.accentColor}40`, borderRadius: 18, padding: '20px', marginBottom: 24 }}>
+          <div style={{ background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(255,255,255,0.25)', borderRadius: 18, padding: '20px', marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
               <div style={{ background: 'white', padding: 10, borderRadius: 12 }}>
                 <QRCodeSVG value={joinUrl(pin)} size={120} />
               </div>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 6 }}>📱 Students scan or enter PIN:</p>
-            <p style={{ color: tpl.accentColor, fontSize: 44, fontWeight: 900, letterSpacing: 8, fontFamily: 'monospace' }}>{pin}</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, marginBottom: 6 }}>📱 Students scan or enter PIN:</p>
+            <p style={{ color: 'white', fontSize: 44, fontWeight: 900, letterSpacing: 8, fontFamily: 'monospace' }}>{pin}</p>
             <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, wordBreak: 'break-all', marginTop: 6 }}>{joinUrl(pin)}</p>
           </div>
           {firebaseError && (
@@ -228,7 +231,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           )}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '14px 24px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
-            <button onClick={startHosting} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 12, padding: '14px 36px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 17, fontWeight: 800, boxShadow: `0 4px 24px ${tpl.accentColor}50` }}>
+            <button onClick={startHosting} style={{ background: '#ff3355', color: 'white', border: 'none', borderRadius: 12, padding: '14px 36px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 17, fontWeight: 800, boxShadow: '0 4px 24px rgba(255,51,85,0.5)' }}>
               🚀 Open Waiting Room
             </button>
           </div>
@@ -240,9 +243,9 @@ export default function HostGamePage({ gameId, onBack }: Props) {
   // ── Waiting room ────────────────────────────────────────────────────────
   if (phase === 'waiting') {
     return (
-      <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', background: KAHOOT_BG, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <div style={{ background: tpl.headerBg, padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${tpl.accentColor}20` }}>
+        <div style={{ background: KAHOOT_HEADER, padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div>
             <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>HOSTING</div>
             <div style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>{game?.title}</div>
@@ -253,14 +256,14 @@ export default function HostGamePage({ gameId, onBack }: Props) {
         <div style={{ flex: 1, display: 'flex', gap: 24, padding: 24, maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
           {/* Left: QR + PIN + start */}
           <div style={{ flex: 1 }}>
-            <div style={{ background: tpl.cardBg, borderRadius: 22, padding: 28, textAlign: 'center', border: `2px solid ${tpl.accentColor}35`, marginBottom: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 22, padding: 28, textAlign: 'center', border: '2px solid rgba(255,255,255,0.2)', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                 <div style={{ background: 'white', padding: 12, borderRadius: 16 }}>
                   <QRCodeSVG value={joinUrl(pin)} size={150} />
                 </div>
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, marginBottom: 6 }}>📱 Students scan or type:</div>
-              <div style={{ color: tpl.accentColor, fontSize: 58, fontWeight: 900, letterSpacing: 12, fontFamily: 'monospace', textShadow: `0 0 40px ${tpl.accentColor}60` }}>
+              <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, marginBottom: 6 }}>📱 Students scan or type:</div>
+              <div style={{ color: 'white', fontSize: 58, fontWeight: 900, letterSpacing: 12, fontFamily: 'monospace', textShadow: '0 0 40px rgba(255,255,255,0.4)' }}>
                 {pin}
               </div>
               <button onClick={copyLink} style={{ marginTop: 10, background: copied ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.07)', border: `1px solid ${copied ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.15)'}`, color: copied ? '#6ee7b7' : 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '6px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, transition: 'all 0.2s' }}>
@@ -272,11 +275,11 @@ export default function HostGamePage({ gameId, onBack }: Props) {
               onClick={startGame}
               style={{
                 width: '100%', padding: '20px', fontSize: 22, fontWeight: 900,
-                background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`,
+                background: '#ff3355',
                 color: 'white',
                 border: 'none', borderRadius: 18, cursor: 'pointer',
                 fontFamily: 'inherit', transition: 'all 0.3s',
-                boxShadow: `0 8px 32px ${tpl.accentColor}50`,
+                boxShadow: '0 8px 32px rgba(255,51,85,0.5)',
                 letterSpacing: 1,
               }}
             >
@@ -298,11 +301,11 @@ export default function HostGamePage({ gameId, onBack }: Props) {
               ) : (
                 students.map((s, i) => (
                   <div key={s.nickname} style={{
-                    background: tpl.cardBg, border: `1px solid ${tpl.accentColor}25`,
+                    background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
                     borderRadius: 12, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 10,
                     animation: 'slideIn 0.35s ease',
                   }}>
-                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: tpl.choiceColors[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 900, color: 'white', flexShrink: 0 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: KAHOOT_COLORS[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 900, color: 'white', flexShrink: 0 }}>
                       {s.nickname[0].toUpperCase()}
                     </div>
                     <span style={{ color: 'white', fontWeight: 600, fontSize: 14, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.nickname}</span>
@@ -320,7 +323,6 @@ export default function HostGamePage({ gameId, onBack }: Props) {
 
   // ── Game hosting screen ────────────────────────────────────────────────
   if (phase === 'hosting') {
-    const CHOICE_LABELS = ['A', 'B', 'C', 'D'];
     const choiceAnswerCounts = currentQ?.choices.map((_, ci) =>
       students.filter(s => {
         const key = (session?.currentQuestion ?? 0);
@@ -328,11 +330,12 @@ export default function HostGamePage({ gameId, onBack }: Props) {
       }).length
     ) || [];
     const maxCount = Math.max(...choiceAnswerCounts, 1);
+    const isUrgent = timeLeft <= 5;
 
     return (
-      <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', background: KAHOOT_BG, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <div style={{ background: tpl.headerBg, padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${tpl.accentColor}20` }}>
+        <div style={{ background: KAHOOT_HEADER, padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, letterSpacing: 1 }}>QUESTION {(session?.currentQuestion ?? 0) + 1} OF {game?.questions.length}</div>
             <div style={{ color: 'white', fontWeight: 700 }}>{game?.title}</div>
@@ -342,73 +345,70 @@ export default function HostGamePage({ gameId, onBack }: Props) {
             {status === 'playing' && isCompetitive && (
               <div style={{
                 width: 52, height: 52, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: `4px solid ${timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#fde68a' : tpl.timerColor}`,
-                color: timeLeft <= 5 ? '#ef4444' : timeLeft <= 10 ? '#fde68a' : tpl.timerColor,
-                fontWeight: 900, fontSize: 22, transition: 'all 0.5s',
+                background: isUrgent ? '#e21b3c' : KAHOOT_BG,
+                border: `4px solid ${isUrgent ? '#e21b3c' : 'white'}`,
+                color: 'white', fontWeight: 900, fontSize: 22, transition: 'all 0.5s',
               }}>{timeLeft}</div>
             )}
             {/* Answer progress */}
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>ANSWERED</div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: tpl.accentColor }}>{answeredCount}/{students.length}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'white' }}>{answeredCount}/{students.length}</div>
             </div>
             <button onClick={endSession} style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#fca5a5', borderRadius: 10, padding: '7px 14px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12 }}>✕ End</button>
           </div>
         </div>
 
         <div style={{ flex: 1, padding: '20px 24px', maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-          {/* Question card */}
+          {/* Question card — white like Kahoot */}
           {currentQ && (
-            <div style={{ background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`, borderRadius: 22, padding: '24px 28px', marginBottom: 20, textAlign: 'center', boxShadow: `0 8px 40px rgba(0,0,0,0.3)` }}>
-              <h2 style={{ color: 'white', fontSize: 'clamp(18px,2.8vw,28px)', fontWeight: 700, lineHeight: 1.5, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{currentQ.text}</h2>
+            <div style={{ background: 'white', borderRadius: 22, padding: '24px 28px', marginBottom: 20, textAlign: 'center', boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
+              <h2 style={{ color: '#1a1a2e', fontSize: 'clamp(18px,2.8vw,28px)', fontWeight: 700, lineHeight: 1.5, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{currentQ.text}</h2>
             </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            {/* Left: answer distribution */}
+            {/* Left: answer distribution with Kahoot colors */}
             <div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>
+              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>
                 ANSWER DISTRIBUTION {status === 'playing' && <span style={{ color: 'rgba(255,255,255,0.25)', fontWeight: 400, fontSize: 11 }}>(hidden until time's up)</span>}
               </div>
               {currentQ?.choices.map((choice, ci) => {
                 const count = choiceAnswerCounts[ci] || 0;
-                const color = tpl.choiceColors[ci];
+                const color = KAHOOT_COLORS[ci];
                 const showResults = status !== 'playing';
                 return (
                   <div key={ci} style={{
-                    background: `${color}15`,
-                    border: `2px solid ${color}50`,
+                    background: color,
                     borderRadius: 14, padding: '12px 14px', marginBottom: 8, position: 'relative', overflow: 'hidden',
                   }}>
                     {/* Bar fill — hidden during timer */}
-                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: color + '25', width: showResults ? `${(count / maxCount) * 100}%` : '0%', transition: 'width 0.8s ease', borderRadius: 12 }} />
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: 'rgba(0,0,0,0.25)', width: showResults ? `${(count / maxCount) * 100}%` : '0%', transition: 'width 0.8s ease' }} />
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ width: 28, height: 28, borderRadius: 6, background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
-                        {CHOICE_LABELS[ci]}
-                      </span>
-                      <span style={{ color: 'white', fontWeight: 600, fontSize: 13, flex: 1 }}>{choice}</span>
-                      {showResults && <span style={{ color: tpl.accentColor, fontWeight: 900, fontSize: 18 }}>{count}</span>}
+                      <span style={{ fontSize: 20, flexShrink: 0 }}>{KAHOOT_SHAPES[ci]}</span>
+                      <span style={{ color: 'white', fontWeight: 700, fontSize: 13, flex: 1, direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
+                      {showResults && <span style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{count}</span>}
                     </div>
                   </div>
                 );
               })}
 
               {/* Answer progress bar */}
-              <div style={{ background: tpl.cardBg, borderRadius: 14, padding: '14px 16px', marginTop: 12 }}>
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px 16px', marginTop: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Students answered</span>
-                  <span style={{ color: tpl.accentColor, fontWeight: 700 }}>{answeredCount} / {students.length}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>Students answered</span>
+                  <span style={{ color: 'white', fontWeight: 700 }}>{answeredCount} / {students.length}</span>
                 </div>
-                <div style={{ height: 10, background: 'rgba(255,255,255,0.08)', borderRadius: 100, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${students.length > 0 ? (answeredCount / students.length) * 100 : 0}%`, background: `linear-gradient(90deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, borderRadius: 100, transition: 'width 0.5s ease' }} />
+                <div style={{ height: 10, background: 'rgba(255,255,255,0.15)', borderRadius: 100, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${students.length > 0 ? (answeredCount / students.length) * 100 : 0}%`, background: '#ff3355', borderRadius: 100, transition: 'width 0.5s ease' }} />
                 </div>
               </div>
             </div>
 
-            {/* Right: live leaderboard / student grid */}
+            {/* Right: live leaderboard */}
             <div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>LIVE SCOREBOARD</div>
-              <div style={{ background: tpl.cardBg, borderRadius: 18, padding: '14px', maxHeight: 340, overflowY: 'auto' }}>
+              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>LIVE SCOREBOARD</div>
+              <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 18, padding: '14px', maxHeight: 340, overflowY: 'auto' }}>
                 {sorted.length === 0 ? (
                   <div style={{ color: 'rgba(255,255,255,0.25)', textAlign: 'center', padding: '20px 0', fontSize: 13 }}>Waiting for answers...</div>
                 ) : (
@@ -417,16 +417,16 @@ export default function HostGamePage({ gameId, onBack }: Props) {
                     return (
                       <div key={s.nickname} style={{
                         display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
-                        background: i === 0 ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.04)',
-                        borderRadius: 10, padding: '9px 12px', border: `1px solid ${i === 0 ? 'rgba(251,191,36,0.3)' : 'transparent'}`,
+                        background: i === 0 ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.06)',
+                        borderRadius: 10, padding: '9px 12px', border: `1px solid ${i === 0 ? 'rgba(251,191,36,0.4)' : 'transparent'}`,
                       }}>
                         <span style={{ fontSize: 16, width: 24 }}>{MEDAL[i] || `${i + 1}`}</span>
-                        <div style={{ width: 30, height: 30, borderRadius: '50%', background: tpl.choiceColors[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 12, flexShrink: 0 }}>
+                        <div style={{ width: 30, height: 30, borderRadius: '50%', background: KAHOOT_COLORS[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 12, flexShrink: 0 }}>
                           {s.nickname[0].toUpperCase()}
                         </div>
                         <span style={{ flex: 1, color: 'white', fontWeight: 600, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.nickname}</span>
                         <span style={{ fontSize: 14, marginRight: 4 }}>{hasAnswered ? '✅' : '⏳'}</span>
-                        <span style={{ color: tpl.accentColor, fontWeight: 800, fontSize: 15 }}>{s.score}</span>
+                        <span style={{ color: 'white', fontWeight: 800, fontSize: 15 }}>{s.score}</span>
                       </div>
                     );
                   })
@@ -438,12 +438,12 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
             {status === 'playing' && (
-              <button onClick={revealAnswer} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 14, padding: '16px 44px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 4px 24px ${tpl.accentColor}50` }}>
+              <button onClick={revealAnswer} style={{ background: '#ff3355', color: 'white', border: 'none', borderRadius: 14, padding: '16px 44px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 24px rgba(255,51,85,0.5)' }}>
                 ⏩ Next
               </button>
             )}
             {(status === 'leaderboard' || status === 'reveal') && (
-              <button onClick={nextQuestion} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 14, padding: '16px 44px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 4px 24px ${tpl.accentColor}50` }}>
+              <button onClick={nextQuestion} style={{ background: '#ff3355', color: 'white', border: 'none', borderRadius: 14, padding: '16px 44px', fontSize: 17, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 24px rgba(255,51,85,0.5)' }}>
                 {(session?.currentQuestion ?? 0) + 1 >= (game?.questions.length ?? 0) ? '🏁 Finish Game' : 'Next Question →'}
               </button>
             )}
@@ -467,12 +467,12 @@ export default function HostGamePage({ gameId, onBack }: Props) {
     };
 
     return (
-      <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ background: tpl.headerBg, padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ minHeight: '100vh', background: KAHOOT_BG, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: KAHOOT_HEADER, padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>🏁 Game Over — {game?.title}</div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={downloadResults} style={{ background: 'rgba(34,197,94,0.2)', border: '1px solid rgba(34,197,94,0.5)', color: '#6ee7b7', borderRadius: 10, padding: '9px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>📥 Download Excel</button>
-            <button onClick={endSession} style={{ background: `linear-gradient(135deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`, color: 'white', border: 'none', borderRadius: 10, padding: '9px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>✓ Done</button>
+            <button onClick={endSession} style={{ background: '#ff3355', color: 'white', border: 'none', borderRadius: 10, padding: '9px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>✓ Done</button>
           </div>
         </div>
 
@@ -518,21 +518,21 @@ export default function HostGamePage({ gameId, onBack }: Props) {
           )}
 
           {/* Full list */}
-          <div style={{ background: tpl.cardBg, borderRadius: 20, padding: 20 }}>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>ALL PARTICIPANTS</div>
+          <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: 20 }}>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>ALL PARTICIPANTS</div>
             {sorted.map((s, i) => (
               <div key={s.nickname} style={{
                 display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10,
-                background: i < 3 ? `${tpl.choiceColors[i]}12` : 'rgba(255,255,255,0.04)',
-                borderRadius: 12, padding: '12px 16px', border: `1px solid ${i < 3 ? tpl.choiceColors[i] + '30' : 'transparent'}`,
+                background: i < 3 ? `${KAHOOT_COLORS[i]}25` : 'rgba(255,255,255,0.06)',
+                borderRadius: 12, padding: '12px 16px', border: `1px solid ${i < 3 ? KAHOOT_COLORS[i] + '50' : 'transparent'}`,
               }}>
                 <span style={{ fontSize: 18, width: 28 }}>{MEDAL[i] || `${i + 1}.`}</span>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: tpl.choiceColors[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 15, flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: KAHOOT_COLORS[i % 4], display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 15, flexShrink: 0 }}>
                   {s.nickname[0].toUpperCase()}
                 </div>
                 <span style={{ flex: 1, color: 'white', fontWeight: 700, fontSize: 15 }}>{s.nickname}</span>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ color: tpl.accentColor, fontWeight: 900, fontSize: 18 }}>{s.score} pts</div>
+                  <div style={{ color: 'white', fontWeight: 900, fontSize: 18 }}>{s.score} pts</div>
                   {s.streak > 1 && <div style={{ color: '#fb923c', fontSize: 11 }}>🔥 {s.streak} streak</div>}
                 </div>
               </div>

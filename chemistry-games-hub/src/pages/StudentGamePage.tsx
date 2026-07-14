@@ -13,7 +13,6 @@ type LocalPhase = 'waiting' | 'playing' | 'reveal' | 'leaderboard' | 'finished';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const RANK_LABEL = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
-const CHOICE_SHAPES = ['▲', '◆', '●', '■'];
 
 // ── Sound engine ───────────────────────────────────────────────────────────
 function playTick() {
@@ -140,18 +139,20 @@ function BigConfetti({ active, gold }: { active: boolean; gold?: boolean }) {
 }
 
 // ── QuizGame ───────────────────────────────────────────────────────────────
-function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLeft }: {
+const KAHOOT_COLORS = ['#e21b3c', '#1368ce', '#d89e00', '#26890c'];
+const KAHOOT_SHAPES = ['▲', '◆', '●', '■'];
+
+function QuizGame({ session, nickname, tpl: _tpl, onAnswer, myScore, answered, timeLeft }: {
   session: LiveSession; nickname: string; tpl: GameTemplate;
   onAnswer: (idx: number) => void; myScore: number; answered: boolean; timeLeft: number;
 }) {
   const questions = session.questions;
-  // Firebase/PeerJS may deliver questions as an object with numeric keys — normalise to array
   const questionsArr: LiveQuestion[] = Array.isArray(questions)
     ? questions
     : Object.values(questions ?? {});
   const q: LiveQuestion | undefined = questionsArr[session.currentQuestion];
   if (!q) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: tpl.bg, flexDirection: 'column', gap: 16 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#46178f', flexDirection: 'column', gap: 16 }}>
       <div style={{ fontSize: 48, animation: 'spin 1s linear infinite' }}>⚛️</div>
       <div style={{ color: 'white', fontSize: 18 }}>Loading question...</div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -169,110 +170,111 @@ function QuizGame({ session, nickname, tpl, onAnswer, myScore, answered, timeLef
   const myStudentAnswers = session.students[nickname]?.answers;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: tpl.bg }}>
-      {/* Top bar */}
-      <div style={{ background: tpl.headerBg, padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${tpl.accentColor}30` }}>
-        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 600 }}>
-          Q {session.currentQuestion + 1}/{session.questionCount}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#46178f' }}>
+      {/* Header bar */}
+      <div style={{ background: 'rgba(0,0,0,0.35)', padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 700 }}>
+          Q {session.currentQuestion + 1} / {session.questionCount}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div aria-live="polite" aria-label={`Score: ${myScore} points`} style={{ color: tpl.accentColor, fontWeight: 800, fontSize: 17 }}>⭐ {myScore} pts</div>
+          <div style={{ color: 'white', fontWeight: 800, fontSize: 15 }}>⭐ {myScore}</div>
           {myRank > 0 && (
-            <div style={{
-              background: myRank === 1 ? 'rgba(251,191,36,0.25)' : `${tpl.accentColor}20`,
-              border: `1px solid ${myRank === 1 ? 'rgba(251,191,36,0.6)' : tpl.accentColor + '50'}`,
-              borderRadius: 20, padding: '3px 10px',
-              color: myRank === 1 ? '#fde68a' : tpl.accentColor,
-              fontSize: 12, fontWeight: 800,
-            }}>
-              {MEDAL[myRank - 1] || `#${myRank}`} {RANK_LABEL[myRank - 1] || `${myRank}th`}
+            <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 20, padding: '3px 10px', color: 'white', fontSize: 12, fontWeight: 700 }}>
+              {MEDAL[myRank - 1] || `#${myRank}`}
             </div>
           )}
         </div>
       </div>
 
       {/* Timer bar */}
-      <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ height: 8, background: 'rgba(255,255,255,0.15)', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', left: 0, top: 0, bottom: 0,
           width: `${timerPct}%`,
-          background: isUrgent
-            ? 'linear-gradient(90deg, #ef4444, #fca5a5)'
-            : `linear-gradient(90deg, ${tpl.accentColor}, ${tpl.choiceColors[0]})`,
-          transition: 'width 1s linear, background 0.3s',
+          background: isUrgent ? '#ef4444' : 'white',
+          transition: 'width 1s linear',
           animation: isUrgent ? 'timerPulse 0.5s ease-in-out infinite alternate' : 'none',
         }} />
       </div>
 
-      {/* Timer number — text cue added so it's not color-only */}
-      <div style={{ textAlign: 'center', padding: '6px 0 0' }}>
-        <span
-          aria-live="assertive"
-          aria-label={`${timeLeft} seconds left${isUrgent ? ', hurry!' : ''}`}
-          style={{
-            fontSize: isUrgent ? 28 : 20,
-            fontWeight: 900,
-            color: isUrgent ? '#ef4444' : tpl.timerColor,
-            transition: 'all 0.3s',
+      {/* Question card */}
+      <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '35vh', position: 'relative' }}>
+        <div style={{
+          background: 'white',
+          borderRadius: 16,
+          padding: '28px 36px',
+          maxWidth: 720,
+          width: '100%',
+          textAlign: 'center',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
+          position: 'relative',
+        }}>
+          {/* Circular timer */}
+          <div style={{
+            position: 'absolute', top: -20, right: -20,
+            width: 52, height: 52, borderRadius: '50%',
+            background: isUrgent ? '#e21b3c' : '#46178f',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontWeight: 900, fontSize: 22,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+            transition: 'background 0.3s',
             animation: isUrgent ? 'timerPulse 0.5s ease-in-out infinite alternate' : 'none',
           }}
-        >
-          {timeLeft}s {isUrgent ? '⚠️' : ''}
-        </span>
-      </div>
-
-      {/* Question card */}
-      <div style={{ padding: '12px 16px 8px', maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        <div style={{ background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`, borderRadius: 20, padding: '20px 24px', textAlign: 'center', boxShadow: `0 8px 32px rgba(0,0,0,0.3)` }}>
-          <h2 style={{ color: 'white', fontSize: 'clamp(17px,3vw,26px)', fontWeight: 700, lineHeight: 1.4, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{q.text}</h2>
+            aria-live="assertive" aria-label={`${timeLeft} seconds left`}
+          >{timeLeft}</div>
+          <h2 style={{ color: '#1a1a2e', fontSize: 'clamp(18px,3vw,28px)', fontWeight: 800, lineHeight: 1.4, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{q.text}</h2>
         </div>
       </div>
 
-      {/* Answer buttons 2×2 grid */}
-      <div style={{ flex: 1, padding: '8px 16px 16px', maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {q.choices.map((choice, ci) => {
-            const color = tpl.choiceColors[ci];
-            const isChosen = answered && myStudentAnswers?.[session.currentQuestion] === ci;
-            return (
-              <button key={ci} onClick={() => !answered && onAnswer(ci)} disabled={answered}
-                aria-label={`Choice ${['A','B','C','D'][ci]}: ${choice}`}
-                aria-pressed={isChosen}
-                style={{
-                  background: answered ? (isChosen ? color : `${color}20`) : color,
-                  border: `3px solid ${isChosen ? 'white' : answered ? color + '30' : color}`,
-                  borderRadius: 18, padding: '16px 14px',
-                  color: answered && !isChosen ? 'rgba(255,255,255,0.3)' : 'white',
-                  cursor: answered ? 'default' : 'pointer', fontFamily: 'inherit',
-                  fontSize: 'clamp(14px,2.5vw,18px)', fontWeight: 700, textAlign: 'left',
-                  display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.25s',
-                  minHeight: 90,
-                  boxShadow: answered ? 'none' : `0 6px 24px ${color}50`,
-                  transform: answered && !isChosen ? 'scale(0.95)' : isChosen ? 'scale(1.03)' : 'scale(1)',
-                }}>
-                <span style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: answered && !isChosen ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.25)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 18, fontWeight: 900, flexShrink: 0,
-                }}>
-                  {CHOICE_SHAPES[ci]}
-                </span>
-                <span style={{ lineHeight: 1.3, direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
-              </button>
-            );
-          })}
-        </div>
-        {answered && (
-          <div style={{ textAlign: 'center', marginTop: 14, color: tpl.accentColor, fontWeight: 800, fontSize: 16, animation: 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
-            ✓ Locked in!
-          </div>
-        )}
+      {/* 2×2 answer grid */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '0 10px 16px', minHeight: '45vh' }}>
+        {q.choices.map((choice, ci) => {
+          const color = KAHOOT_COLORS[ci];
+          const isChosen = answered && myStudentAnswers?.[session.currentQuestion] === ci;
+          const dimmed = answered && !isChosen;
+          return (
+            <button
+              key={ci}
+              onClick={() => !answered && onAnswer(ci)}
+              disabled={answered}
+              aria-label={`${['A','B','C','D'][ci]}: ${choice}`}
+              aria-pressed={isChosen}
+              style={{
+                background: color,
+                border: isChosen ? '5px solid white' : '5px solid transparent',
+                borderRadius: 14,
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 'clamp(14px,2.5vw,18px)',
+                cursor: answered ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: 14, padding: '0 18px',
+                opacity: dimmed ? 0.45 : 1,
+                transition: 'all 0.2s',
+                boxShadow: dimmed ? 'none' : `0 6px 20px rgba(0,0,0,0.35)`,
+                transform: isChosen ? 'scale(1.02)' : dimmed ? 'scale(0.97)' : 'scale(1)',
+                fontFamily: 'inherit',
+                overflow: 'hidden',
+              }}
+            >
+              <span style={{
+                width: 44, height: 44, background: 'rgba(0,0,0,0.2)', borderRadius: 10,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 22, flexShrink: 0, fontWeight: 900,
+              }}>{KAHOOT_SHAPES[ci]}</span>
+              <span style={{ lineHeight: 1.3, textAlign: 'left', direction: 'rtl', unicodeBidi: 'plaintext', flex: 1 }}>{choice}</span>
+            </button>
+          );
+        })}
       </div>
+
+      {answered && (
+        <div style={{ textAlign: 'center', paddingBottom: 12, color: 'rgba(255,255,255,0.8)', fontWeight: 800, fontSize: 15, letterSpacing: 0.5 }}>
+          ✓ Answer locked in!
+        </div>
+      )}
 
       <style>{`
         @keyframes timerPulse { 0% { opacity: 1; } 100% { opacity: 0.55; } }
-        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
       `}</style>
     </div>
   );
@@ -296,7 +298,7 @@ function RevealScreen({ session, tpl, myAnswerIdx, myScore }: {
   const correctChoiceText = q.choices[q.correctIndex];
 
   return (
-    <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+    <div style={{ minHeight: '100vh', background: '#46178f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
       <div style={{ fontSize: 90, marginBottom: 12, animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {isCorrect ? '✅' : myAnswerIdx === null ? '⏰' : '❌'}
       </div>
@@ -333,7 +335,7 @@ function LeaderboardScreen({ session, nickname, tpl }: { session: LiveSession; n
   const sorted = Object.values(session.students).sort((a, b) => b.score - a.score);
   const myRank = sorted.findIndex(s => s.nickname === nickname) + 1;
   return (
-    <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column', padding: 24 }}>
+    <div style={{ minHeight: '100vh', background: '#46178f', display: 'flex', flexDirection: 'column', padding: 24 }}>
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <div style={{ fontSize: 40, marginBottom: 6 }}>🏆</div>
         <h2 style={{ color: 'white', fontWeight: 900, fontSize: 24, margin: 0 }}>Leaderboard</h2>
@@ -396,7 +398,7 @@ function FinishedScreen({ session, nickname, tpl, onFinish }: { session: LiveSes
     tpl.bg;
 
   return (
-    <div style={{ minHeight: '100vh', background: isWinner ? podiumBg : tpl.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: isWinner ? podiumBg : '#46178f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', position: 'relative' }}>
       <BigConfetti active={isWinner} gold={myRank === 1} />
 
       {myRank === 1 && (
@@ -481,7 +483,7 @@ function WaitingScreen({ session, nickname, tpl, onBack }: { session: LiveSessio
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: tpl.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#46178f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         {['⚗️','🧪','⚛️','🔬','🧬','💊'].map((e, i) => (
           <div key={i} style={{ position: 'absolute', fontSize: 28, opacity: 0.06, top: `${15 + i * 14}%`, left: `${8 + i * 14}%`, animation: `floatP ${4 + i}s ${i * 0.5}s ease-in-out infinite alternate` }}>{e}</div>
