@@ -135,6 +135,7 @@ function App() {
           <CreateGamePage
             folderId={state.selectedFolderId}
             editGameId={state.editGameId}
+            theme={theme}
             onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
             onSaved={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
           />
