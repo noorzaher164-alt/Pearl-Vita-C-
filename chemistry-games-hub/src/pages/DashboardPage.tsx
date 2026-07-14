@@ -69,7 +69,6 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
   const [gameSearch, setGameSearch] = useState('');
-  const [showFolderPicker, setShowFolderPicker] = useState(false);
   const [tip] = useState(() => CHEMISTRY_TIPS[Math.floor(Math.random() * CHEMISTRY_TIPS.length)]);
 
   const reloadFolders = () => setAllFolders(getFolders());
@@ -96,15 +95,6 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
 
   const handleLogout = () => { setCurrentUser(null); onLogout(); };
   const switchView = (v: SidebarView) => { setView(v); setActiveFolder(null); };
-
-  const ensureFolder = (): string => {
-    const general = getFolders().find(f => f.name === 'General') || getFolders()[0];
-    if (general) return general.id;
-    const id = crypto.randomUUID();
-    saveFolder({ id, name: 'General', color: FOLDER_COLORS[0], icon: '📁', createdAt: new Date().toISOString() });
-    reloadFolders();
-    return id;
-  };
 
   // ── Shared styles ─────────────────────────────────────────────────────────
   const card: React.CSSProperties = { background: th.cardBg, border: `1px solid ${th.cardBorder}`, borderRadius: 20, padding: '20px 22px', boxShadow: th.shadow };
@@ -415,13 +405,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
     );
 
     const handleCreateFromAllGames = () => {
-      if (allFolders.length === 0) {
-        // No folders — create a General one and start
-        const id = ensureFolder();
-        onCreateGame(id);
-        return;
-      }
-      setShowFolderPicker(true);
+      onCreateGame('');
     };
 
     return (
@@ -548,36 +532,6 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
     </div>
   );
 
-  // ── Folder picker modal (for All Games → Create) ───────────────────────────
-  const FolderPicker = () => (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 24 }}>
-      <div style={{ background: th.modalBg, border: `1px solid ${th.cardBorder}`, borderRadius: 24, padding: 32, maxWidth: 460, width: '100%', boxShadow: th.shadow }}>
-        <h3 style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>✨ Create New Game</h3>
-        <p style={{ color: th.textMuted, fontSize: 14, marginBottom: 24 }}>Choose which folder to save the game in</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto', marginBottom: 16 }}>
-          {allFolders.map(f => (
-            <button key={f.id} onClick={() => { setShowFolderPicker(false); onCreateGame(f.id); }}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, background: isDark ? `${f.color}10` : `${f.color}08`, border: `2px solid ${f.color}30`, borderRadius: 14, padding: '14px 16px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = f.color + '70'; e.currentTarget.style.background = `${f.color}20`; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = f.color + '30'; e.currentTarget.style.background = isDark ? `${f.color}10` : `${f.color}08`; }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${f.color}20`, border: `2px solid ${f.color}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{f.icon}</div>
-              <div>
-                <div style={{ color: th.text, fontWeight: 700, fontSize: 15 }}>{f.name}</div>
-                <div style={{ color: th.textMuted, fontSize: 12 }}>{getGamesByFolder(f.id).length} games</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        <div style={{ borderTop: `1px solid ${th.divider}`, paddingTop: 14, display: 'flex', gap: 10 }}>
-          <button onClick={() => setShowFolderPicker(false)} style={{ flex: 1, background: th.badge, border: `1px solid ${th.cardBorder}`, color: th.textMuted, borderRadius: 12, padding: '11px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>Cancel</button>
-          <button onClick={() => { setShowFolderPicker(false); switchView('library'); setShowCreate(true); }} style={{ flex: 2, background: th.accentLight, border: `1px solid ${th.accent}40`, color: th.accent, borderRadius: 12, padding: '11px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-            ➕ Create New Folder First
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   // ── Create Folder modal ───────────────────────────────────────────────────
   const CreateFolderModal = () => (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 24 }}>
@@ -620,7 +574,6 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       </div>
 
       {showCreate && <CreateFolderModal />}
-      {showFolderPicker && <FolderPicker />}
     </div>
   );
 }

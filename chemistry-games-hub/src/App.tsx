@@ -131,13 +131,13 @@ function App() {
         {state.page === 'host-game' && state.selectedGameId && (
           <HostGamePage gameId={state.selectedGameId} onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })} />
         )}
-        {state.page === 'create-game' && state.selectedFolderId && (
+        {state.page === 'create-game' && (
           <CreateGamePage
-            folderId={state.selectedFolderId}
+            folderId={state.selectedFolderId || ''}
             editGameId={state.editGameId}
             theme={theme}
-            onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
-            onSaved={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
+            onBack={() => state.selectedFolderId ? navigate('folder', { selectedFolderId: state.selectedFolderId }) : navigate('dashboard')}
+            onSaved={() => state.selectedFolderId ? navigate('folder', { selectedFolderId: state.selectedFolderId }) : navigate('dashboard')}
           />
         )}
         {state.page === 'play-game' && state.selectedGameId && (
