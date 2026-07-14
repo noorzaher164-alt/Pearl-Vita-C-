@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Game, LeaderboardEntry } from '../types';
 import { getGameById, saveResult } from '../storage';
 import { getTemplate, type GameTemplate } from '../templates';
+import { getTheme } from '../theme';
+import type { Theme } from '../theme';
 
 interface Props {
   gameId: string;
@@ -519,6 +521,10 @@ function WordSearchGame({ game, tpl, onFinish, onBack, soundOn }: { game: Game; 
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
+  const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
+  const C = getTheme(theme);
+  const isDark = theme === 'dark';
+
   const [game, setGame] = useState<Game | null>(null);
   const [tpl, setTpl] = useState<GameTemplate>(getTemplate('periodic-table'));
   const [phase, setPhase] = useState<Phase>('nickname');
@@ -609,17 +615,17 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
     else { setCurrentQ(prev => prev + 1); setPhase('playing'); if (isCompetitive) startTimer(); }
   };
 
-  if (!game) return <div style={{ color: 'white', padding: 40, textAlign: 'center' }}>Loading...</div>;
+  if (!game) return <div style={{ color: C.text, padding: 40, textAlign: 'center' }}>Loading...</div>;
 
   // ── NICKNAME SCREEN ─────────────────────────────────────────────────────────
   if (phase === 'nickname') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, background: tpl.bg, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, background: isDark ? tpl.bg : '#f3f0ff', position: 'relative', overflow: 'hidden' }}>
         <FloatingParticles particles={tpl.particles} color={tpl.accentColor} />
         <div style={{ textAlign: 'center', maxWidth: 500, width: '100%', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 72, marginBottom: 16, animation: 'bounce 1s infinite' }}>🎮</div>
-          <h1 style={{ fontSize: 36, fontWeight: 800, color: 'white', marginBottom: 8 }}>{game.title}</h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>📚 {game.lessonName}</p>
+          <h1 style={{ fontSize: 36, fontWeight: 800, color: C.text, marginBottom: 8 }}>{game.title}</h1>
+          <p style={{ color: C.textMuted, marginBottom: 4 }}>📚 {game.lessonName}</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
             <span style={{ background: 'rgba(192,132,252,0.2)', border: '1px solid rgba(192,132,252,0.4)', color: '#c084fc', borderRadius: 100, padding: '4px 14px', fontSize: 13 }}>❓ {game.questions.length} questions</span>
             <span style={{ background: isCompetitive ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)', border: `1px solid ${isCompetitive ? 'rgba(239,68,68,0.4)' : 'rgba(34,197,94,0.4)'}`, color: isCompetitive ? '#fca5a5' : '#6ee7b7', borderRadius: 100, padding: '4px 14px', fontSize: 13 }}>
@@ -628,9 +634,9 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
           </div>
           {isCompetitive && (
             <div style={{ marginBottom: 24 }}>
-              <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: 15, display: 'block', marginBottom: 10 }}>🎭 Enter your nickname:</label>
+              <label style={{ color: C.textMuted, fontSize: 15, display: 'block', marginBottom: 10 }}>🎭 Enter your nickname:</label>
               <input value={nickname} onChange={e => setNickname(e.target.value)} onKeyDown={e => e.key === 'Enter' && nickname.trim() && handleStart()} placeholder="Your nickname..." autoFocus
-                style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(192,132,252,0.5)', borderRadius: 14, padding: '16px 20px', color: 'white', fontSize: 18, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', textAlign: 'center' }} />
+                style={{ width: '100%', background: isDark ? 'rgba(255,255,255,0.08)' : 'white', border: '2px solid rgba(192,132,252,0.5)', borderRadius: 14, padding: '16px 20px', color: C.text, fontSize: 18, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', textAlign: 'center' }} />
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 24 }}>
@@ -639,7 +645,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
             </button>
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 14, padding: '14px 28px', fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
+            <button onClick={onBack} style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#ede9fe', border: `1px solid ${C.cardBorder}`, color: C.text, borderRadius: 14, padding: '14px 28px', fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
             <button onClick={handleStart} disabled={isCompetitive && !nickname.trim()}
               style={{ background: isCompetitive && !nickname.trim() ? 'rgba(34,197,94,0.3)' : 'linear-gradient(135deg, #22c55e, #16a34a)', color: 'white', border: 'none', borderRadius: 14, padding: '14px 44px', fontSize: 20, fontWeight: 800, cursor: isCompetitive && !nickname.trim() ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(34,197,94,0.4)', letterSpacing: 1 }}>
               🚀 START!
@@ -654,7 +660,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   // ── COUNTDOWN SCREEN ────────────────────────────────────────────────────────
   if (phase === 'countdown') {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: tpl.bg, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDark ? tpl.bg : '#f3f0ff', position: 'relative', overflow: 'hidden' }}>
         <FloatingParticles particles={tpl.particles} color={tpl.accentColor} />
         <div style={{ fontSize: 160, fontWeight: 900, color: tpl.accentColor, textShadow: `0 0 60px ${tpl.accentColor}80`, animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)', position: 'relative', zIndex: 1 }}>{countdown}</div>
         <style>{`@keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }`}</style>

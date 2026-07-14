@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Game, Folder, Page, GameType } from '../types';
 import { getFolders, getGamesByFolder, deleteGame, duplicateGame, assignPinToGame } from '../storage';
+import { getTheme } from '../theme';
+import type { Theme } from '../theme';
 
 function studentJoinUrl(pin: string) {
   return `${window.location.origin}${window.location.pathname}?join=${pin}`;
@@ -45,6 +47,10 @@ const GAME_COLORS: Record<GameType, string> = {
 type FilterType = 'all' | 'competitive' | 'practice';
 
 export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGame, onCreateGame, onEditGame }: Props) {
+  const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
+  const C = getTheme(theme);
+  const isDark = theme === 'dark';
+
   const [folder, setFolder] = useState<Folder | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState('');
@@ -83,7 +89,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
     return matchSearch && matchFilter;
   });
 
-  if (!folder) return <div style={{ color: 'white', padding: 40 }}>Folder not found.</div>;
+  if (!folder) return <div style={{ color: C.text, padding: 40 }}>Folder not found.</div>;
 
   return (
     <div style={{ minHeight: '100vh', padding: 24 }}>
@@ -92,16 +98,16 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
             onClick={() => onNavigate('dashboard')}
-            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
+            style={{ background: isDark ? 'rgba(255,255,255,0.1)' : '#ede9fe', border: `1px solid ${C.cardBorder}`, color: C.text, borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}
           >
             ← Dashboard
           </button>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 36 }}>{folder.icon}</span>
-              <h1 style={{ fontSize: 28, fontWeight: 800, color: 'white', margin: 0 }}>{folder.name}</h1>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: C.text, margin: 0 }}>{folder.name}</h1>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, margin: 0 }}>{games.length} game{games.length !== 1 ? 's' : ''}</p>
+            <p style={{ color: C.textFaint, fontSize: 13, margin: 0 }}>{games.length} game{games.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
         <button
@@ -124,8 +130,8 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
           onChange={e => setSearch(e.target.value)}
           placeholder="🔍 Search games..."
           style={{
-            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 14,
+            background: C.inputBg, border: `1px solid ${C.inputBorder}`,
+            borderRadius: 10, padding: '10px 14px', color: C.text, fontSize: 14,
             outline: 'none', fontFamily: 'inherit', flex: '1', minWidth: 200, maxWidth: 350,
           }}
         />
@@ -134,9 +140,9 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
             key={f}
             onClick={() => setFilter(f)}
             style={{
-              background: filter === f ? 'rgba(192,132,252,0.3)' : 'rgba(255,255,255,0.05)',
-              border: filter === f ? '1px solid #c084fc' : '1px solid rgba(255,255,255,0.1)',
-              color: filter === f ? '#c084fc' : 'rgba(255,255,255,0.5)',
+              background: filter === f ? 'rgba(192,132,252,0.3)' : C.cardBg,
+              border: filter === f ? '1px solid #c084fc' : `1px solid ${C.cardBorder}`,
+              color: filter === f ? C.accent : C.textMuted,
               borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
             }}
           >
@@ -147,9 +153,9 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
 
       {/* Games */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 24px', color: 'rgba(255,255,255,0.4)' }}>
+        <div style={{ textAlign: 'center', padding: '80px 24px', color: C.textFaint }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🎮</div>
-          <h3 style={{ fontSize: 20, marginBottom: 8, color: 'rgba(255,255,255,0.6)' }}>No games found</h3>
+          <h3 style={{ fontSize: 20, marginBottom: 8, color: C.textMuted }}>No games found</h3>
           <p style={{ marginBottom: 24 }}>
             {games.length === 0 ? 'Create your first game in this folder!' : 'Try a different search or filter.'}
           </p>
@@ -170,7 +176,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
             const color = GAME_COLORS[game.gameType];
             return (
               <div key={game.id} style={{
-                background: 'rgba(255,255,255,0.05)',
+                background: C.cardBg,
                 border: `1px solid ${color}30`,
                 borderRadius: 20,
                 padding: 24,
@@ -185,7 +191,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                   e.currentTarget.style.boxShadow = `0 12px 40px ${color}25`;
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.background = C.cardBg;
                   e.currentTarget.style.borderColor = `${color}30`;
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = 'none';
@@ -205,9 +211,9 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                   </span>
                 )}
 
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 4 }}>{game.title}</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>📚 {game.lessonName}</p>
-                <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 4 }}>{game.title}</h3>
+                <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 4 }}>📚 {game.lessonName}</p>
+                <div style={{ display: 'flex', gap: 16, fontSize: 12, color: C.textFaint, marginBottom: 20 }}>
                   <span>❓ {game.questions.length} questions</span>
                   <span>📅 {new Date(game.createdAt).toLocaleDateString()}</span>
                 </div>
@@ -219,7 +225,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                     background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)',
                     borderRadius: 8, padding: '4px 10px', fontSize: 12,
                   }}>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>PIN:</span>
+                    <span style={{ color: C.textMuted }}>PIN:</span>
                     <span style={{ fontWeight: 800, color: '#6ee7b7', letterSpacing: 2 }}>{game.pin}</span>
                   </div>
                 )}
@@ -341,7 +347,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                   setPinModal({ game: pinModal.game, pin: newPin });
                 }}
                 style={{
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                  background: isDark ? 'rgba(255,255,255,0.08)' : '#ede9fe', border: '1px solid rgba(255,255,255,0.15)',
                   color: 'rgba(255,255,255,0.7)', borderRadius: 12, padding: '11px 20px',
                   fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
                 }}

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { LeaderboardEntry } from '../types';
 import { getGameById } from '../storage';
+import { getTheme } from '../theme';
+import type { Theme } from '../theme';
 
 interface Props {
   gameId: string;
@@ -42,6 +44,10 @@ const RANK_CONFIG = [
 ];
 
 export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Props) {
+  const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
+  const C = getTheme(theme);
+  const isDark = theme === 'dark';
+
   const [showConfetti, setShowConfetti] = useState(true);
   const [visible, setVisible] = useState(false);
 
@@ -91,7 +97,7 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
         }}>
           Game Over!
         </h1>
-        {game && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>📚 {game.title}</p>}
+        {game && <p style={{ color: C.textMuted, fontSize: 15 }}>📚 {game.title}</p>}
         <p style={{ fontSize: 20, fontWeight: 700, color: msg.color, marginTop: 8 }}>{msg.text}</p>
       </div>
 
@@ -108,7 +114,7 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
             border: '1px solid rgba(253,230,138,0.4)',
             borderRadius: 24, padding: '28px 24px', textAlign: 'center',
           }}>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+            <div style={{ fontSize: 14, color: C.textMuted, marginBottom: 4 }}>
               {top.nickname}
             </div>
             <div style={{
@@ -118,7 +124,7 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
             }}>
               {top.score}
             </div>
-            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>points</div>
+            <div style={{ fontSize: 14, color: C.textFaint, marginBottom: 20 }}>points</div>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: 32 }}>
               {[
@@ -126,8 +132,8 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
                 { label: 'Score %', value: `${accuracy}%`, icon: '🎯' },
               ].map(stat => (
                 <div key={stat.label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: 'white' }}>{stat.icon} {stat.value}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{stat.label}</div>
+                  <div style={{ fontSize: 28, fontWeight: 800, color: C.text }}>{stat.icon} {stat.value}</div>
+                  <div style={{ fontSize: 12, color: C.textFaint }}>{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -142,7 +148,7 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
           opacity: visible ? 1 : 0,
           transition: 'all 0.6s 0.4s ease',
         }}>
-          <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 24 }}>🏅 Podium</h2>
+          <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 24 }}>🏅 Podium</h2>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 8, height: 200 }}>
             {podiumOrder.filter(i => sorted[i]).map((rankIdx, pos) => {
               const cfg = RANK_CONFIG[rankIdx];
@@ -150,7 +156,7 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
               return (
                 <div key={pos} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                   <div style={{ fontSize: 28 }}>{cfg.emoji}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'white', textAlign: 'center', lineHeight: 1.2 }}>{player.nickname}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.text, textAlign: 'center', lineHeight: 1.2 }}>{player.nickname}</div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: cfg.color }}>{player.score}</div>
                   <div style={{
                     width: '100%', height: cfg.height,
@@ -173,12 +179,12 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
       {/* Full leaderboard */}
       {sorted.length > 0 && (
         <div style={{ maxWidth: 500, margin: '0 auto 32px', padding: '0 20px' }}>
-          <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 16 }}>📊 Leaderboard</h2>
+          <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 16 }}>📊 Leaderboard</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {sorted.map((entry, i) => (
               <div key={i} style={{
-                background: i === 0 ? 'rgba(253,230,138,0.12)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${i === 0 ? 'rgba(253,230,138,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                background: i === 0 ? 'rgba(253,230,138,0.12)' : C.cardBg,
+                border: `1px solid ${i === 0 ? 'rgba(253,230,138,0.3)' : C.cardBorder}`,
                 borderRadius: 14, padding: '14px 18px',
                 display: 'flex', alignItems: 'center', gap: 14,
                 opacity: visible ? 1 : 0,
@@ -188,8 +194,8 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
                 <span style={{ fontSize: 24, width: 32, textAlign: 'center' }}>
                   {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
                 </span>
-                <span style={{ flex: 1, fontWeight: 600, color: 'white', fontSize: 16 }}>{entry.nickname}</span>
-                <span style={{ fontWeight: 800, fontSize: 22, color: i === 0 ? '#fde68a' : '#c084fc' }}>{entry.score}</span>
+                <span style={{ flex: 1, fontWeight: 600, color: C.text, fontSize: 16 }}>{entry.nickname}</span>
+                <span style={{ fontWeight: 800, fontSize: 22, color: i === 0 ? '#fde68a' : C.accent }}>{entry.score}</span>
               </div>
             ))}
           </div>
@@ -199,16 +205,16 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
       {/* Answer review */}
       {game && (
         <div style={{ maxWidth: 600, margin: '0 auto 32px', padding: '0 20px' }}>
-          <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 16 }}>📝 Answer Review</h2>
+          <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, textAlign: 'center', marginBottom: 16 }}>📝 Answer Review</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {game.questions.map((q, i) => (
               <div key={i} style={{
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                background: C.cardBg, border: `1px solid ${C.cardBorder}`,
                 borderRadius: 12, padding: '14px 16px',
               }}>
-                <p style={{ color: 'white', fontWeight: 600, fontSize: 14, marginBottom: 6 }}>Q{i + 1}: {q.text}</p>
+                <p style={{ color: C.text, fontWeight: 600, fontSize: 14, marginBottom: 6 }}>Q{i + 1}: {q.text}</p>
                 <p style={{ color: '#6ee7b7', fontSize: 13 }}>✓ {q.choices[q.correctIndex]}</p>
-                {q.explanation && <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 4 }}>💡 {q.explanation}</p>}
+                {q.explanation && <p style={{ color: C.textFaint, fontSize: 12, marginTop: 4 }}>💡 {q.explanation}</p>}
               </div>
             ))}
           </div>
@@ -243,8 +249,8 @@ export default function ResultsPage({ gameId, entries, onPlayAgain, onBack }: Pr
           boxShadow: '0 4px 20px rgba(34,197,94,0.4)',
         }}>🔄 Play Again</button>
         <button onClick={onBack} style={{
-          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)',
-          color: 'white', borderRadius: 14, padding: '14px 36px',
+          background: isDark ? 'rgba(255,255,255,0.08)' : '#ede9fe', border: `1px solid ${C.cardBorder}`,
+          color: C.text, borderRadius: 14, padding: '14px 36px',
           fontSize: 17, cursor: 'pointer', fontFamily: 'inherit',
         }}>← Back</button>
       </div>

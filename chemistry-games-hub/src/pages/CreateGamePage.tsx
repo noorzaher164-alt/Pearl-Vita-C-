@@ -203,7 +203,16 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
 
         {/* Selected type big banner */}
         <div style={{ background: `${sel.color}18`, border: `2px solid ${sel.color}`, borderRadius: 18, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 18 }}>
-          <div style={{ fontSize: 56, lineHeight: 1, flexShrink: 0 }}>{sel.disney}</div>
+          <div style={{
+            width: 90, height: 90, borderRadius: 24,
+            background: `linear-gradient(135deg, ${sel.color}35, ${sel.color}15)`,
+            border: `3px solid ${sel.color}60`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 52, flexShrink: 0,
+            boxShadow: `0 8px 24px ${sel.color}40`,
+          }}>
+            {sel.disney}
+          </div>
           <div>
             <div style={{ color: sel.color, fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 2 }}>{sel.competitive ? '⚔️ LIVE MULTIPLAYER' : '📚 SOLO PRACTICE'}</div>
             <div style={{ color: C.text, fontSize: 20, fontWeight: 800 }}>{sel.label}</div>
@@ -230,7 +239,15 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                   transition: 'all 0.2s', transform: isSelected ? 'scale(1.04)' : 'scale(1)',
                 }}>
-                  <div style={{ fontSize: 34 }}>{t.disney}</div>
+                  <div style={{
+                    width: 70, height: 70, borderRadius: 20,
+                    background: `linear-gradient(135deg, ${t.color}30, ${t.color}15)`,
+                    border: `2px solid ${t.color}40`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 38,
+                    boxShadow: isSelected ? `0 4px 16px ${t.color}50` : 'none',
+                    transition: 'all 0.2s',
+                  }}>{t.disney}</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{t.label}</div>
                   <div style={{ fontSize: 10, color: isSelected ? t.color : C.textMuted, fontWeight: 600 }}>{t.disneyName}</div>
                   {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
@@ -258,7 +275,15 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                   transition: 'all 0.2s', transform: isSelected ? 'scale(1.04)' : 'scale(1)',
                 }}>
-                  <div style={{ fontSize: 34 }}>{t.disney}</div>
+                  <div style={{
+                    width: 70, height: 70, borderRadius: 20,
+                    background: `linear-gradient(135deg, ${t.color}30, ${t.color}15)`,
+                    border: `2px solid ${t.color}40`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 38,
+                    boxShadow: isSelected ? `0 4px 16px ${t.color}50` : 'none',
+                    transition: 'all 0.2s',
+                  }}>{t.disney}</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{t.label}</div>
                   <div style={{ fontSize: 10, color: isSelected ? t.color : C.textMuted, fontWeight: 600 }}>{t.disneyName}</div>
                   {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
