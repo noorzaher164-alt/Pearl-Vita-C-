@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { AppState, Page, LeaderboardEntry, User } from './types';
-import { getCurrentUser } from './users';
+import type { Theme } from './theme';
+import { THEME_KEY } from './theme';
+import { getCurrentUser, seedAdmin } from './users';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
@@ -13,13 +15,26 @@ import HostGamePage from './pages/HostGamePage';
 import StudentGamePage from './pages/StudentGamePage';
 import BubbleBackground from './components/BubbleBackground';
 import AdminPage from './pages/AdminPage';
+import AdminPanelPage from './pages/AdminPanelPage';
 import TestBankPage from './pages/TestBankPage';
+import CustomBankPage from './pages/CustomBankPage';
+
+seedAdmin();
 
 function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const urlPin = urlParams.get('join')?.toUpperCase() || null;
 
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(THEME_KEY) as Theme) || 'dark');
   const [currentUser, setCurrentUser] = useState<User | null>(getCurrentUser);
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next: Theme = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      return next;
+    });
+  };
 
   const [state, setState] = useState<AppState>({
     page: urlPin ? 'student' : 'home',
@@ -51,63 +66,56 @@ function App() {
     return () => window.removeEventListener('keydown', handler);
   }, [state, fromStudent]);
 
+  // Light mode needs a plain background; dark mode uses gradient + bubbles
+  const isDark = theme === 'dark';
+
   return (
-    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' }}>
-      <BubbleBackground />
+    <div className="min-h-screen relative" style={{ background: isDark ? 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' : '#f3f0ff' }}>
+      {isDark && <BubbleBackground />}
       <div className="relative z-10">
         <>
         {state.page === 'admin' && (
           <AdminPage onBack={() => navigate('home')} />
         )}
+        {state.page === 'admin-panel' && currentUser && (
+          <AdminPanelPage currentUser={currentUser} theme={theme} onBack={() => navigate('dashboard')} />
+        )}
+        {state.page === 'custom-bank' && (
+          <CustomBankPage theme={theme} onBack={() => navigate('dashboard')} />
+        )}
         {state.page === 'test-bank' && (
           <TestBankPage onBack={() => navigate('dashboard')} semester={state.testBankSemester || 's1'} />
         )}
         {state.page === 'home' && (
-          <HomePage
-            onNavigate={navigate}
-            onStudentJoin={() => navigate('student')}
-          />
+          <HomePage onNavigate={navigate} onStudentJoin={() => navigate('student')} />
         )}
         {state.page === 'login' && (
-          <AuthPage
-            onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }}
-            onBack={() => navigate('home')}
-          />
+          <AuthPage theme={theme} onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }} onBack={() => navigate('home')} />
         )}
         {state.page === 'student' && (
           <StudentPage
             initialPin={state.studentPin || undefined}
-            onPlayGame={(gameId) => {
-              setFromStudent(true);
-              navigate('play-game', { selectedGameId: gameId });
-            }}
-            onJoinLive={(pin, nickname) => {
-              navigate('student-game', { studentPin: pin, studentNickname: nickname });
-            }}
+            onPlayGame={(gameId) => { setFromStudent(true); navigate('play-game', { selectedGameId: gameId }); }}
+            onJoinLive={(pin, nickname) => { navigate('student-game', { studentPin: pin, studentNickname: nickname }); }}
             onBack={() => navigate('home')}
           />
         )}
         {state.page === 'student-game' && state.studentPin && state.studentNickname && (
-          <StudentGamePage
-            pin={state.studentPin}
-            nickname={state.studentNickname}
-            onFinish={() => navigate('home')}
-            onBack={() => navigate('student')}
-          />
+          <StudentGamePage pin={state.studentPin} nickname={state.studentNickname} onFinish={() => navigate('home')} onBack={() => navigate('student')} />
         )}
         {state.page === 'dashboard' && (
           currentUser ? (
             <DashboardPage
               user={currentUser}
+              theme={theme}
+              onThemeToggle={toggleTheme}
               onNavigate={navigate}
               onSelectFolder={(id) => navigate('folder', { selectedFolderId: id })}
+              onCreateGame={(folderId) => navigate('create-game', { selectedFolderId: folderId, editGameId: null })}
               onLogout={() => { setCurrentUser(null); navigate('home'); }}
             />
           ) : (
-            <AuthPage
-              onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }}
-              onBack={() => navigate('home')}
-            />
+            <AuthPage theme={theme} onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }} onBack={() => navigate('home')} />
           )
         )}
         {state.page === 'folder' && state.selectedFolderId && (
@@ -121,10 +129,7 @@ function App() {
           />
         )}
         {state.page === 'host-game' && state.selectedGameId && (
-          <HostGamePage
-            gameId={state.selectedGameId}
-            onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })}
-          />
+          <HostGamePage gameId={state.selectedGameId} onBack={() => navigate('folder', { selectedFolderId: state.selectedFolderId })} />
         )}
         {state.page === 'create-game' && state.selectedFolderId && (
           <CreateGamePage
@@ -137,10 +142,7 @@ function App() {
         {state.page === 'play-game' && state.selectedGameId && (
           <PlayGamePage
             gameId={state.selectedGameId}
-            onFinish={(entries) => {
-              setLastResult({ entries, gameId: state.selectedGameId! });
-              navigate('results', { selectedGameId: state.selectedGameId });
-            }}
+            onFinish={(entries) => { setLastResult({ entries, gameId: state.selectedGameId! }); navigate('results', { selectedGameId: state.selectedGameId }); }}
             onBack={() => navigate(fromStudent ? 'student' : 'folder', { selectedFolderId: state.selectedFolderId })}
           />
         )}

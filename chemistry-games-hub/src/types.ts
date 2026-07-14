@@ -60,17 +60,42 @@ export interface GameResult {
   playedAt: string;
 }
 
+export type UserRole = 'admin' | 'teacher' | 'student';
+export type QuestionType = 'mcq' | 'true-false' | 'short-answer' | 'yes-no';
+
 export interface User {
   id: string;
-  username: string;
+  email: string;
   password: string;
   displayName: string;
+  role: UserRole;
+  createdAt: string;
+}
+
+export interface CustomBankFolder {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  createdAt: string;
+}
+
+export interface CustomBankQuestion {
+  id: string;
+  folderId: string;
+  text: string;
+  questionType: QuestionType;
+  choices: string[];
+  correctIndex: number;
+  explanation?: string;
   createdAt: string;
 }
 
 export type Page =
   | 'home'
   | 'login'
+  | 'admin-panel'
+  | 'custom-bank'
   | 'student'
   | 'dashboard'
   | 'folder'

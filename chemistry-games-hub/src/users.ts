@@ -1,39 +1,52 @@
-import type { User } from './types';
+import type { User, UserRole } from './types';
 
 const USERS_KEY = 'cgh_users';
 const SESSION_KEY = 'cgh_user_session';
 
-export function getUsers(): User[] {
+const ADMIN_EMAIL = 'noorzaher164@gmail.com';
+const ADMIN_PASSWORD = 'Nourhan@2025';
+const ADMIN_ID = 'admin_nourhan_2025';
+
+export function seedAdmin(): void {
+  const users = getRawUsers();
+  if (!users.find(u => u.id === ADMIN_ID)) {
+    const admin: User = {
+      id: ADMIN_ID, email: ADMIN_EMAIL, password: ADMIN_PASSWORD,
+      displayName: 'Ms. Nourhan Zaher', role: 'admin', createdAt: new Date().toISOString(),
+    };
+    localStorage.setItem(USERS_KEY, JSON.stringify([admin, ...users]));
+  }
+}
+
+function getRawUsers(): User[] {
   try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch { return []; }
 }
 
+export function getUsers(): User[] {
+  seedAdmin();
+  return getRawUsers();
+}
+
+export function isAdmin(user: User): boolean { return user.role === 'admin'; }
+
 export function registerUser(
-  username: string,
-  password: string,
-  displayName: string,
+  email: string, password: string, displayName: string, role: UserRole = 'teacher',
 ): { user?: User; error?: string } {
-  const u = username.trim();
-  if (u.length < 3) return { error: 'Username must be at least 3 characters' };
-  if (password.length < 4) return { error: 'Password must be at least 4 characters' };
+  const e = email.trim().toLowerCase();
+  if (!e.includes('@') || !e.includes('.')) return { error: 'Please enter a valid email address' };
+  if (password.length < 6) return { error: 'Password must be at least 6 characters' };
+  if (!displayName.trim()) return { error: 'Please enter your full name' };
   const users = getUsers();
-  if (users.find(x => x.username.toLowerCase() === u.toLowerCase())) {
-    return { error: 'Username already taken — try another' };
-  }
+  if (users.find(u => u.email.toLowerCase() === e)) return { error: 'An account with this email already exists' };
   const user: User = {
-    id: crypto.randomUUID(),
-    username: u,
-    password,
-    displayName: displayName.trim() || u,
-    createdAt: new Date().toISOString(),
+    id: crypto.randomUUID(), email: e, password, displayName: displayName.trim(), role, createdAt: new Date().toISOString(),
   };
   localStorage.setItem(USERS_KEY, JSON.stringify([...users, user]));
   return { user };
 }
 
-export function loginUser(username: string, password: string): User | null {
-  return getUsers().find(
-    u => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password,
-  ) ?? null;
+export function loginUser(email: string, password: string): User | null {
+  return getUsers().find(u => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password) ?? null;
 }
 
 export function getCurrentUser(): User | null {
@@ -47,4 +60,18 @@ export function getCurrentUser(): User | null {
 export function setCurrentUser(user: User | null): void {
   if (user) localStorage.setItem(SESSION_KEY, user.id);
   else localStorage.removeItem(SESSION_KEY);
+}
+
+export function updateUser(id: string, updates: Partial<Pick<User, 'displayName' | 'role' | 'password'>>): void {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.id === id);
+  if (idx === -1) return;
+  users[idx] = { ...users[idx], ...updates };
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+export function deleteUser(id: string): void {
+  if (id === ADMIN_ID) return; // can't delete admin
+  const users = getUsers().filter(u => u.id !== id);
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }

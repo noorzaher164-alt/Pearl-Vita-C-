@@ -1,4 +1,4 @@
-import type { Folder, Game, GameResult } from './types';
+import type { Folder, Game, GameResult, CustomBankFolder, CustomBankQuestion } from './types';
 
 // ── KEYS ──────────────────────────────────────────────────────────────────────
 const FOLDERS_KEY = 'cgh_folders';
@@ -105,6 +105,37 @@ export function saveResult(result: GameResult) {
 
 export function getResultsByGame(gameId: string): GameResult[] {
   return getResults().filter(r => r.gameId === gameId);
+}
+
+// ── CUSTOM BANK ───────────────────────────────────────────────────────────────
+const CB_FOLDERS_KEY = 'cgh_cb_folders';
+const CB_QUESTIONS_KEY = 'cgh_cb_questions';
+
+export function getCBFolders(): CustomBankFolder[] {
+  return JSON.parse(localStorage.getItem(CB_FOLDERS_KEY) || '[]');
+}
+export function saveCBFolder(f: CustomBankFolder) {
+  const arr = getCBFolders();
+  const idx = arr.findIndex(x => x.id === f.id);
+  if (idx >= 0) arr[idx] = f; else arr.push(f);
+  localStorage.setItem(CB_FOLDERS_KEY, JSON.stringify(arr));
+}
+export function deleteCBFolder(id: string) {
+  localStorage.setItem(CB_FOLDERS_KEY, JSON.stringify(getCBFolders().filter(f => f.id !== id)));
+  localStorage.setItem(CB_QUESTIONS_KEY, JSON.stringify(getCBQuestions().filter(q => q.folderId !== id)));
+}
+export function getCBQuestions(folderId?: string): CustomBankQuestion[] {
+  const all: CustomBankQuestion[] = JSON.parse(localStorage.getItem(CB_QUESTIONS_KEY) || '[]');
+  return folderId ? all.filter(q => q.folderId === folderId) : all;
+}
+export function saveCBQuestion(q: CustomBankQuestion) {
+  const arr = getCBQuestions();
+  const idx = arr.findIndex(x => x.id === q.id);
+  if (idx >= 0) arr[idx] = q; else arr.push(q);
+  localStorage.setItem(CB_QUESTIONS_KEY, JSON.stringify(arr));
+}
+export function deleteCBQuestion(id: string) {
+  localStorage.setItem(CB_QUESTIONS_KEY, JSON.stringify(getCBQuestions().filter(q => q.id !== id)));
 }
 
 // ── PIN SYSTEM ────────────────────────────────────────────────────────────────
