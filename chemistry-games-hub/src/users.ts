@@ -45,8 +45,9 @@ export function registerUser(
   return { user };
 }
 
-export function loginUser(email: string, password: string): User | null {
-  return getUsers().find(u => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password) ?? null;
+export function loginUser(emailOrName: string, password: string): User | null {
+  const q = emailOrName.trim().toLowerCase();
+  return getUsers().find(u => (u.email.toLowerCase() === q || u.displayName.toLowerCase() === q) && u.password === password) ?? null;
 }
 
 export function getCurrentUser(): User | null {

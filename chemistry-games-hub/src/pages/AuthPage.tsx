@@ -35,7 +35,7 @@ export default function AuthPage({ onAuthed, onBack, theme }: Props) {
       const user = loginUser(loginEmail, loginPassword);
       setLoginLoading(false);
       if (user) { setCurrentUser(user); onAuthed(user); }
-      else setLoginError('Incorrect email or password');
+      else setLoginError('Incorrect email/name or password');
     }, 350);
   };
 
@@ -87,10 +87,10 @@ export default function AuthPage({ onAuthed, onBack, theme }: Props) {
           {tab === 'login' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>School Email</label>
+                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Email or Teacher Name</label>
                 <input value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                  placeholder="teacher@school.edu" type="email" style={inp} autoFocus />
+                  placeholder="a.mohamed1234@education.qa or Ms. Sarah" style={inp} autoFocus />
               </div>
               <div>
                 <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Password</label>
@@ -121,7 +121,7 @@ export default function AuthPage({ onAuthed, onBack, theme }: Props) {
               <div>
                 <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>School Email</label>
                 <input type="email" value={signupEmail} onChange={e => setSignupEmail(e.target.value)}
-                  placeholder="teacher@school.edu" style={inp} />
+                  placeholder="a.mohamed1234@education.qa" style={inp} />
               </div>
               <div>
                 <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Password <span style={{ color: th.textFaint, fontWeight: 400 }}>(min. 6 characters)</span></label>
