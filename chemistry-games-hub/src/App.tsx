@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { AppState, Page, LeaderboardEntry } from './types';
+import type { AppState, Page, LeaderboardEntry, User } from './types';
+import { getCurrentUser } from './users';
+import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import FolderPage from './pages/FolderPage';
@@ -14,10 +16,10 @@ import AdminPage from './pages/AdminPage';
 import TestBankPage from './pages/TestBankPage';
 
 function App() {
-  // Pre-fill PIN if URL has ?join=XXXXXX
   const urlParams = new URLSearchParams(window.location.search);
   const urlPin = urlParams.get('join')?.toUpperCase() || null;
-  // Admin is accessed via the dashboard, not via URL param (removed ?admin=true for security)
+
+  const [currentUser, setCurrentUser] = useState<User | null>(getCurrentUser);
 
   const [state, setState] = useState<AppState>({
     page: urlPin ? 'student' : 'home',
@@ -50,7 +52,7 @@ function App() {
   }, [state, fromStudent]);
 
   return (
-    <div className="min-h-screen relative" style={{ background: '#46178f' }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' }}>
       <BubbleBackground />
       <div className="relative z-10">
         <>
@@ -64,6 +66,12 @@ function App() {
           <HomePage
             onNavigate={navigate}
             onStudentJoin={() => navigate('student')}
+          />
+        )}
+        {state.page === 'login' && (
+          <AuthPage
+            onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }}
+            onBack={() => navigate('home')}
           />
         )}
         {state.page === 'student' && (
@@ -88,10 +96,19 @@ function App() {
           />
         )}
         {state.page === 'dashboard' && (
-          <DashboardPage
-            onNavigate={navigate}
-            onSelectFolder={(id) => navigate('folder', { selectedFolderId: id })}
-          />
+          currentUser ? (
+            <DashboardPage
+              user={currentUser}
+              onNavigate={navigate}
+              onSelectFolder={(id) => navigate('folder', { selectedFolderId: id })}
+              onLogout={() => { setCurrentUser(null); navigate('home'); }}
+            />
+          ) : (
+            <AuthPage
+              onAuthed={(user) => { setCurrentUser(user); navigate('dashboard'); }}
+              onBack={() => navigate('home')}
+            />
+          )
         )}
         {state.page === 'folder' && state.selectedFolderId && (
           <FolderPage

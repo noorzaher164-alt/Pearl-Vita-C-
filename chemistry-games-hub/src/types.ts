@@ -60,8 +60,17 @@ export interface GameResult {
   playedAt: string;
 }
 
+export interface User {
+  id: string;
+  username: string;
+  password: string;
+  displayName: string;
+  createdAt: string;
+}
+
 export type Page =
   | 'home'
+  | 'login'
   | 'student'
   | 'dashboard'
   | 'folder'
