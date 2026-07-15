@@ -68,7 +68,7 @@ export default function TestBankPage({ onBack, semester = 's1' }: Props) {
       explanation: q.explanation,
     }));
 
-    const isCompetitive = ['quiz-battle', 'fastest-molecule', 'periodic-challenge', 'reaction-race', 'energy-points'].includes(gameType);
+    const isCompetitive = COMPETITIVE_TYPES.some(t => t.value === gameType);
 
     const game = {
       id: crypto.randomUUID(),

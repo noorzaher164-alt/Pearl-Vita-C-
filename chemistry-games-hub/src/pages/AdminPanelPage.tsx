@@ -26,6 +26,7 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
   const [editRole, setEditRole] = useState<UserRole>('teacher');
   const [editPw, setEditPw] = useState('');
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [activeTab, setActiveTab] = useState<'users' | 'overview'>('overview');
 
   const reload = () => setUsers(getUsers());
@@ -47,8 +48,9 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
   };
 
   const filtered = users.filter(u =>
-    u.email.toLowerCase().includes(search.toLowerCase()) ||
-    u.displayName.toLowerCase().includes(search.toLowerCase())
+    (roleFilter === 'all' || u.role === roleFilter) &&
+    (u.email.toLowerCase().includes(search.toLowerCase()) ||
+     u.displayName.toLowerCase().includes(search.toLowerCase()))
   );
 
   const card: React.CSSProperties = {
@@ -152,8 +154,9 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
                 style={{ flex: 1, minWidth: 200, background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '11px 16px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
               <div style={{ display: 'flex', gap: 6 }}>
                 {(['all', 'admin', 'teacher', 'student'] as const).map(r => (
-                  <button key={r} style={{ background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 8, padding: '8px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 600 }}
-                    onClick={() => setSearch(r === 'all' ? '' : r)}>
+                  <button key={r}
+                    style={{ background: roleFilter === r ? th.accentLight : th.badge, border: `1px solid ${roleFilter === r ? th.accent + '50' : th.cardBorder}`, borderRadius: 8, padding: '8px 14px', color: roleFilter === r ? th.accent : th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: roleFilter === r ? 700 : 600 }}
+                    onClick={() => setRoleFilter(r)}>
                     {r === 'all' ? 'All' : ROLE_LABELS[r]}
                   </button>
                 ))}

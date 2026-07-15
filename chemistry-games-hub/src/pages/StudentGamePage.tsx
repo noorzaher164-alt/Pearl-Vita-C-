@@ -288,12 +288,14 @@ function RevealScreen({ session, tpl, myAnswerIdx, myScore }: {
     ? session.questions
     : Object.values(session.questions ?? {});
   const q: LiveQuestion | undefined = questionsArr[session.currentQuestion];
-  if (!q) return null;
-  const isCorrect = myAnswerIdx !== null && myAnswerIdx === q.correctIndex;
+  const isCorrect = !!q && myAnswerIdx !== null && myAnswerIdx === q.correctIndex;
 
   useEffect(() => {
+    if (!q) return;
     if (isCorrect) playChallengeCorrect(); else playChallengeWrong();
   }, []);
+
+  if (!q) return null;
 
   const correctChoiceText = q.choices[q.correctIndex];
 
@@ -624,19 +626,6 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
     return () => { unsub(); if (connTimeoutRef.current) clearTimeout(connTimeoutRef.current); };
   }, [pin, nickname]);
 
-  if (connFailed) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a1a,#1a0a2e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, padding: 24, textAlign: 'center' }}>
-        <div style={{ fontSize: 56 }}>📡</div>
-        <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800 }}>Connection Failed</h2>
-        <p style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 360, lineHeight: 1.6 }}>
-          Could not reach the teacher's game. Check that the teacher's screen is still open, your device is on the same network, and try again.
-        </p>
-        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '12px 28px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
-      </div>
-    );
-  }
-
   const handleAnswer = useCallback(async (choiceIdx: number) => {
     const s = sessionRef.current;
     if (!s || myAnswers[s.currentQuestion] !== undefined) return;
@@ -651,6 +640,19 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
     setMyStreak(newStreak);
     await submitAnswer(pin, nickname, s.currentQuestion, choiceIdx, newScore, newStreak);
   }, [myAnswers, myScore, myStreak, pin, nickname]);
+
+  if (connFailed) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a1a,#1a0a2e)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 20, padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 56 }}>📡</div>
+        <h2 style={{ color: 'white', fontSize: 22, fontWeight: 800 }}>Connection Failed</h2>
+        <p style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 360, lineHeight: 1.6 }}>
+          Could not reach the teacher's game. Check that the teacher's screen is still open, your device is on the same network, and try again.
+        </p>
+        <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', borderRadius: 12, padding: '12px 28px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>← Back</button>
+      </div>
+    );
+  }
 
   if (!session) return <Connecting />;
   if (localPhase === 'waiting') return <WaitingScreen session={session} nickname={nickname} tpl={tpl} onBack={onBack} />;

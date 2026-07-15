@@ -191,7 +191,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
               {t.dashDesc}
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button onClick={() => { switchView('library'); setShowCreate(true); }}
+              <button onClick={() => onCreateGame('')}
                 style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.4)' }}>
                 {t.createNewGame}
               </button>
@@ -223,7 +223,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, marginBottom: 14 }}>{t.quickActions}</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12, marginBottom: 36 }}>
           {[
-            { icon: '✨', label: t.createNewGame, desc: 'Create from scratch', color: '#c084fc', action: () => { switchView('library'); setShowCreate(true); } },
+            { icon: '✨', label: t.createNewGame, desc: 'Create from scratch', color: '#c084fc', action: () => onCreateGame('') },
             { icon: '📚', label: t.library, desc: 'Browse your folders', color: '#60a5fa', action: () => switchView('library') },
             { icon: '🏦', label: t.testBank, desc: 'Generate from bank', color: '#f59e0b', action: () => switchView('testbank') },
             { icon: '📊', label: t.results, desc: 'Session history', color: '#34d399', action: () => switchView('results') },

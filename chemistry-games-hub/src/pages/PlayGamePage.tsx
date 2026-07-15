@@ -13,10 +13,9 @@ interface Props {
 
 type Phase = 'nickname' | 'countdown' | 'playing' | 'answer-reveal' | 'between' | 'finished';
 
-const COMPETITIVE_TYPES = ['quiz-battle', 'fastest-molecule', 'periodic-challenge', 'reaction-race', 'energy-points'];
 const TIMER_SECS: Record<string, number> = {
-  'quiz-battle': 20, 'fastest-molecule': 10, 'periodic-challenge': 25,
-  'reaction-race': 15, 'energy-points': 20,
+  'quiz': 20, 'gameshow-quiz': 15, 'matching-pairs': 30,
+  'spin-the-wheel': 20, 'open-the-box': 20, 'find-the-match': 25,
 };
 
 const CHOICES = [
@@ -549,7 +548,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
     if (g) { setGame(g); setTpl(getTemplate(g.templateId || 'periodic-table')); setAllAnswers(new Array(g.questions.length).fill(null)); }
   }, [gameId]);
 
-  const isCompetitive = game ? COMPETITIVE_TYPES.includes(game.gameType) : false;
+  const isCompetitive = game ? game.isCompetitive : false;
   const currentQuestion = game?.questions[currentQ];
   const maxTime = currentQuestion?.timeSeconds || (game ? (TIMER_SECS[game.gameType] || 20) : 20);
   const urgencyColor = timeLeft / maxTime > 0.5 ? tpl.timerColor : timeLeft / maxTime > 0.25 ? '#fde68a' : '#ef4444';
