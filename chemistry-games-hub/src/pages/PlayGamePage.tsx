@@ -709,7 +709,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
         {isCompetitive && phase === 'playing' && <div style={{ marginBottom: 16 }}><TimerCircle timeLeft={timeLeft} maxTime={maxTime} color={urgencyColor} /></div>}
         <div style={{ background: tpl.cardBg, border: `1px solid ${tpl.accentColor}30`, borderRadius: 24, padding: '28px 28px', maxWidth: 760, margin: '0 auto', boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
           <p style={{ color: tpl.accentColor, fontSize: 13, marginBottom: 10, letterSpacing: 2, fontWeight: 700 }}>QUESTION {currentQ + 1}</p>
-          <h2 style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 700, color: 'white', lineHeight: 1.5, margin: 0 }}>{q.text}</h2>
+          <h2 style={{ fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 700, color: 'white', lineHeight: 1.5, margin: 0, direction: 'rtl', unicodeBidi: 'plaintext' }}>{q.text}</h2>
         </div>
       </div>
 
@@ -735,7 +735,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
                 onMouseEnter={e => phase === 'playing' && (e.currentTarget.style.transform = 'scale(1.02)')}
                 onMouseLeave={e => phase === 'playing' && (e.currentTarget.style.transform = 'scale(1)')}>
                 <span style={{ fontSize: 40 }}>{icon}</span>
-                <span>{choice}</span>
+                <span style={{ direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
               </button>
             );
           })}
@@ -798,7 +798,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
                   <span style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                     {revealed && isCorrect ? '✓' : revealed && isSelected ? '✗' : cfg.shape}
                   </span>
-                  <span style={{ flex: 1, lineHeight: 1.3 }}>{choice}</span>
+                  <span style={{ flex: 1, lineHeight: 1.3, direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
                 </div>
               );
             })}
@@ -832,7 +832,7 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
                 <span style={{ width: 44, height: 44, borderRadius: 10, flexShrink: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, fontWeight: 900 }}>
                   {revealed && isCorrect ? '✓' : revealed && isSelected && !isCorrect ? '✗' : cfg.shape}
                 </span>
-                <span style={{ flex: 1, lineHeight: 1.3 }}>{choice}</span>
+                <span style={{ flex: 1, lineHeight: 1.3, direction: 'rtl', unicodeBidi: 'plaintext' }}>{choice}</span>
               </button>
             );
           })}

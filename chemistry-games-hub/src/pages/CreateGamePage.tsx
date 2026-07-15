@@ -323,7 +323,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
 
               <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>Question Text *</label>
-                <textarea value={q.text} onChange={e => updateQuestion(qi, 'text', e.target.value)} placeholder="Enter your question here..." rows={3}
+                <textarea value={q.text} onChange={e => updateQuestion(qi, 'text', e.target.value)} placeholder="Enter your question here..." rows={3} dir="auto"
                   style={{ ...inputStyle, resize: 'vertical', minHeight: 90, fontSize: 16, lineHeight: 1.5 }} />
               </div>
 
@@ -359,7 +359,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                             {isCorrect ? '✓' : String.fromCharCode(65 + ci)}
                           </button>
                           <input value={choice} onChange={e => updateChoice(qi, ci, e.target.value)}
-                            placeholder={`Choice ${String.fromCharCode(65 + ci)}`}
+                            placeholder={`Choice ${String.fromCharCode(65 + ci)}`} dir="auto"
                             style={{ ...inputStyle, flex: 1, margin: 0, fontSize: 15, borderColor: isCorrect ? choiceColors[ci] : C.inputBorder, background: isCorrect ? `${choiceColors[ci]}12` : C.inputBg, padding: '13px 14px' }} />
                         </div>
                       );
