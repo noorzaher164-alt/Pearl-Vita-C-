@@ -150,7 +150,7 @@ function QuizGame({ session, nickname, tpl: _tpl, onAnswer, myScore, answered, t
   const questionsArr: LiveQuestion[] = Array.isArray(questions)
     ? questions
     : Object.values(questions ?? {});
-  const q: LiveQuestion | undefined = questionsArr[session.currentQuestion];
+  const q: LiveQuestion | undefined = questionsArr[session.currentQuestion ?? 0];
   if (!q) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#46178f', flexDirection: 'column', gap: 16 }}>
       <div style={{ fontSize: 48, animation: 'spin 1s linear infinite' }}>⚛️</div>
@@ -163,11 +163,11 @@ function QuizGame({ session, nickname, tpl: _tpl, onAnswer, myScore, answered, t
   const timerPct = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
   const isUrgent = timeLeft <= 5;
 
-  const myRank = Object.values(session.students)
+  const myRank = Object.values(session.students ?? {})
     .sort((a, b) => b.score - a.score)
     .findIndex(s => s.nickname === nickname) + 1;
 
-  const myStudentAnswers = session.students[nickname]?.answers;
+  const myStudentAnswers = (session.students ?? {})[nickname]?.answers;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#46178f' }}>
@@ -332,7 +332,7 @@ function RevealScreen({ session, tpl, myAnswerIdx, myScore }: {
 
 // ── Between-question Leaderboard ───────────────────────────────────────────
 function LeaderboardScreen({ session, nickname, tpl }: { session: LiveSession; nickname: string; tpl: GameTemplate }) {
-  const sorted = Object.values(session.students).sort((a, b) => b.score - a.score);
+  const sorted = Object.values(session.students ?? {}).sort((a, b) => b.score - a.score);
   const myRank = sorted.findIndex(s => s.nickname === nickname) + 1;
   return (
     <div style={{ minHeight: '100vh', background: '#46178f', display: 'flex', flexDirection: 'column', padding: 24 }}>
@@ -382,7 +382,7 @@ function LeaderboardScreen({ session, nickname, tpl }: { session: LiveSession; n
 
 // ── Final Results Screen ───────────────────────────────────────────────────
 function FinishedScreen({ session, nickname, tpl, onFinish }: { session: LiveSession; nickname: string; tpl: GameTemplate; onFinish: () => void }) {
-  const sorted = Object.values(session.students).sort((a, b) => b.score - a.score);
+  const sorted = Object.values(session.students ?? {}).sort((a, b) => b.score - a.score);
   const myRank = sorted.findIndex(s => s.nickname === nickname) + 1;
   const me = sorted.find(s => s.nickname === nickname);
   const isWinner = myRank <= 3;

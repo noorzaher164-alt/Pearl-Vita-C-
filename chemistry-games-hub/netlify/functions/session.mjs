@@ -1,6 +1,4 @@
-// Simple in-memory session store using a module-level Map
-// Works within a single Lambda warm invocation — good enough for short classroom sessions
-const sessions = new Map();
+import { getStore } from '@netlify/blobs';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -37,26 +35,29 @@ export default async function handler(request) {
     return new Response(JSON.stringify({ error: 'Missing pin' }), { status: 400, headers: h });
   }
 
+  const store = getStore('sessions');
+
   if (request.method === 'GET') {
-    const data = sessions.get(pin) ?? null;
-    return new Response(JSON.stringify(data), { headers: h });
+    const data = await store.get(pin, { type: 'json' }).catch(() => null);
+    return new Response(JSON.stringify(data ?? null), { headers: h });
   }
 
   if (request.method === 'POST') {
     const body = await request.json();
-    sessions.set(pin, body);
+    await store.set(pin, JSON.stringify(body));
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
   if (request.method === 'PATCH') {
     const body = await request.json();
-    const current = sessions.get(pin) ?? {};
-    sessions.set(pin, deepMerge(current, body));
+    const current = await store.get(pin, { type: 'json' }).catch(() => null) ?? {};
+    const merged = deepMerge(current, body);
+    await store.set(pin, JSON.stringify(merged));
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
   if (request.method === 'DELETE') {
-    sessions.delete(pin);
+    await store.delete(pin).catch(() => {});
     return new Response(JSON.stringify({ ok: true }), { headers: h });
   }
 
