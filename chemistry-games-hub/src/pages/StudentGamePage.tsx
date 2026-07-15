@@ -586,24 +586,25 @@ export default function StudentGamePage({ pin, nickname, onFinish, onBack }: Pro
   }, [session?.status, session?.currentQuestion, session?.questionStartedAt]);
 
   useEffect(() => {
-    // 12-second connection timeout — show error if session never arrives
+    // 15-second timeout — if no session found, show error
     connTimeoutRef.current = setTimeout(() => {
       if (!sessionRef.current) setConnFailed(true);
-    }, 12000);
+    }, 15000);
 
-    const join = async () => {
-      if (!joinedRef.current) {
-        joinedRef.current = true;
-        const slot: StudentSlot = { nickname, score: 0, streak: 0, answers: {}, answeredAt: {} };
-        await joinSession(pin, slot);
-      }
-    };
-    join();
+    // Subscribe first so we start polling immediately
     const unsub = subscribeSession(pin, s => {
       if (!s) return;
       if (connTimeoutRef.current) { clearTimeout(connTimeoutRef.current); connTimeoutRef.current = null; }
       sessionRef.current = s;
       setSession(s);
+
+      // Join once we confirm the session exists
+      if (!joinedRef.current) {
+        joinedRef.current = true;
+        const slot: StudentSlot = { nickname, score: 0, streak: 0, answers: {}, answeredAt: {} };
+        joinSession(pin, slot);
+      }
+
       if (s.status === 'finished') {
         setLocalPhase('finished');
       } else if (s.status === 'leaderboard') {

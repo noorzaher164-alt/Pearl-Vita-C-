@@ -13,10 +13,10 @@ interface Props {
 }
 
 const TIMER_SECS: Record<string, number> = {
-  'quiz-battle': 20, 'fastest-molecule': 10, 'periodic-challenge': 25,
-  'reaction-race': 15, 'energy-points': 20,
+  'quiz': 20, 'gameshow-quiz': 15, 'matching-pairs': 30,
+  'spin-the-wheel': 20, 'open-the-box': 20, 'find-the-match': 25,
 };
-const COMPETITIVE = ['quiz-battle', 'fastest-molecule', 'periodic-challenge', 'reaction-race', 'energy-points'];
+const COMPETITIVE = ['quiz', 'gameshow-quiz', 'matching-pairs', 'spin-the-wheel', 'open-the-box', 'find-the-match'];
 const MEDAL = ['🥇', '🥈', '🥉'];
 
 const KAHOOT_BG = '#46178f';
@@ -106,12 +106,7 @@ export default function HostGamePage({ gameId, onBack }: Props) {
     try {
       await createSession(pin, s);
     } catch (err: any) {
-      const msg = err?.message || String(err);
-      if (msg.includes('permission') || msg.includes('PERMISSION')) {
-        setFirebaseError('⚠️ Firebase permission denied — go to Firebase Console → Realtime Database → Rules → set ".read" and ".write" to true → Publish');
-      } else {
-        setFirebaseError(`⚠️ Firebase error: ${msg}`);
-      }
+      setFirebaseError(`⚠️ Could not create session: ${err?.message || String(err)}`);
       return;
     }
     setSession(s);

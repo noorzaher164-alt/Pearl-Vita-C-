@@ -1,8 +1,6 @@
-// Real-time multiplayer via PeerJS WebRTC DataChannels
-// Teacher's browser acts as the server; students connect directly.
-// No backend, no rules, no setup — works instantly across devices.
-// @ts-ignore
-import Peer from 'peerjs';
+// Real-time multiplayer via Netlify serverless function + HTTP polling.
+// Teacher writes session state to the function; students poll every second.
+// No WebRTC, no PeerJS, no STUN — works instantly and reliably on any network.
 
 export const FIREBASE_CONFIGURED = true;
 
@@ -34,286 +32,95 @@ export interface LiveSession {
   currentQuestion: number;
   questionStartedAt: number;
   students: Record<string, StudentSlot>;
-  roomSecret?: string; // included in peer ID so rooms aren't guessable from PIN alone
 }
 
-const SESSIONS_FN = '/.netlify/functions/session';
+const FN = '/.netlify/functions/session';
 
-async function storeRoomId(pin: string, peerId: string) {
-  try {
-    await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ peerId }),
-    });
-  } catch { /**/ }
-}
-
-async function fetchRoomId(pin: string): Promise<string | null> {
-  try {
-    const res = await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data?.peerId ?? null;
-  } catch { return null; }
-}
-
-async function clearRoomId(pin: string) {
-  try {
-    await fetch(`${SESSIONS_FN}?pin=__meta_${pin}`, { method: 'DELETE' });
-  } catch { /**/ }
-}
-
-// ── Module-level state ────────────────────────────────────────────────────
-
-// Teacher side
-let hostPeer: any = null;
-let hostSession: LiveSession | null = null;
-let hostConns: Map<string, any> = new Map(); // nickname → DataConnection
-let hostCallbacks: Set<(s: LiveSession | null) => void> = new Set();
-let hostRoomSecret = ''; // random suffix added to peer ID so rooms aren't guessable from PIN
-
-// Student side
-let clientPeer: any = null;
-let clientConn: any = null;
-let clientCallbacks: Map<string, Set<(s: LiveSession | null) => void>> = new Map();
-
-function makePeerId(pin: string, secret: string) {
-  return `chem-hub-${pin}-${secret}`;
-}
-
-function randomSecret(): string {
-  return Array.from(crypto.getRandomValues(new Uint8Array(6)))
-    .map(b => b.toString(36))
-    .join('');
-}
-
-function broadcastToStudents(session: LiveSession) {
-  hostConns.forEach(conn => {
-    if (conn.open) conn.send({ type: 'session', session });
-  });
-}
-
-function notifyHostCallbacks() {
-  const s = hostSession;
-  if (!s) return;
-  hostCallbacks.forEach(cb => cb(s));
-}
-
-// ── Teacher API ───────────────────────────────────────────────────────────
+// ── Teacher API ───────────────────────────────────────────────────────────────
 
 export async function createSession(pin: string, session: LiveSession): Promise<void> {
-  hostRoomSecret = randomSecret();
-  hostSession = { ...session, students: {}, roomSecret: hostRoomSecret };
+  const res = await fetch(`${FN}?pin=${pin}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...session, students: {} }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => String(res.status));
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+}
 
-  return new Promise((resolve, reject) => {
-    // Destroy any existing host peer
-    if (hostPeer) { try { hostPeer.destroy(); } catch { /**/ } }
-
-    const peerId = makePeerId(pin, hostRoomSecret);
-    hostPeer = new Peer(peerId, {
-      host: '0.peerjs.com',
-      port: 443,
-      path: '/',
-      secure: true,
-    });
-
-    hostPeer.on('open', () => { storeRoomId(pin, peerId); resolve(); });
-    hostPeer.on('error', (err: any) => reject(err));
-
-    hostPeer.on('connection', (conn: any) => {
-      conn.on('open', () => {
-        // Send current session state immediately
-        conn.send({ type: 'session', session: hostSession });
-      });
-      conn.on('data', (msg: any) => {
-        if (!hostSession) return;
-        if (msg.type === 'join') {
-          const slot: StudentSlot = { ...msg.slot, answers: {}, answeredAt: {} };
-          hostSession = { ...hostSession, students: { ...hostSession.students, [slot.nickname]: slot } };
-          hostConns.set(slot.nickname, conn);
-          broadcastToStudents(hostSession);
-          notifyHostCallbacks();
-        } else if (msg.type === 'answer') {
-          const { nickname, questionIndex, choiceIndex, score, streak } = msg;
-          const existing = hostSession.students[nickname] || { nickname, score: 0, streak: 0, answers: {}, answeredAt: {} };
-          hostSession = {
-            ...hostSession,
-            students: {
-              ...hostSession.students,
-              [nickname]: { ...existing, score, streak, answers: { ...existing.answers, [questionIndex]: choiceIndex } },
-            },
-          };
-          broadcastToStudents(hostSession);
-          notifyHostCallbacks();
-        } else if (msg.type === 'get-session') {
-          conn.send({ type: 'session', session: hostSession });
-        }
-      });
-      conn.on('close', () => {
-        // Don't remove student — keep their score visible
-      });
-    });
+export async function updateSession(pin: string, updates: Partial<LiveSession>): Promise<void> {
+  await fetch(`${FN}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
   });
 }
 
 export async function deleteSession(pin: string): Promise<void> {
-  if (hostPeer) { try { hostPeer.destroy(); } catch { /**/ } }
-  hostPeer = null;
-  hostSession = null;
-  hostRoomSecret = '';
-  hostConns.clear();
-  hostCallbacks.clear();
-  clearRoomId(pin);
+  await fetch(`${FN}?pin=${pin}`, { method: 'DELETE' });
 }
+
+// ── Subscription (works for both teacher and student) ─────────────────────────
 
 export function subscribeSession(
   pin: string,
   callback: (session: LiveSession | null) => void,
 ): () => void {
-  // Determine if we're the host (hostSession exists for this pin)
-  if (hostSession && hostPeer) {
-    // Teacher side
-    hostCallbacks.add(callback);
-    callback(hostSession); // immediate call with current state
-    return () => hostCallbacks.delete(callback);
-  }
+  let active = true;
 
-  // Student side — connect to teacher's peer
-  if (!clientCallbacks.has(pin)) clientCallbacks.set(pin, new Set());
-  const cbs = clientCallbacks.get(pin)!;
-  cbs.add(callback);
-
-  let resolvedPeerId: string | null = null;
-
-  async function connectToHost() {
-    if (!resolvedPeerId) {
-      // First try: peer ID stored in Netlify function (has secret suffix)
-      const stored = await fetchRoomId(pin);
-      resolvedPeerId = stored ?? makePeerId(pin, ''); // fallback for old-format rooms
-    }
-
-    if (clientPeer && !clientPeer.destroyed) {
-      openConnection(resolvedPeerId);
-      return;
-    }
-    clientPeer = new Peer({
-      host: '0.peerjs.com',
-      port: 443,
-      path: '/',
-      secure: true,
-    });
-    clientPeer.on('open', () => openConnection(resolvedPeerId!));
-    clientPeer.on('error', () => {});
-  }
-
-  function openConnection(peerId: string) {
-    if (clientConn && clientConn.open) {
-      clientConn.send({ type: 'get-session' });
-      return;
-    }
-    clientConn = clientPeer.connect(peerId, { reliable: true });
-    clientConn.on('open', () => {
-      clientConn.send({ type: 'get-session' });
-    });
-    clientConn.on('data', (msg: any) => {
-      if (msg.type === 'session') {
-        const cbs2 = clientCallbacks.get(pin);
-        cbs2?.forEach(cb => cb(msg.session));
+  async function poll() {
+    if (!active) return;
+    try {
+      const res = await fetch(`${FN}?pin=${pin}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data: LiveSession | null = await res.json();
+        callback(data);
       }
-    });
-    clientConn.on('close', () => {
-      setTimeout(() => connectToHost(), 2000);
-    });
-    clientConn.on('error', () => {
-      setTimeout(() => connectToHost(), 2000);
-    });
+    } catch { /* network error — retry next tick */ }
+    if (active) setTimeout(poll, 1000);
   }
 
-  connectToHost();
-
-  return () => {
-    cbs.delete(callback);
-    if (cbs.size === 0) {
-      clientCallbacks.delete(pin);
-      if (clientConn) { try { clientConn.close(); } catch { /**/ } clientConn = null; }
-    }
-  };
+  poll();
+  return () => { active = false; };
 }
 
-export async function updateSession(_pin: string, updates: Partial<LiveSession>): Promise<void> {
-  if (!hostSession) return;
-  const { students, ...rest } = updates as any;
-  hostSession = { ...hostSession, ...rest };
-  broadcastToStudents(hostSession!);
-  notifyHostCallbacks();
-}
+// ── Student API ───────────────────────────────────────────────────────────────
 
 export async function getSession(pin: string): Promise<LiveSession | null> {
-  // Look up the secret-bearing peer ID from the Netlify function first
-  const storedPeerId = await fetchRoomId(pin);
-  const peerId = storedPeerId ?? makePeerId(pin, ''); // fallback for rooms without secret
-
-  return new Promise(resolve => {
-    let done = false;
-    let testPeer: any = null;
-
-    try {
-      testPeer = new Peer({
-        host: '0.peerjs.com',
-        port: 443,
-        path: '/',
-        secure: true,
-      });
-
-      testPeer.on('open', () => {
-        const conn = testPeer.connect(peerId, { reliable: true });
-        conn.on('open', () => {
-          conn.send({ type: 'get-session' });
-        });
-        conn.on('data', (msg: any) => {
-          if (done) return;
-          if (msg.type === 'session' && msg.session?.gameId) {
-            done = true;
-            clientPeer = testPeer;
-            clientConn = conn;
-            resolve(msg.session);
-          }
-        });
-        conn.on('error', () => { if (!done) { done = true; resolve(null); } });
-      });
-      testPeer.on('error', () => { if (!done) { done = true; resolve(null); } });
-      // 8-second timeout with clear failure (fix #8)
-      setTimeout(() => { if (!done) { done = true; try { testPeer?.destroy(); } catch { /**/ } resolve(null); } }, 8000);
-    } catch {
-      resolve(null);
-    }
-  });
+  try {
+    const res = await fetch(`${FN}?pin=${pin}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
 }
 
-export async function joinSession(_pin: string, slot: StudentSlot): Promise<void> {
-  return new Promise(resolve => {
-    function sendJoin() {
-      if (clientConn?.open) {
-        clientConn.send({ type: 'join', slot: { nickname: slot.nickname, score: 0, streak: 0 } });
-        resolve();
-      } else {
-        setTimeout(sendJoin, 500);
-      }
-    }
-    sendJoin();
+export async function joinSession(pin: string, slot: StudentSlot): Promise<void> {
+  await fetch(`${FN}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      students: { [slot.nickname]: { nickname: slot.nickname, score: 0, streak: 0, answers: {}, answeredAt: {} } },
+    }),
   });
 }
 
 export async function submitAnswer(
-  _pin: string,
+  pin: string,
   nickname: string,
   questionIndex: number,
   choiceIndex: number,
   score: number,
   streak: number,
 ): Promise<void> {
-  if (clientConn?.open) {
-    clientConn.send({ type: 'answer', nickname, questionIndex, choiceIndex, score, streak });
-  }
+  await fetch(`${FN}?pin=${pin}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      students: {
+        [nickname]: { score, streak, answers: { [questionIndex]: choiceIndex } },
+      },
+    }),
+  });
 }
