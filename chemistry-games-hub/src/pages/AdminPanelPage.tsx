@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { User, UserRole } from '../types';
 import type { Theme } from '../theme';
 import { getTheme } from '../theme';
@@ -20,17 +20,16 @@ const ROLE_LABELS: Record<UserRole, string> = { admin: 'ðŸ‘‘ Admin', teacher: 'ð
 
 export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
   const th = getTheme(theme);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>(() => getUsers());
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editDisplay, setEditDisplay] = useState('');
   const [editRole, setEditRole] = useState<UserRole>('teacher');
   const [editPw, setEditPw] = useState('');
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
-  const [activeTab, setActiveTab] = useState<'users' | 'overview'>('overview');
+  const [activeTab, setActiveTab] = useState<'users' | 'overview'>('users');
 
   const reload = () => setUsers(getUsers());
-  useEffect(() => { reload(); }, []);
 
   const games = getGames();
   const folders = getFolders();
