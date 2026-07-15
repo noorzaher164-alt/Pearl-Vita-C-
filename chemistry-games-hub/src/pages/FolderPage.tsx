@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import type { Game, Folder, Page, GameType } from '../types';
-import { getFolders, getGamesByFolder, deleteGame, duplicateGame, assignPinToGame } from '../storage';
+import { getFolders, getGamesByFolder, deleteGame, duplicateGame, assignPinToGame, saveGame } from '../storage';
 import { getTheme } from '../theme';
 import type { Theme } from '../theme';
 
@@ -62,6 +62,27 @@ const GAME_COLORS: Record<GameType, string> = {
 
 type FilterType = 'all' | 'competitive' | 'practice';
 
+const ALL_GAME_TYPES = [
+  { value: 'quiz', label: 'Quiz', icon: '❓', competitive: true },
+  { value: 'gameshow-quiz', label: 'Gameshow Quiz', icon: '🎬', competitive: true },
+  { value: 'matching-pairs', label: 'Matching Pairs', icon: '🃏', competitive: true },
+  { value: 'spin-the-wheel', label: 'Spin the Wheel', icon: '🎡', competitive: true },
+  { value: 'open-the-box', label: 'Open the Box', icon: '📦', competitive: true },
+  { value: 'find-the-match', label: 'Find the Match', icon: '🎯', competitive: true },
+  { value: 'anagram', label: 'Anagram', icon: '🔤', competitive: false },
+  { value: 'unjumble', label: 'Unjumble', icon: '🔀', competitive: false },
+  { value: 'match-up', label: 'Match Up', icon: '🔗', competitive: false },
+  { value: 'group-sort', label: 'Group Sort', icon: '🗂️', competitive: false },
+  { value: 'flash-cards', label: 'Flash Cards', icon: '📋', competitive: false },
+  { value: 'wordsearch', label: 'Wordsearch', icon: '🔍', competitive: false },
+  { value: 'crossword', label: 'Crossword', icon: '✏️', competitive: false },
+  { value: 'complete-the-sentence', label: 'Complete the Sentence', icon: '📝', competitive: false },
+  { value: 'spell-the-word', label: 'Spell the Word', icon: '🔡', competitive: false },
+  { value: 'speaking-cards', label: 'Speaking Cards', icon: '🗣️', competitive: false },
+  { value: 'flip-tiles', label: 'Flip Tiles', icon: '🔄', competitive: false },
+  { value: 'labelled-diagram', label: 'Labelled Diagram', icon: '🗺️', competitive: false },
+] as const;
+
 export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGame, onCreateGame, onEditGame }: Props) {
   const theme = (localStorage.getItem('cgh_theme') as Theme) || 'dark';
   const C = getTheme(theme);
@@ -72,6 +93,7 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [pinModal, setPinModal] = useState<{ game: Game; pin: string } | null>(null);
+  const [switchModal, setSwitchModal] = useState<Game | null>(null);
 
   const load = () => {
     const all = getFolders();
@@ -89,6 +111,12 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
 
   const handleDuplicate = (id: string) => {
     duplicateGame(id);
+    load();
+  };
+
+  const handleSwitchTemplate = (game: Game, newType: GameType) => {
+    saveGame({ ...game, gameType: newType, isCompetitive: ALL_GAME_TYPES.find(t => t.value === newType)?.competitive ?? false });
+    setSwitchModal(null);
     load();
   };
 
@@ -285,6 +313,14 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                     }}
                   >✏️</button>
                   <button
+                    onClick={() => setSwitchModal(game)}
+                    style={{
+                      background: 'rgba(167,139,250,0.15)', color: '#a78bfa',
+                      border: '1px solid rgba(167,139,250,0.3)', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
+                    }}
+                  >🔀 Switch</button>
+                  <button
                     onClick={() => handleDuplicate(game.id)}
                     style={{
                       background: 'rgba(253,230,138,0.15)', color: '#fde68a',
@@ -304,6 +340,85 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Switch Template Modal */}
+      {switchModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        }} onClick={() => setSwitchModal(null)}>
+          <div style={{
+            background: isDark ? '#1a1230' : '#ffffff',
+            border: '1px solid rgba(167,139,250,0.3)',
+            borderRadius: 20, padding: 28, maxWidth: 600, width: '100%',
+            position: 'relative', maxHeight: '85vh', overflowY: 'auto',
+          }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setSwitchModal(null)}
+              style={{
+                position: 'absolute', top: 16, right: 16,
+                background: 'rgba(255,255,255,0.1)', border: 'none', color: C.textMuted,
+                borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 18,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >×</button>
+            <h2 style={{ color: C.text, fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>🔀 Switch Template</h2>
+            <p style={{ color: C.textMuted, fontSize: 13, margin: '0 0 20px' }}>Keep your questions, change the activity type</p>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#fde68a', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>⚔️ Live (Competitive)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {ALL_GAME_TYPES.filter(t => t.competitive).map(t => {
+                  const isActive = switchModal.gameType === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => handleSwitchTemplate(switchModal, t.value as GameType)}
+                      style={{
+                        background: isActive ? 'rgba(192,132,252,0.3)' : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'),
+                        border: isActive ? '2px solid #c084fc' : `1px solid ${C.cardBorder}`,
+                        borderRadius: 10, padding: '10px 8px', cursor: 'pointer', fontFamily: 'inherit',
+                        color: isActive ? '#c084fc' : C.textMuted,
+                        textAlign: 'center', fontSize: 13, fontWeight: isActive ? 700 : 400,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <div style={{ fontSize: 20, marginBottom: 4 }}>{t.icon}</div>
+                      <div>{t.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#7dd3fc', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>📚 Solo (Practice)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {ALL_GAME_TYPES.filter(t => !t.competitive).map(t => {
+                  const isActive = switchModal.gameType === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      onClick={() => handleSwitchTemplate(switchModal, t.value as GameType)}
+                      style={{
+                        background: isActive ? 'rgba(125,211,252,0.2)' : (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'),
+                        border: isActive ? '2px solid #7dd3fc' : `1px solid ${C.cardBorder}`,
+                        borderRadius: 10, padding: '10px 8px', cursor: 'pointer', fontFamily: 'inherit',
+                        color: isActive ? '#7dd3fc' : C.textMuted,
+                        textAlign: 'center', fontSize: 13, fontWeight: isActive ? 700 : 400,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <div style={{ fontSize: 20, marginBottom: 4 }}>{t.icon}</div>
+                      <div>{t.label}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -376,6 +491,59 @@ export default function FolderPage({ folderId, onNavigate, onPlayGame, onHostGam
                   fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >✓ Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Switch Template Modal */}
+      {switchModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ background: isDark ? '#1a0a2e' : 'white', border: `1px solid ${C.cardBorder}`, borderRadius: 24, padding: 28, width: '100%', maxWidth: 620, maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div>
+                <h2 style={{ color: C.text, fontSize: 20, fontWeight: 800, margin: 0 }}>🔀 Switch Template</h2>
+                <p style={{ color: C.textMuted, fontSize: 13, margin: '4px 0 0' }}>Keep your questions — just change the activity type</p>
+              </div>
+              <button onClick={() => setSwitchModal(null)} style={{ background: 'transparent', border: 'none', color: C.textMuted, fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+            </div>
+
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ background: '#e21b3c', color: 'white', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800 }}>⚔️ LIVE</span>
+                <span style={{ color: C.textMuted, fontSize: 12 }}>Teacher hosts on the big screen</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginBottom: 20 }}>
+                {ALL_GAME_TYPES.filter(t => t.competitive).map(t => {
+                  const isCurrent = switchModal.gameType === t.value;
+                  return (
+                    <button key={t.value} onClick={() => handleSwitchTemplate(switchModal, t.value as GameType)}
+                      style={{ background: isCurrent ? 'rgba(192,132,252,0.2)' : C.cardBg, border: `2px solid ${isCurrent ? '#c084fc' : C.cardBorder}`, borderRadius: 14, padding: '12px 10px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', transition: 'all 0.15s' }}>
+                      <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: isCurrent ? '#c084fc' : C.text }}>{t.label}</div>
+                      {isCurrent && <div style={{ fontSize: 10, color: '#c084fc', marginTop: 4 }}>✓ Current</div>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ background: '#1368ce', color: 'white', borderRadius: 8, padding: '3px 10px', fontSize: 11, fontWeight: 800 }}>📚 SOLO</span>
+                <span style={{ color: C.textMuted, fontSize: 12 }}>Students practice on their own device</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+                {ALL_GAME_TYPES.filter(t => !t.competitive).map(t => {
+                  const isCurrent = switchModal.gameType === t.value;
+                  return (
+                    <button key={t.value} onClick={() => handleSwitchTemplate(switchModal, t.value as GameType)}
+                      style={{ background: isCurrent ? 'rgba(99,102,241,0.2)' : C.cardBg, border: `2px solid ${isCurrent ? '#6366f1' : C.cardBorder}`, borderRadius: 14, padding: '12px 10px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', transition: 'all 0.15s' }}>
+                      <div style={{ fontSize: 28, marginBottom: 6 }}>{t.icon}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: isCurrent ? '#6366f1' : C.text }}>{t.label}</div>
+                      {isCurrent && <div style={{ fontSize: 10, color: '#6366f1', marginTop: 4 }}>✓ Current</div>}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
