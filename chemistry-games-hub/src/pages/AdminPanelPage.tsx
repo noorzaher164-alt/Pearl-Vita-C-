@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { User, UserRole } from '../types';
 import type { Theme } from '../theme';
 import { getTheme } from '../theme';
-import { getUsers, updateUser, deleteUser } from '../users';
+import { getUsers, updateUser, deleteUser, registerUser } from '../users';
 import { getGames, getFolders, getResults } from '../storage';
 
 interface Props {
@@ -28,6 +28,12 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | UserRole>('all');
   const [activeTab, setActiveTab] = useState<'users' | 'overview'>('users');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newDisplay, setNewDisplay] = useState('');
+  const [newRole, setNewRole] = useState<UserRole>('teacher');
+  const [newPw, setNewPw] = useState('');
+  const [createError, setCreateError] = useState('');
 
   const reload = () => setUsers(getUsers());
 
@@ -44,6 +50,12 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
   const handleDelete = (u: User) => {
     if (u.id === currentUser.id) { alert("You can't delete your own account"); return; }
     if (confirm(`Delete ${u.displayName} (${u.email})? This cannot be undone.`)) { deleteUser(u.id); reload(); }
+  };
+  const handleCreate = () => {
+    setCreateError('');
+    const { user, error } = registerUser(newEmail, newPw, newDisplay, newRole);
+    if (error) { setCreateError(error); return; }
+    if (user) { setShowCreate(false); setNewEmail(''); setNewDisplay(''); setNewPw(''); setNewRole('teacher'); reload(); }
   };
 
   const filtered = users.filter(u =>
@@ -151,6 +163,9 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="🔍 Search by name or email..."
                 style={{ flex: 1, minWidth: 200, background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '11px 16px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit' }} />
+              <button onClick={() => setShowCreate(true)} style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 12, padding: '11px 20px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                ➕ Add User
+              </button>
               <div style={{ display: 'flex', gap: 6 }}>
                 {(['all', 'admin', 'teacher', 'student'] as const).map(r => (
                   <button key={r}
@@ -198,6 +213,53 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Create User modal */}
+      {showCreate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: 24 }}>
+          <div style={{ background: th.modalBg, border: `1px solid ${th.cardBorder}`, borderRadius: 24, padding: 32, maxWidth: 440, width: '100%', boxShadow: th.shadow }}>
+            <h3 style={{ color: th.text, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>➕ Add New User</h3>
+            <p style={{ color: th.textMuted, fontSize: 13, marginBottom: 24 }}>Create a teacher or student account</p>
+            {createError && <div style={{ background: th.danger, border: `1px solid ${th.dangerText}40`, color: th.dangerText, borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 13 }}>{createError}</div>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Full Name</label>
+                <input value={newDisplay} onChange={e => setNewDisplay(e.target.value)} placeholder="e.g. Ahmed Mohamed"
+                  style={{ width: '100%', background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '12px 14px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>School Email</label>
+                <input value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="e.g. a.mohamed@education.qa"
+                  style={{ width: '100%', background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '12px 14px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Password</label>
+                <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="At least 6 characters"
+                  style={{ width: '100%', background: th.inputBg, border: `1.5px solid ${th.inputBorder}`, borderRadius: 12, padding: '12px 14px', color: th.text, fontSize: 14, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ color: th.textMuted, fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Role</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['teacher', 'student', 'admin'] as UserRole[]).map(r => (
+                    <button key={r} onClick={() => setNewRole(r)} style={{
+                      flex: 1, background: newRole === r ? `${ROLE_COLORS[r]}20` : th.badge,
+                      border: `2px solid ${newRole === r ? ROLE_COLORS[r] : 'transparent'}`,
+                      borderRadius: 10, padding: '8px 6px', color: newRole === r ? ROLE_COLORS[r] : th.textMuted,
+                      cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700,
+                    }}>{ROLE_LABELS[r]}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+              <button onClick={() => { setShowCreate(false); setCreateError(''); }} style={{ flex: 1, background: th.badge, border: `1px solid ${th.cardBorder}`, color: th.textMuted, borderRadius: 12, padding: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15 }}>Cancel</button>
+              <button onClick={handleCreate} style={{ flex: 2, background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 12, padding: '12px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                ✓ Create Account
+              </button>
+            </div>
           </div>
         </div>
       )}
