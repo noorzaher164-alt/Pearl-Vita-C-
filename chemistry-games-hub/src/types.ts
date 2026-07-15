@@ -1,14 +1,22 @@
 export type GameType =
-  | 'quiz-battle'
-  | 'fastest-molecule'
-  | 'periodic-challenge'
-  | 'reaction-race'
-  | 'energy-points'
-  | 'match-terms'
-  | 'word-search'
-  | 'drag-drop'
-  | 'true-false'
-  | 'flashcards';
+  | 'quiz'
+  | 'gameshow-quiz'
+  | 'matching-pairs'
+  | 'match-up'
+  | 'anagram'
+  | 'wordsearch'
+  | 'flash-cards'
+  | 'group-sort'
+  | 'spin-the-wheel'
+  | 'open-the-box'
+  | 'unjumble'
+  | 'complete-the-sentence'
+  | 'crossword'
+  | 'spell-the-word'
+  | 'speaking-cards'
+  | 'flip-tiles'
+  | 'find-the-match'
+  | 'labelled-diagram';
 
 export interface Question {
   id: string;

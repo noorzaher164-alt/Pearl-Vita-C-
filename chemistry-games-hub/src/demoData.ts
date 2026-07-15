@@ -14,7 +14,7 @@ export const DEMO_GAMES: Game[] = [
     title: 'Organic Basics Quiz',
     folderId: 'f1',
     lessonName: 'Introduction to Organic Chemistry',
-    gameType: 'quiz-battle',
+    gameType: 'quiz',
     isCompetitive: true,
     createdAt: '2024-01-15T10:00:00Z',
     questions: [
@@ -60,7 +60,7 @@ export const DEMO_GAMES: Game[] = [
     title: 'Equilibrium Flashcards',
     folderId: 'f2',
     lessonName: 'Le Chatelier\'s Principle',
-    gameType: 'flashcards',
+    gameType: 'flash-cards',
     isCompetitive: false,
     createdAt: '2024-01-16T10:00:00Z',
     questions: [
@@ -97,7 +97,7 @@ export const DEMO_GAMES: Game[] = [
     title: 'Enthalpy & Entropy Battle',
     folderId: 'f3',
     lessonName: 'Thermodynamics Concepts',
-    gameType: 'quiz-battle',
+    gameType: 'quiz',
     isCompetitive: true,
     createdAt: '2024-01-17T10:00:00Z',
     questions: [
@@ -136,7 +136,7 @@ export const DEMO_GAMES: Game[] = [
     title: 'Acids & Bases Match',
     folderId: 'f4',
     lessonName: 'pH and Buffers',
-    gameType: 'match-terms',
+    gameType: 'match-up',
     isCompetitive: false,
     createdAt: '2024-01-18T10:00:00Z',
     questions: [
@@ -168,7 +168,7 @@ export const DEMO_GAMES: Game[] = [
     title: 'Reaction Rates Challenge',
     folderId: 'f2',
     lessonName: 'Kinetics and Rates',
-    gameType: 'true-false',
+    gameType: 'quiz',
     isCompetitive: false,
     createdAt: '2024-01-19T10:00:00Z',
     questions: [

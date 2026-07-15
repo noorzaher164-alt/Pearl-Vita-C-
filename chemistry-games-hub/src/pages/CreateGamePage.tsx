@@ -13,17 +13,25 @@ interface Props {
   theme?: Theme;
 }
 
-const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean; desc: string; disney: string; disneyName: string; color: string }[] = [
-  { value: 'quiz-battle', label: 'Quiz Battle', icon: '⚔️', competitive: true, desc: 'Everyone answers at the same time — fastest correct answer wins the most points!', disney: '🦁', disneyName: 'Simba', color: '#e21b3c' },
-  { value: 'fastest-molecule', label: 'Speed Round', icon: '⚡', competitive: true, desc: 'Super fast! Bonus points for whoever answers first. Great for quick chemistry facts.', disney: '🐇', disneyName: 'Judy Hopps', color: '#1368ce' },
-  { value: 'periodic-challenge', label: 'Element Challenge', icon: '🔬', competitive: true, desc: 'Race the clock on periodic table questions — elements, compounds & more!', disney: '🧪', disneyName: 'Hiro Hamada', color: '#d89e00' },
-  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃', competitive: true, desc: 'Short timer per question keeps the energy HIGH. Perfect for reaction equations.', disney: '⚡', disneyName: 'Lightning McQueen', color: '#26890c' },
-  { value: 'energy-points', label: 'Streak Bonus', icon: '💎', competitive: true, desc: 'Earn HUGE bonuses for answer streaks. Risk-reward scoring — can you keep your streak?', disney: '✨', disneyName: 'Tinker Bell', color: '#9c27b0' },
-  { value: 'match-terms', label: 'Match the Terms', icon: '🔗', competitive: false, desc: 'Match chemistry terms to their definitions at your own pace. Great for vocabulary!', disney: '🐟', disneyName: 'Dory', color: '#1368ce' },
-  { value: 'word-search', label: 'Word Search', icon: '🔍', competitive: false, desc: 'Find hidden chemistry words in a grid. Fun and relaxing review activity.', disney: '🦉', disneyName: 'Archimedes', color: '#26890c' },
-  { value: 'drag-drop', label: 'Drag & Drop', icon: '🧩', competitive: false, desc: 'Drag labels into the right categories. Perfect for classification tasks.', disney: '🍄', disneyName: 'Pascal', color: '#d89e00' },
-  { value: 'true-false', label: 'True or False', icon: '✅', competitive: false, desc: 'Simple true/false statements. Great for checking understanding after a lesson.', disney: '🐧', disneyName: 'Skipper', color: '#e21b3c' },
-  { value: 'flashcards', label: 'Flashcards', icon: '🃏', competitive: false, desc: 'Self-paced flip-card study. Students review at their own speed before a test.', disney: '📚', disneyName: 'Belle', color: '#9c27b0' },
+const GAME_TYPES: { value: GameType; label: string; icon: string; competitive: boolean; desc: string; color: string }[] = [
+  { value: 'quiz', label: 'Quiz', icon: '❓', competitive: true, desc: 'A series of multiple choice questions. Tap the correct answer to proceed.', color: '#e21b3c' },
+  { value: 'gameshow-quiz', label: 'Gameshow Quiz', icon: '🎬', competitive: true, desc: 'A multiple choice quiz with time pressure, lifelines and a bonus round.', color: '#1368ce' },
+  { value: 'matching-pairs', label: 'Matching Pairs', icon: '🃏', competitive: true, desc: 'Tap a pair of tiles at a time to reveal if they are a match.', color: '#9c27b0' },
+  { value: 'spin-the-wheel', label: 'Spin the Wheel', icon: '🎡', competitive: true, desc: 'Spin the wheel to see which item comes up next.', color: '#d89e00' },
+  { value: 'open-the-box', label: 'Open the Box', icon: '📦', competitive: true, desc: 'Tap each box in turn to open them up and reveal the item inside.', color: '#e21b3c' },
+  { value: 'find-the-match', label: 'Find the Match', icon: '🎯', competitive: true, desc: 'Tap the matching answer to eliminate it. Repeat until all answers are gone.', color: '#26890c' },
+  { value: 'anagram', label: 'Anagram', icon: '🔤', competitive: false, desc: 'Drag the letters into their correct positions to unscramble the word or phrase.', color: '#1368ce' },
+  { value: 'unjumble', label: 'Unjumble', icon: '🔀', competitive: false, desc: 'Drag and drop words to rearrange each sentence into its correct order.', color: '#9c27b0' },
+  { value: 'match-up', label: 'Match Up', icon: '🔗', competitive: false, desc: 'Drag and drop each keyword next to its definition.', color: '#d89e00' },
+  { value: 'group-sort', label: 'Group Sort', icon: '🗂️', competitive: false, desc: 'Drag and drop each item into its correct group.', color: '#26890c' },
+  { value: 'flash-cards', label: 'Flash Cards', icon: '📋', competitive: false, desc: 'Test yourself using cards with prompts on the front and answers on the back.', color: '#e21b3c' },
+  { value: 'wordsearch', label: 'Wordsearch', icon: '🔍', competitive: false, desc: 'Words are hidden in a letter grid. Find them as fast as you can.', color: '#1368ce' },
+  { value: 'crossword', label: 'Crossword', icon: '✏️', competitive: false, desc: 'Use the clues to solve the crossword. Tap on a word and type in the answer.', color: '#9c27b0' },
+  { value: 'complete-the-sentence', label: 'Complete the Sentence', icon: '📝', competitive: false, desc: 'A cloze activity where you drag and drop words into blank spaces within a text.', color: '#d89e00' },
+  { value: 'spell-the-word', label: 'Spell the Word', icon: '🔡', competitive: false, desc: 'Drag or type the letters to their correct positions to spell the answer.', color: '#26890c' },
+  { value: 'speaking-cards', label: 'Speaking Cards', icon: '🗣️', competitive: false, desc: 'Deal out cards at random from a shuffled deck.', color: '#e21b3c' },
+  { value: 'flip-tiles', label: 'Flip Tiles', icon: '🔄', competitive: false, desc: 'Explore a series of two sided tiles by tapping to zoom and swiping to flip.', color: '#1368ce' },
+  { value: 'labelled-diagram', label: 'Labelled Diagram', icon: '🗺️', competitive: false, desc: 'Drag and drop the pins to their place on the image.', color: '#9c27b0' },
 ];
 
 function emptyQuestion(): Question {
@@ -36,7 +44,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
 
   const [title, setTitle] = useState('');
   const [lessonName, setLessonName] = useState('');
-  const [gameType, setGameType] = useState<GameType>('quiz-battle');
+  const [gameType, setGameType] = useState<GameType>('quiz');
   const [templateId, setTemplateId] = useState('periodic-table');
   const [questions, setQuestions] = useState<Question[]>([emptyQuestion()]);
   const [saving, setSaving] = useState(false);
@@ -57,13 +65,6 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
 
   const changeGameType = (val: GameType) => {
     setGameType(val);
-    if (val === 'true-false') {
-      setQuestions(prev => prev.map(q => ({
-        ...q,
-        choices: ['True', 'False', '', ''],
-        correctIndex: q.correctIndex > 1 ? 0 : q.correctIndex,
-      })));
-    }
   };
 
   const updateQuestion = (idx: number, field: keyof Question, value: string | number | string[]) => {
@@ -86,7 +87,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
     const errs: string[] = [];
     if (!title.trim()) errs.push('Game title is required');
     if (!lessonName.trim()) errs.push('Lesson name is required');
-    const isTF = gameType === 'true-false';
+    const isTF = false;
     questions.forEach((q, i) => {
       if (!q.text.trim()) errs.push(`Question ${i + 1}: text is required`);
       (isTF ? q.choices.slice(0, 2) : q.choices).forEach((c, j) => {
@@ -199,7 +200,7 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
       {/* Game Type */}
       <div style={cardStyle}>
         <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, marginBottom: 4 }}>🎮 Pick a Game Type</h2>
-        <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 24 }}>Each game has a Disney friend to guide your students!</p>
+        <p style={{ color: C.textMuted, fontSize: 13, marginBottom: 24 }}>Choose the type of activity you want to create.</p>
 
         {/* Selected type big banner */}
         <div style={{ background: `${sel.color}18`, border: `2px solid ${sel.color}`, borderRadius: 18, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 18 }}>
@@ -211,13 +212,12 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
             fontSize: 52, flexShrink: 0,
             boxShadow: `0 8px 24px ${sel.color}40`,
           }}>
-            {sel.disney}
+            {sel.icon}
           </div>
           <div>
             <div style={{ color: sel.color, fontSize: 11, fontWeight: 700, letterSpacing: 1, marginBottom: 2 }}>{sel.competitive ? '⚔️ LIVE MULTIPLAYER' : '📚 SOLO PRACTICE'}</div>
             <div style={{ color: C.text, fontSize: 20, fontWeight: 800 }}>{sel.label}</div>
             <div style={{ color: C.textMuted, fontSize: 13, marginTop: 4 }}>{sel.desc}</div>
-            <div style={{ color: sel.color, fontSize: 12, marginTop: 6, fontWeight: 600 }}>✨ Hosted by {sel.disneyName}</div>
           </div>
         </div>
 
@@ -247,9 +247,8 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                     fontSize: 38,
                     boxShadow: isSelected ? `0 4px 16px ${t.color}50` : 'none',
                     transition: 'all 0.2s',
-                  }}>{t.disney}</div>
+                  }}>{t.icon}</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{t.label}</div>
-                  <div style={{ fontSize: 10, color: isSelected ? t.color : C.textMuted, fontWeight: 600 }}>{t.disneyName}</div>
                   {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
                 </button>
               );
@@ -283,9 +282,8 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                     fontSize: 38,
                     boxShadow: isSelected ? `0 4px 16px ${t.color}50` : 'none',
                     transition: 'all 0.2s',
-                  }}>{t.disney}</div>
+                  }}>{t.icon}</div>
                   <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>{t.label}</div>
-                  <div style={{ fontSize: 10, color: isSelected ? t.color : C.textMuted, fontWeight: 600 }}>{t.disneyName}</div>
                   {isSelected && <div style={{ width: 24, height: 3, background: t.color, borderRadius: 100 }} />}
                 </button>
               );
@@ -348,24 +346,9 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
 
               <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>
-                  {gameType === 'true-false' ? '✅ Correct Answer — click True or False' : 'Answer Choices * — click the circle to mark the correct answer'}
+                  {'Answer Choices * — click the circle to mark the correct answer'}
                 </label>
-                {gameType === 'true-false' ? (
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    {['True', 'False'].map((lbl, ci) => {
-                      const isCorrect = q.correctIndex === ci;
-                      const col = ci === 0 ? '#22c55e' : '#ef4444';
-                      return (
-                        <button key={ci} onClick={() => updateQuestion(qi, 'correctIndex', ci)}
-                          style={{ flex: 1, background: isCorrect ? `${col}18` : C.cardBg, border: `2px solid ${isCorrect ? col : C.cardBorder}`, borderRadius: 14, padding: 18, color: isCorrect ? col : C.text, cursor: 'pointer', fontFamily: 'inherit', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.2s' }}>
-                          <span style={{ fontSize: 28 }}>{ci === 0 ? '✅' : '❌'}</span> {lbl}
-                          {isCorrect && <span style={{ fontSize: 20 }}>✓</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {q.choices.map((choice, ci) => {
                       const choiceColors = ['#e74c3c', '#2980e4', '#f1c40f', '#27ae60'];
                       const isCorrect = q.correctIndex === ci;
@@ -382,7 +365,6 @@ export default function CreateGamePage({ folderId, editGameId, onBack, onSaved, 
                       );
                     })}
                   </div>
-                )}
               </div>
 
               <div>

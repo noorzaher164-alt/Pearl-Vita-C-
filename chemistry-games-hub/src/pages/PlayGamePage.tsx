@@ -669,21 +669,21 @@ export default function PlayGamePage({ gameId, onFinish, onBack }: Props) {
   }
 
   // ── PRACTICE GAME MODES (full-screen) ───────────────────────────────────────
-  if (game.gameType === 'flashcards') {
+  if (game.gameType === 'flash-cards') {
     return <FlashcardsGame game={game} tpl={tpl} onFinish={(s, st) => finishGame(s, st, nickname || 'Player')} onBack={onBack} soundOn={soundOn} />;
   }
-  if (game.gameType === 'match-terms') {
+  if (game.gameType === 'match-up') {
     return <MatchTermsGame game={game} tpl={tpl} onFinish={(s, st) => finishGame(s, st, nickname || 'Player')} onBack={onBack} soundOn={soundOn} />;
   }
-  if (game.gameType === 'word-search') {
+  if (game.gameType === 'wordsearch') {
     return <WordSearchGame game={game} tpl={tpl} onFinish={(s, st) => finishGame(s, st, nickname || 'Player')} onBack={onBack} soundOn={soundOn} />;
   }
 
-  // ── QUIZ / MCQ SCREEN (competitive + true-false + drag-drop) ────────────────
+  // ── QUIZ / MCQ SCREEN ────────────────────────────────────────────────────────
   const q = game.questions[currentQ];
   const progress = (currentQ / game.questions.length) * 100;
-  const isTrueFalse = game.gameType === 'true-false';
-  const isDragDrop = game.gameType === 'drag-drop';
+  const isTrueFalse = false;
+  const isDragDrop = false;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: tpl.bg }}>

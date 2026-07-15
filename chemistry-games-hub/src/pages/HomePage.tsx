@@ -11,16 +11,24 @@ interface Props {
 }
 
 const gameTypes = [
-  { name: 'Quiz Battle', icon: '⚔️', color: '#c084fc', type: 'competitive' },
-  { name: 'Fastest Molecule', icon: '⚡', color: '#7dd3fc', type: 'competitive' },
-  { name: 'Periodic Challenge', icon: '🔬', color: '#fde68a', type: 'competitive' },
-  { name: 'Reaction Race', icon: '🏃', color: '#6ee7b7', type: 'competitive' },
-  { name: 'Energy Points', icon: '💎', color: '#fca5a5', type: 'competitive' },
-  { name: 'Match Terms', icon: '🔗', color: '#a78bfa', type: 'practice' },
-  { name: 'Word Search', icon: '🔍', color: '#ff6eb4', type: 'practice' },
-  { name: 'Drag & Drop', icon: '🧩', color: '#34d399', type: 'practice' },
-  { name: 'True or False', icon: '✅', color: '#fb923c', type: 'practice' },
-  { name: 'Flashcards', icon: '🃏', color: '#60a5fa', type: 'practice' },
+  { name: 'Quiz', icon: '❓', color: '#c084fc', type: 'competitive' },
+  { name: 'Gameshow Quiz', icon: '🎬', color: '#7dd3fc', type: 'competitive' },
+  { name: 'Matching Pairs', icon: '🃏', color: '#fde68a', type: 'competitive' },
+  { name: 'Spin the Wheel', icon: '🎡', color: '#6ee7b7', type: 'competitive' },
+  { name: 'Open the Box', icon: '📦', color: '#fca5a5', type: 'competitive' },
+  { name: 'Find the Match', icon: '🎯', color: '#34d399', type: 'competitive' },
+  { name: 'Anagram', icon: '🔤', color: '#a78bfa', type: 'practice' },
+  { name: 'Unjumble', icon: '🔀', color: '#ff6eb4', type: 'practice' },
+  { name: 'Match Up', icon: '🔗', color: '#60a5fa', type: 'practice' },
+  { name: 'Group Sort', icon: '🗂️', color: '#fb923c', type: 'practice' },
+  { name: 'Flash Cards', icon: '📋', color: '#fde68a', type: 'practice' },
+  { name: 'Wordsearch', icon: '🔍', color: '#6ee7b7', type: 'practice' },
+  { name: 'Crossword', icon: '✏️', color: '#c084fc', type: 'practice' },
+  { name: 'Complete the Sentence', icon: '📝', color: '#7dd3fc', type: 'practice' },
+  { name: 'Spell the Word', icon: '🔡', color: '#fca5a5', type: 'practice' },
+  { name: 'Speaking Cards', icon: '🗣️', color: '#a78bfa', type: 'practice' },
+  { name: 'Flip Tiles', icon: '🔄', color: '#34d399', type: 'practice' },
+  { name: 'Labelled Diagram', icon: '🗺️', color: '#ff6eb4', type: 'practice' },
 ];
 
 export default function HomePage({ onNavigate, onStudentJoin, lang, onToggleLang }: Props) {

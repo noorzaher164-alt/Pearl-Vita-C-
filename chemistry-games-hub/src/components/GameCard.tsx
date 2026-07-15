@@ -5,32 +5,48 @@ import type { Game, GameType } from '../types';
 
 export function gameTypeLabel(type: GameType): string {
   const labels: Record<GameType, string> = {
-    'quiz-battle': 'Quiz Battle',
-    'fastest-molecule': 'Fastest Molecule',
-    'periodic-challenge': 'Periodic Challenge',
-    'reaction-race': 'Reaction Race',
-    'energy-points': 'Energy Points',
-    'match-terms': 'Match Terms',
-    'word-search': 'Word Search',
-    'drag-drop': 'Drag & Drop',
-    'true-false': 'True / False',
-    'flashcards': 'Flashcards',
+    'quiz': 'Quiz',
+    'gameshow-quiz': 'Gameshow Quiz',
+    'matching-pairs': 'Matching Pairs',
+    'match-up': 'Match Up',
+    'anagram': 'Anagram',
+    'wordsearch': 'Wordsearch',
+    'flash-cards': 'Flash Cards',
+    'group-sort': 'Group Sort',
+    'spin-the-wheel': 'Spin the Wheel',
+    'open-the-box': 'Open the Box',
+    'unjumble': 'Unjumble',
+    'complete-the-sentence': 'Complete the Sentence',
+    'crossword': 'Crossword',
+    'spell-the-word': 'Spell the Word',
+    'speaking-cards': 'Speaking Cards',
+    'flip-tiles': 'Flip Tiles',
+    'find-the-match': 'Find the Match',
+    'labelled-diagram': 'Labelled Diagram',
   };
   return labels[type] ?? type;
 }
 
 export function gameTypeColor(type: GameType): string {
   const colors: Record<GameType, string> = {
-    'quiz-battle': '#a855f7',
-    'fastest-molecule': '#ec4899',
-    'periodic-challenge': '#3b82f6',
-    'reaction-race': '#f97316',
-    'energy-points': '#eab308',
-    'match-terms': '#14b8a6',
-    'word-search': '#6366f1',
-    'drag-drop': '#06b6d4',
-    'true-false': '#22c55e',
-    'flashcards': '#f43f5e',
+    'quiz': '#a855f7',
+    'gameshow-quiz': '#3b82f6',
+    'matching-pairs': '#eab308',
+    'match-up': '#14b8a6',
+    'anagram': '#ec4899',
+    'wordsearch': '#6366f1',
+    'flash-cards': '#f43f5e',
+    'group-sort': '#22c55e',
+    'spin-the-wheel': '#f97316',
+    'open-the-box': '#06b6d4',
+    'unjumble': '#8b5cf6',
+    'complete-the-sentence': '#0ea5e9',
+    'crossword': '#a855f7',
+    'spell-the-word': '#10b981',
+    'speaking-cards': '#f43f5e',
+    'flip-tiles': '#3b82f6',
+    'find-the-match': '#22c55e',
+    'labelled-diagram': '#f97316',
   };
   return colors[type] ?? '#a855f7';
 }

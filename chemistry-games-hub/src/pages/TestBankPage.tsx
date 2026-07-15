@@ -14,18 +14,18 @@ interface Props {
 }
 
 const PRACTICE_TYPES: { value: GameType; label: string; icon: string }[] = [
-  { value: 'quiz-battle', label: 'Quiz Battle', icon: '⚔️' },
-  { value: 'true-false', label: 'True or False', icon: '✅' },
-  { value: 'flashcards', label: 'Flashcards', icon: '🃏' },
-  { value: 'match-terms', label: 'Match Terms', icon: '🔗' },
-  { value: 'drag-drop', label: 'Drag & Drop', icon: '🧩' },
+  { value: 'flash-cards', label: 'Flash Cards', icon: '📋' },
+  { value: 'matching-pairs', label: 'Matching Pairs', icon: '🃏' },
+  { value: 'match-up', label: 'Match Up', icon: '🔗' },
+  { value: 'wordsearch', label: 'Wordsearch', icon: '🔍' },
+  { value: 'anagram', label: 'Anagram', icon: '🔤' },
 ];
 
 const COMPETITIVE_TYPES: { value: GameType; label: string; icon: string }[] = [
-  { value: 'fastest-molecule', label: 'Fastest Molecule', icon: '⚡' },
-  { value: 'periodic-challenge', label: 'Periodic Challenge', icon: '🔬' },
-  { value: 'reaction-race', label: 'Reaction Race', icon: '🏃' },
-  { value: 'energy-points', label: 'Energy Points', icon: '💎' },
+  { value: 'quiz', label: 'Quiz', icon: '❓' },
+  { value: 'gameshow-quiz', label: 'Gameshow Quiz', icon: '🎬' },
+  { value: 'spin-the-wheel', label: 'Spin the Wheel', icon: '🎡' },
+  { value: 'find-the-match', label: 'Find the Match', icon: '🎯' },
 ];
 
 const TEMPLATES = ['periodic-table', 'lab-dark', 'neon-glow', 'deep-space', 'volcano'];
@@ -40,7 +40,7 @@ export default function TestBankPage({ onBack, semester = 's1' }: Props) {
   const [selectedUnit, setSelectedUnit] = useState<number | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   const [questionCount, setQuestionCount] = useState(10);
-  const [gameType, setGameType] = useState<GameType>('quiz-battle');
+  const [gameType, setGameType] = useState<GameType>('quiz');
   const [folderId, setFolderId] = useState(folders[0]?.id || '');
   const [templateId, setTemplateId] = useState('periodic-table');
   const [shuffle, setShuffle] = useState(true);
