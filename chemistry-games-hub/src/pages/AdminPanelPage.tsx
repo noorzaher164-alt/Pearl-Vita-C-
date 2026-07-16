@@ -78,8 +78,11 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
     }}>{label}</button>
   );
 
+  const initial = (name: string) => (name && name.trim() ? name.trim()[0].toUpperCase() : '?');
+
   return (
-    <div style={{ minHeight: '100vh', padding: '32px 36px', maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: th.appBg, padding: '32px 36px' }}>
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
         <button onClick={onBack} style={{ background: th.cardBg, border: `1px solid ${th.cardBorder}`, color: th.text, borderRadius: 12, padding: '9px 16px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Back</button>
@@ -122,7 +125,7 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
             {[...users].reverse().slice(0, 5).map(u => (
               <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: `1px solid ${th.divider}` }}>
                 <div style={{ width: 38, height: 38, borderRadius: '50%', background: `${ROLE_COLORS[u.role]}25`, border: `2px solid ${ROLE_COLORS[u.role]}60`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: ROLE_COLORS[u.role], fontSize: 15 }}>
-                  {u.displayName[0].toUpperCase()}
+                  {initial(u.displayName)}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ color: th.text, fontWeight: 600, fontSize: 14 }}>{u.displayName}</div>
@@ -144,9 +147,9 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
                 <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: `1px solid ${th.divider}` }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ color: th.text, fontWeight: 600, fontSize: 14 }}>{r.gameTitle}</div>
-                    <div style={{ color: th.textMuted, fontSize: 12 }}>{r.leaderboard.length} players · {r.sessionType === 'live' ? '⚔️ Live' : '📚 Solo'}</div>
+                    <div style={{ color: th.textMuted, fontSize: 12 }}>{(r.leaderboard ?? []).length} players · {r.sessionType === 'live' ? '⚔️ Live' : '📚 Solo'}</div>
                   </div>
-                  {r.leaderboard[0] && <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: 14 }}>🥇 {r.leaderboard[0].nickname} · {r.leaderboard[0].score}pts</div>}
+                  {r.leaderboard?.[0] && <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: 14 }}>🥇 {r.leaderboard[0].nickname} · {r.leaderboard[0].score}pts</div>}
                   <div style={{ color: th.textFaint, fontSize: 11 }}>{new Date(r.playedAt).toLocaleDateString()}</div>
                 </div>
               ))}
@@ -191,7 +194,7 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
               <div key={u.id} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr auto', gap: 12, alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${th.divider}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ width: 34, height: 34, borderRadius: '50%', background: `${ROLE_COLORS[u.role]}20`, border: `2px solid ${ROLE_COLORS[u.role]}50`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: ROLE_COLORS[u.role], fontSize: 13, flexShrink: 0 }}>
-                    {u.displayName[0].toUpperCase()}
+                    {initial(u.displayName)}
                   </div>
                   <div>
                     <div style={{ color: th.text, fontWeight: 600, fontSize: 14 }}>{u.displayName}</div>
@@ -307,6 +310,7 @@ export default function AdminPanelPage({ currentUser, onBack, theme }: Props) {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
