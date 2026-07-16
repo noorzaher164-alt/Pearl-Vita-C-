@@ -88,17 +88,17 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   ];
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
-  const NAV_COLORS = ['#6366f1','#3b82f6','#10b981','#f59e0b','#8b5cf6'];
+  const NAV_COLORS = ['#f43f5e','#0ea5e9','#10b981','#f97316','#ec4899'];
 
   const Sidebar = () => (
-    <div style={{ width: 256, minHeight: '100vh', background: th.sidebarBg, borderRight: `1px solid ${th.sidebarBorder}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', boxShadow: isDark ? 'none' : '2px 0 20px rgba(0,0,0,0.06)' }}>
-      {/* Rainbow top strip */}
-      {!isDark && <div style={{ height: 4, background: 'linear-gradient(90deg,#6366f1,#ec4899,#f59e0b,#10b981,#3b82f6)', flexShrink: 0 }} />}
+    <div style={{ width: 256, minHeight: '100vh', background: th.sidebarBg, borderRight: `1px solid ${th.sidebarBorder}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', boxShadow: isDark ? 'none' : '2px 0 16px rgba(0,0,0,0.05)' }}>
+      {/* Colorful top strip */}
+      {!isDark && <div style={{ height: 4, background: 'linear-gradient(90deg,#f43f5e,#f97316,#f59e0b,#10b981,#0ea5e9,#ec4899)', flexShrink: 0 }} />}
 
       {/* Brand */}
       <div style={{ padding: '20px 18px 16px', borderBottom: `1px solid ${th.divider}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🎮</div>
+          <div style={{ width: 42, height: 42, borderRadius: 13, background: 'linear-gradient(135deg,#f43f5e,#f97316,#10b981,#0ea5e9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🎮</div>
           <div>
             <div style={{ color: th.text, fontWeight: 900, fontSize: 14, lineHeight: 1.2 }}>{t.appName}</div>
             <div style={{ color: th.textFaint, fontSize: 10, marginTop: 1 }}>{t.tagline}</div>
@@ -106,14 +106,15 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         </div>
       </div>
 
-      <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {NAV.map((item, i) => {
           const active = view === item.id;
           const color = NAV_COLORS[i % NAV_COLORS.length];
+          const bgPastel = ['#fff1f2','#e0f2fe','#dcfce7','#fff7ed','#fce7f3'][i % 5];
           return (
             <button key={item.id} onClick={() => switchView(item.id)} style={{
               display: 'flex', alignItems: 'center', gap: 12,
-              background: active ? `${color}12` : 'transparent',
+              background: active ? bgPastel : 'transparent',
               border: active ? `1.5px solid ${color}30` : '1.5px solid transparent',
               borderRadius: 12, padding: '10px 14px',
               color: active ? color : th.textMuted,
@@ -129,7 +130,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
 
         <div style={{ margin: '6px 4px', borderTop: `1px solid ${th.divider}` }} />
         {user.role === 'admin' && (
-          <button onClick={() => onNavigate('admin-panel' as any)} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fef9c320', border: '1.5px solid #ca8a0430', borderRadius: 12, padding: '10px 14px', color: '#ca8a04', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, width: '100%', textAlign: 'left' }}>
+          <button onClick={() => onNavigate('admin-panel' as any)} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fef9c3', border: '1.5px solid #fde047', borderRadius: 12, padding: '10px 14px', color: '#a16207', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, width: '100%', textAlign: 'left' }}>
             <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>👑</span> Admin Panel
           </button>
         )}
@@ -146,7 +147,7 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
       {/* User */}
       <div style={{ padding: '14px 12px', borderTop: `1px solid ${th.divider}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 15, flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#f43f5e,#f97316)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 15, flexShrink: 0 }}>
             {(user.displayName?.[0] || '?').toUpperCase()}
           </div>
           <div style={{ overflow: 'hidden', minWidth: 0 }}>
@@ -168,28 +169,25 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
     return (
       <div style={{ padding: '36px 40px', maxWidth: 1100 }}>
         {/* Hero banner */}
-        <div style={{ background: isDark ? 'rgba(192,132,252,0.08)' : 'linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%)', border: `1px solid ${isDark ? 'rgba(192,132,252,0.2)' : 'rgba(124,58,237,0.15)'}`, borderRadius: 28, padding: '32px 36px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}>
-          {/* decorative atoms */}
-          <div style={{ position: 'absolute', right: 32, top: '50%', transform: 'translateY(-50%)', fontSize: 90, opacity: isDark ? 0.15 : 0.25, userSelect: 'none', pointerEvents: 'none' }}>⚗️</div>
-          <div style={{ position: 'absolute', right: 150, top: 10, fontSize: 40, opacity: isDark ? 0.1 : 0.2, userSelect: 'none', pointerEvents: 'none' }}>🔬</div>
-          <div style={{ position: 'absolute', right: 240, bottom: 10, fontSize: 30, opacity: isDark ? 0.1 : 0.15, userSelect: 'none', pointerEvents: 'none' }}>🧪</div>
+        <div style={{ background: isDark ? 'rgba(14,165,233,0.08)' : 'linear-gradient(135deg,#fff7ed 0%,#ecfdf5 50%,#e0f2fe 100%)', border: `1px solid ${isDark ? 'rgba(14,165,233,0.2)' : '#e5e7eb'}`, borderRadius: 28, padding: '32px 36px', marginBottom: 32, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', right: 32, top: '50%', transform: 'translateY(-50%)', fontSize: 90, opacity: 0.2, userSelect: 'none', pointerEvents: 'none' }}>🎮</div>
+          <div style={{ position: 'absolute', right: 160, top: 10, fontSize: 40, opacity: 0.15, userSelect: 'none', pointerEvents: 'none' }}>⭐</div>
+          <div style={{ position: 'absolute', right: 250, bottom: 10, fontSize: 30, opacity: 0.15, userSelect: 'none', pointerEvents: 'none' }}>🏆</div>
           <div style={{ position: 'relative' }}>
-            <div style={{ color: isDark ? 'rgba(192,132,252,0.7)' : '#7c3aed', fontSize: 12, fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>{t.appName.toUpperCase()} · TEACHER DASHBOARD</div>
+            <div style={{ color: '#ea580c', fontSize: 12, fontWeight: 800, letterSpacing: 2, marginBottom: 8 }}>{t.appName.toUpperCase()} · TEACHER DASHBOARD</div>
             <h1 style={{ color: th.text, fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 900, margin: '0 0 10px', lineHeight: 1.2 }}>
               {t.welcomeBack}, {user.displayName.split(' ').slice(-1)[0]}! 👋<br />
-              <span style={{ background: 'linear-gradient(135deg, #c084fc, #60a5fa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ready to ignite curiosity?</span>
+              <span style={{ background: 'linear-gradient(90deg,#f43f5e,#f97316,#10b981,#0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ready to ignite curiosity?</span>
             </h1>
-            <p style={{ color: th.textMuted, fontSize: 15, marginBottom: 24, maxWidth: 480 }}>
-              {t.dashDesc}
-            </p>
+            <p style={{ color: th.textMuted, fontSize: 15, marginBottom: 24, maxWidth: 480 }}>{t.dashDesc}</p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={() => onCreateGame('')}
-                style={{ background: 'linear-gradient(135deg, #c084fc, #a78bfa)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(192,132,252,0.4)' }}>
-                {t.createNewGame}
+                style={{ background: 'linear-gradient(135deg,#f43f5e,#f97316)', color: 'white', border: 'none', borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(244,63,94,0.3)' }}>
+                ✨ {t.createNewGame}
               </button>
               <button onClick={() => switchView('library')}
                 style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'white', border: `1px solid ${th.cardBorder}`, color: th.text, borderRadius: 14, padding: '13px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: th.shadow }}>
-                {t.openLibrary}
+                📚 {t.openLibrary}
               </button>
             </div>
           </div>
@@ -198,10 +196,10 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         {/* Stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 36 }}>
           {[
-            { icon: '🎮', label: t.games, value: allGames.length, color: '#c084fc', bg: isDark ? 'rgba(192,132,252,0.08)' : '#faf5ff' },
-            { icon: '📁', label: t.folders, value: allFolders.length, color: '#60a5fa', bg: isDark ? 'rgba(96,165,250,0.08)' : '#eff6ff' },
-            { icon: '📊', label: t.sessions, value: allResults.length, color: '#34d399', bg: isDark ? 'rgba(52,211,153,0.08)' : '#f0fdf4' },
-            { icon: '⚡', label: t.live, value: liveCount, color: '#f59e0b', bg: isDark ? 'rgba(245,158,11,0.08)' : '#fffbeb' },
+            { icon: '🎮', label: t.games, value: allGames.length, color: '#f43f5e', bg: isDark ? 'rgba(244,63,94,0.08)' : '#fff1f2' },
+            { icon: '📁', label: t.folders, value: allFolders.length, color: '#0ea5e9', bg: isDark ? 'rgba(14,165,233,0.08)' : '#e0f2fe' },
+            { icon: '📊', label: t.sessions, value: allResults.length, color: '#10b981', bg: isDark ? 'rgba(16,185,129,0.08)' : '#dcfce7' },
+            { icon: '⚡', label: t.live, value: liveCount, color: '#f97316', bg: isDark ? 'rgba(249,115,22,0.08)' : '#fff7ed' },
           ].map(s => (
             <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.color}25`, borderRadius: 18, padding: '20px 18px', borderTop: `3px solid ${s.color}` }}>
               <div style={{ fontSize: 26, marginBottom: 8 }}>{s.icon}</div>
@@ -215,10 +213,10 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
         <h3 style={{ color: th.textMuted, fontSize: 11, letterSpacing: 2, fontWeight: 700, marginBottom: 14 }}>{t.quickActions}</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 12, marginBottom: 36 }}>
           {[
-            { icon: '✨', label: t.createNewGame, desc: 'Create from scratch', color: '#c084fc', action: () => onCreateGame('') },
-            { icon: '📚', label: t.library, desc: 'Browse your folders', color: '#60a5fa', action: () => switchView('library') },
-            { icon: '🏦', label: t.testBank, desc: 'Generate from bank', color: '#f59e0b', action: () => switchView('testbank') },
-            { icon: '📊', label: t.results, desc: 'Session history', color: '#34d399', action: () => switchView('results') },
+            { icon: '✨', label: t.createNewGame, desc: 'Create from scratch', color: '#f43f5e', action: () => onCreateGame('') },
+            { icon: '📚', label: t.library, desc: 'Browse your folders', color: '#0ea5e9', action: () => switchView('library') },
+            { icon: '🏦', label: t.testBank, desc: 'Generate from bank', color: '#f97316', action: () => switchView('testbank') },
+            { icon: '📊', label: t.results, desc: 'Session history', color: '#10b981', action: () => switchView('results') },
           ].map(a => (
             <button key={a.label} onClick={a.action}
               style={{ background: isDark ? `${a.color}08` : `${a.color}10`, border: `1.5px solid ${a.color}25`, borderRadius: 18, padding: '20px 16px', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.2s' }}
