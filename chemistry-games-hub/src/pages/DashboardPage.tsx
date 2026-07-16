@@ -24,23 +24,6 @@ const FOLDER_COLORS = ['#c084fc','#7dd3fc','#fde68a','#6ee7b7','#fca5a5','#a78bf
 const FOLDER_ICONS  = ['📁','🧪','⚗️','🔬','🧬','⚖️','🔥','🧫','⚡','🌡️','💊','🧲','📝','🎯','💡','🌊','🌿','🦋','🔭','🎨'];
 
 // Chemistry molecule decoration for light mode
-const MoleculeDecor = () => (
-  <svg width="180" height="180" viewBox="0 0 180 180" style={{ opacity: 0.07, position: 'absolute', right: -20, top: -20 }}>
-    <circle cx="90" cy="90" r="18" fill="#7c3aed" />
-    <circle cx="40" cy="60" r="12" fill="#6d28d9" />
-    <circle cx="140" cy="60" r="12" fill="#6d28d9" />
-    <circle cx="40" cy="120" r="12" fill="#6d28d9" />
-    <circle cx="140" cy="120" r="12" fill="#6d28d9" />
-    <circle cx="90" cy="20" r="10" fill="#8b5cf6" />
-    <circle cx="90" cy="160" r="10" fill="#8b5cf6" />
-    <line x1="90" y1="90" x2="40" y2="60" stroke="#7c3aed" strokeWidth="3" />
-    <line x1="90" y1="90" x2="140" y2="60" stroke="#7c3aed" strokeWidth="3" />
-    <line x1="90" y1="90" x2="40" y2="120" stroke="#7c3aed" strokeWidth="3" />
-    <line x1="90" y1="90" x2="140" y2="120" stroke="#7c3aed" strokeWidth="3" />
-    <line x1="90" y1="90" x2="90" y2="20" stroke="#7c3aed" strokeWidth="3" />
-    <line x1="90" y1="90" x2="90" y2="160" stroke="#7c3aed" strokeWidth="3" />
-  </svg>
-);
 
 const CHEMISTRY_TIPS = [
   '💡 Tip: Use "Host Live" to project the game on your classroom screen!',
@@ -105,61 +88,70 @@ export default function DashboardPage({ user, theme, onThemeToggle, onNavigate, 
   ];
 
   // ── Sidebar ───────────────────────────────────────────────────────────────
+  const NAV_COLORS = ['#6366f1','#3b82f6','#10b981','#f59e0b','#8b5cf6'];
+
   const Sidebar = () => (
-    <div style={{ width: 248, minHeight: '100vh', background: th.sidebarBg, borderRight: `1px solid ${th.sidebarBorder}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', boxShadow: isDark ? 'none' : '2px 0 24px rgba(124,58,237,0.07)' }}>
+    <div style={{ width: 256, minHeight: '100vh', background: th.sidebarBg, borderRight: `1px solid ${th.sidebarBorder}`, display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh', boxShadow: isDark ? 'none' : '2px 0 20px rgba(0,0,0,0.06)' }}>
+      {/* Rainbow top strip */}
+      {!isDark && <div style={{ height: 4, background: 'linear-gradient(90deg,#6366f1,#ec4899,#f59e0b,#10b981,#3b82f6)', flexShrink: 0 }} />}
+
       {/* Brand */}
-      <div style={{ padding: '22px 18px 18px', borderBottom: `1px solid ${th.divider}`, position: 'relative', overflow: 'hidden' }}>
-        {!isDark && <MoleculeDecor />}
-        <div style={{ fontSize: 30, marginBottom: 5 }}>⚗️</div>
-        <div style={{ color: th.text, fontWeight: 900, fontSize: 15, lineHeight: 1.2 }}>{t.appName}</div>
-        <div style={{ color: th.textMuted, fontSize: 11, marginTop: 4 }}>{t.tagline}</div>
+      <div style={{ padding: '20px 18px 16px', borderBottom: `1px solid ${th.divider}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>🎮</div>
+          <div>
+            <div style={{ color: th.text, fontWeight: 900, fontSize: 14, lineHeight: 1.2 }}>{t.appName}</div>
+            <div style={{ color: th.textFaint, fontSize: 10, marginTop: 1 }}>{t.tagline}</div>
+          </div>
+        </div>
       </div>
 
-      <nav style={{ flex: 1, padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {NAV.map(item => {
+      <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {NAV.map((item, i) => {
           const active = view === item.id;
+          const color = NAV_COLORS[i % NAV_COLORS.length];
           return (
             <button key={item.id} onClick={() => switchView(item.id)} style={{
-              display: 'flex', alignItems: 'center', gap: 11,
-              background: active ? th.accentLight : 'transparent',
-              border: active ? `1px solid ${th.accent}45` : '1px solid transparent',
-              borderRadius: 12, padding: '11px 14px',
-              color: active ? th.accent : th.textMuted,
-              cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: active ? 700 : 400,
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: active ? `${color}12` : 'transparent',
+              border: active ? `1.5px solid ${color}30` : '1.5px solid transparent',
+              borderRadius: 12, padding: '10px 14px',
+              color: active ? color : th.textMuted,
+              cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: active ? 700 : 500,
               width: '100%', textAlign: 'left', transition: 'all 0.15s',
             }}>
-              <span style={{ fontSize: 17 }}>{item.icon}</span>
+              <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{item.icon}</span>
               <span style={{ flex: 1 }}>{item.label}</span>
-              {active && <div style={{ width: 6, height: 6, borderRadius: '50%', background: th.accent }} />}
+              {active && <div style={{ width: 7, height: 7, borderRadius: '50%', background: color, flexShrink: 0 }} />}
             </button>
           );
         })}
 
-        <div style={{ margin: '8px 4px', borderTop: `1px solid ${th.divider}` }} />
+        <div style={{ margin: '6px 4px', borderTop: `1px solid ${th.divider}` }} />
         {user.role === 'admin' && (
-          <button onClick={() => onNavigate('admin-panel' as any)} style={{ display: 'flex', alignItems: 'center', gap: 11, background: 'transparent', border: '1px solid transparent', borderRadius: 12, padding: '11px 14px', color: th.warningText, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left' }}>
-            <span style={{ fontSize: 17 }}>👑</span> Admin Panel
+          <button onClick={() => onNavigate('admin-panel' as any)} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fef9c320', border: '1.5px solid #ca8a0430', borderRadius: 12, padding: '10px 14px', color: '#ca8a04', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600, width: '100%', textAlign: 'left' }}>
+            <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>👑</span> Admin Panel
           </button>
         )}
-        <button onClick={onThemeToggle} style={{ display: 'flex', alignItems: 'center', gap: 11, background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 12, padding: '11px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left' }}>
-          <span style={{ fontSize: 17 }}>{isDark ? '☀️' : '🌙'}</span>
+        <button onClick={onThemeToggle} style={{ display: 'flex', alignItems: 'center', gap: 12, background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 12, padding: '10px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left', fontWeight: 500 }}>
+          <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>{isDark ? '☀️' : '🌙'}</span>
           {isDark ? 'Light Mode' : 'Dark Mode'}
         </button>
-        <button onClick={onToggleLang} style={{ display: 'flex', alignItems: 'center', gap: 11, background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 12, padding: '11px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left' }}>
-          <span style={{ fontSize: 17 }}>🌐</span>
-          {lang === 'en' ? 'عربي 🌐' : 'English 🌐'}
+        <button onClick={onToggleLang} style={{ display: 'flex', alignItems: 'center', gap: 12, background: th.badge, border: `1px solid ${th.cardBorder}`, borderRadius: 12, padding: '10px 14px', color: th.textMuted, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, width: '100%', textAlign: 'left', fontWeight: 500 }}>
+          <span style={{ fontSize: 18, width: 22, textAlign: 'center' }}>🌐</span>
+          {lang === 'en' ? 'عربي' : 'English'}
         </button>
       </nav>
 
       {/* User */}
       <div style={{ padding: '14px 12px', borderTop: `1px solid ${th.divider}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #c084fc, #a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 14, flexShrink: 0 }}>
-            {user.displayName[0].toUpperCase()}
+          <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: 'white', fontSize: 15, flexShrink: 0 }}>
+            {(user.displayName?.[0] || '?').toUpperCase()}
           </div>
           <div style={{ overflow: 'hidden', minWidth: 0 }}>
             <div style={{ color: th.text, fontWeight: 700, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.displayName}</div>
-            <div style={{ color: th.textMuted, fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+            <div style={{ color: th.textFaint, fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
           </div>
         </div>
         <button onClick={handleLogout} style={{ width: '100%', background: th.danger, border: `1px solid ${th.dangerText}30`, color: th.dangerText, borderRadius: 10, padding: '8px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>🔒 {t.logout}</button>

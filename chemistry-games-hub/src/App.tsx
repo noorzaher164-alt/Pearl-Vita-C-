@@ -26,7 +26,7 @@ function App() {
   const urlParams = new URLSearchParams(window.location.search);
   const urlPin = urlParams.get('join')?.toUpperCase() || null;
 
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(THEME_KEY) as Theme) || 'dark');
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(THEME_KEY) as Theme) || 'light');
   const [currentUser, setCurrentUser] = useState<User | null>(getCurrentUser);
   const [lang, setLang2] = useState<Lang>(getLang);
 
@@ -78,7 +78,7 @@ function App() {
   const isDark = theme === 'dark';
 
   return (
-    <div className="min-h-screen relative" dir={lang === 'ar' ? 'rtl' : 'ltr'} lang={lang} style={{ background: isDark ? 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' : '#f3f0ff', fontFamily: lang === 'ar' ? "'Segoe UI', 'Arial', sans-serif" : undefined }}>
+    <div className="min-h-screen relative" dir={lang === 'ar' ? 'rtl' : 'ltr'} lang={lang} style={{ background: isDark ? 'linear-gradient(135deg, #0f0a1e 0%, #1a0933 50%, #0d1f3c 100%)' : '#f5f7ff', fontFamily: lang === 'ar' ? "'Segoe UI', 'Arial', sans-serif" : undefined }}>
       {isDark && <BubbleBackground />}
       <div className="relative z-10">
         <>
