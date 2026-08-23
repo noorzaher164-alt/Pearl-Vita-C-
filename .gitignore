@@ -1,2 +1,8 @@
 .claude/
 **/.vite/
+
+# Nour AI Hub
+nour-ai-hub/node_modules/
+nour-ai-hub/.next/
+nour-ai-hub/.env.local
+nour-ai-hub/memory/store.json
