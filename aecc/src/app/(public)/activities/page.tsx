@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CalendarDays, FlaskConical, Leaf, MapPin, Microscope, PenLine } from 'lucide-react';
+import { CalendarDays, FlaskConical, Leaf, MapPin, PenLine } from 'lucide-react';
 import { SparkRule } from '@/components/brand/Motifs';
 import { Card, Meta, Pill } from '@/components/ui';
 import { committeeName } from '@/components/portal/Common';
@@ -8,7 +8,7 @@ import { eventStatus } from '@/lib/domain/labels';
 import { formatDateTime, pick } from '@/lib/i18n';
 import { getT } from '@/lib/i18n/server';
 
-export const metadata: Metadata = { title: 'Activities' };
+export const metadata: Metadata = { title: 'Club Life' };
 
 export default async function ActivitiesPage() {
   const { locale, d } = await getT();
@@ -19,7 +19,6 @@ export default async function ActivitiesPage() {
 
   const pillars = [
     { icon: <FlaskConical />, title: d.publicSite.activityExperiments, body: d.publicSite.activityExperimentsBody },
-    { icon: <Microscope />, title: d.publicSite.activityResearch, body: d.publicSite.activityResearchBody },
     { icon: <PenLine />, title: d.publicSite.activityMagazine, body: d.publicSite.activityMagazineBody },
     { icon: <Leaf />, title: d.publicSite.activityCommunity, body: d.publicSite.activityCommunityBody },
   ];

@@ -1,34 +1,31 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, FlaskConical, Leaf, Microscope, PenLine } from 'lucide-react';
+import { ArrowRight, BookOpen, FlaskConical, Leaf, PenLine } from 'lucide-react';
 import { ArticleCard } from '@/components/magazine/ArticleCard';
 import { Logo } from '@/components/brand/Logo';
 import { ChemistryField, SparkRule } from '@/components/brand/Motifs';
-import { Card, Pill } from '@/components/ui';
-import { getClubStats, listAlbums, listArticles, listProjects } from '@/lib/db/queries';
-import { projectStatus } from '@/lib/domain/labels';
+import { Card } from '@/components/ui';
+import { getClubStats, listAlbums, listArticles } from '@/lib/db/queries';
 import { formatNumber, pick } from '@/lib/i18n';
 import { getT } from '@/lib/i18n/server';
 
 export const metadata: Metadata = {
   title: 'Al Eman Chemistry Club',
   description:
-    'AECC — the chemistry club of Al Eman Secondary School. Experiments, student research, an electronic science magazine and sustainability work. Explore. React. Discover.',
+    'AECC — the chemistry club of Al Eman Secondary School. Experiments, an electronic science magazine and sustainability work. Explore. React. Discover.',
 };
 
 export default async function PublicHomePage() {
   const { locale, d } = await getT();
 
-  const [stats, projects, articles, albums] = await Promise.all([
+  const [stats, articles, albums] = await Promise.all([
     getClubStats(),
-    listProjects(true),
     listArticles({ status: 'published' }),
     listAlbums(true),
   ]);
 
   const activities = [
     { icon: <FlaskConical />, title: d.publicSite.activityExperiments, body: d.publicSite.activityExperimentsBody },
-    { icon: <Microscope />, title: d.publicSite.activityResearch, body: d.publicSite.activityResearchBody },
     { icon: <PenLine />, title: d.publicSite.activityMagazine, body: d.publicSite.activityMagazineBody },
     { icon: <Leaf />, title: d.publicSite.activityCommunity, body: d.publicSite.activityCommunityBody },
   ];
@@ -72,10 +69,9 @@ export default async function PublicHomePage() {
 
       {/* Statistics */}
       <section className="border-b border-line bg-blush" aria-label={d.publicSite.aboutTitle}>
-        <div className="shell grid grid-cols-2 gap-8 py-12 md:grid-cols-4">
+        <div className="shell grid grid-cols-3 gap-8 py-12">
           {[
             { value: stats.totalMembers, label: d.publicSite.statMembers },
-            { value: stats.currentProjects, label: d.publicSite.statProjects },
             { value: stats.publishedArticles, label: d.publicSite.statArticles },
             { value: stats.totalEventsThisYear, label: d.publicSite.statEvents },
           ].map((stat) => (
@@ -124,7 +120,7 @@ export default async function PublicHomePage() {
               {d.publicSite.activitiesTitle}
             </h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-3">
             {activities.map((activity) => (
               <Card key={activity.title} className="p-6">
                 <span className="mb-4 grid h-11 w-11 place-items-center rounded-control bg-plum-50 text-plum [&>svg]:h-5 [&>svg]:w-5">
@@ -137,57 +133,6 @@ export default async function PublicHomePage() {
           </div>
         </div>
       </section>
-
-      {/* Selected projects */}
-      {projects.length > 0 ? (
-        <section className="shell py-16 md:py-20" aria-labelledby="home-projects">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow mb-3">{d.publicSite.projects}</p>
-              <h2 id="home-projects" className="font-brand text-h1 text-plum">
-                {d.publicSite.projectsTitle}
-              </h2>
-            </div>
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-2 text-small font-semibold text-plum underline decoration-rose-gold/60 underline-offset-4"
-            >
-              {d.common.viewAll}
-              <ArrowRight className="h-4 w-4 rtl-flip" aria-hidden="true" strokeWidth={1.75} />
-            </Link>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {projects.slice(0, 3).map((project) => {
-              const status = projectStatus(project.status, d);
-              return (
-                <Card as="article" key={project.id} className="overflow-hidden">
-                  {project.cover_image ? (
-                    <div className="aspect-[16/9] bg-blush">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={project.cover_image}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        aria-hidden="true"
-                      />
-                    </div>
-                  ) : null}
-                  <div className="p-6">
-                    <Pill tone={status.tone}>{status.label}</Pill>
-                    <h3 className="mt-3 font-brand text-h3 text-plum">
-                      {pick(locale, project as unknown as Record<string, unknown>, 'title')}
-                    </h3>
-                    <p className="mt-2 text-small leading-relaxed text-ink-muted">
-                      {pick(locale, project as unknown as Record<string, unknown>, 'objective')}
-                    </p>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
 
       {/* Magazine teaser */}
       {articles.length > 0 ? (

@@ -736,6 +736,7 @@ export const en = {
     vision: 'Vision',
     mission: 'Mission',
     activities: 'Activities',
+    clubLife: 'Club Life',
     projects: 'Projects',
     achievements: 'Achievements',
     magazine: 'Magazine',

@@ -15,9 +15,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const links = [
     { href: '/', label: d.publicSite.home },
     { href: '/about', label: d.publicSite.about },
-    { href: '/activities', label: d.publicSite.activities },
-    { href: '/projects', label: d.publicSite.projects },
-    { href: '/achievements', label: d.publicSite.achievements },
+    { href: '/activities', label: d.publicSite.clubLife },
     { href: '/magazine', label: d.publicSite.magazine },
     { href: '/gallery', label: d.publicSite.gallery },
   ];

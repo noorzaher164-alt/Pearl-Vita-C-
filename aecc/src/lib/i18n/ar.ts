@@ -738,6 +738,7 @@ export const ar: Dictionary = {
     vision: 'الرؤية',
     mission: 'الرسالة',
     activities: 'الأنشطة',
+    clubLife: 'حياة النادي',
     projects: 'المشاريع',
     achievements: 'الإنجازات',
     magazine: 'المجلة',
