@@ -86,64 +86,71 @@
 /* ------------------------------------------------------------------ */
 
 :root.dark {
-  --c-ivory: 28 16 20;
-  --c-ivory-deep: 38 24 30;
-  --c-blush: 34 21 26;
-  --c-blush-deep: 43 26 32;
-  --c-surface: 48 30 38;
+  /* Backgrounds — neutral charcoal with a faint plum undertone */
+  --c-ivory: 18 14 18;
+  --c-ivory-deep: 24 20 24;
+  --c-blush: 26 22 28;
+  --c-blush-deep: 32 27 34;
+  --c-surface: 38 33 42;
 
-  --c-ink: 237 224 228;
-  --c-ink-muted: 196 168 176;
-  --c-ink-faint: 155 128 136;
+  /* Text — high-contrast cream tones */
+  --c-ink: 242 236 240;
+  --c-ink-muted: 186 174 182;
+  --c-ink-faint: 136 124 132;
 
-  --c-plum: 212 168 190;
-  --c-plum-dark: 226 191 207;
-  --c-plum-accent: 122 56 85;
-  --c-plum-50: 46 27 36;
-  --c-plum-100: 61 37 48;
-  --c-plum-200: 82 51 66;
-  --c-plum-300: 122 78 100;
-  --c-plum-400: 168 110 142;
-  --c-plum-500: 212 168 190;
-  --c-plum-600: 226 191 207;
-  --c-plum-700: 234 206 222;
+  /* Plum — lighter for readability on dark grounds */
+  --c-plum: 220 180 204;
+  --c-plum-dark: 235 204 222;
+  --c-plum-accent: 148 72 108;
+  --c-plum-50: 36 26 34;
+  --c-plum-100: 48 34 44;
+  --c-plum-200: 68 46 58;
+  --c-plum-300: 108 72 90;
+  --c-plum-400: 168 118 148;
+  --c-plum-500: 220 180 204;
+  --c-plum-600: 235 204 222;
+  --c-plum-700: 242 220 234;
 
-  --c-rose: 196 138 144;
-  --c-rose-soft: 215 167 165;
-  --c-rose-gold: 203 140 120;
-  --c-rose-50: 46 28 30;
-  --c-rose-100: 61 40 40;
-  --c-rose-200: 82 56 56;
-  --c-rose-300: 184 138 136;
-  --c-rose-400: 168 112 116;
-  --c-rose-500: 196 138 144;
-  --c-rose-600: 212 160 166;
+  /* Rose */
+  --c-rose: 210 152 158;
+  --c-rose-soft: 225 180 178;
+  --c-rose-gold: 218 160 138;
+  --c-rose-50: 38 26 28;
+  --c-rose-100: 52 36 36;
+  --c-rose-200: 72 50 50;
+  --c-rose-300: 190 142 140;
+  --c-rose-400: 180 124 128;
+  --c-rose-500: 210 152 158;
+  --c-rose-600: 224 174 180;
 
-  --c-berry: 184 141 160;
-  --c-mauve: 175 148 158;
-  --c-mauve-light: 107 90 98;
-  --c-mauve-dark: 196 168 180;
+  /* Accents */
+  --c-berry: 196 156 174;
+  --c-mauve: 180 156 166;
+  --c-mauve-light: 96 82 90;
+  --c-mauve-dark: 206 180 192;
 
-  --c-line: rgba(220, 180, 200, 0.12);
-  --c-line-strong: rgba(220, 180, 200, 0.18);
-  --c-line-gold: rgba(203, 140, 120, 0.35);
+  /* Lines — brighter for visibility */
+  --c-line: rgba(200, 170, 190, 0.16);
+  --c-line-strong: rgba(200, 170, 190, 0.24);
+  --c-line-gold: rgba(218, 160, 138, 0.35);
 
-  --c-success: 124 173 138;
-  --c-success-soft: 30 46 34;
-  --c-success-ink: 168 212 176;
-  --c-warning: 212 168 114;
-  --c-warning-soft: 48 36 24;
-  --c-warning-ink: 218 187 142;
-  --c-danger: 212 128 128;
-  --c-danger-soft: 48 26 26;
-  --c-danger-ink: 224 160 160;
-  --c-info: 180 152 186;
-  --c-info-soft: 38 30 40;
-  --c-info-ink: 200 176 206;
+  /* Semantic */
+  --c-success: 120 186 140;
+  --c-success-soft: 22 38 28;
+  --c-success-ink: 170 220 182;
+  --c-warning: 222 180 120;
+  --c-warning-soft: 40 32 20;
+  --c-warning-ink: 230 200 150;
+  --c-danger: 220 130 130;
+  --c-danger-soft: 42 22 22;
+  --c-danger-ink: 235 168 168;
+  --c-info: 186 160 196;
+  --c-info-soft: 32 26 36;
+  --c-info-ink: 210 188 218;
 
-  --c-black: 245 232 237;
+  --c-black: 245 236 240;
 
-  --shadow-card: 0 10px 35px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 10px 35px rgba(0, 0, 0, 0.35);
 }
 
 @layer base {
