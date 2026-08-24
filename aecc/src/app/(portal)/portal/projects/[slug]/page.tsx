@@ -87,7 +87,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                         'relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-pill border',
                         milestone.done
                           ? 'border-rose-gold bg-[#F9EDE6] text-[#8A5540]'
-                          : 'border-line bg-white text-mauve',
+                          : 'border-line bg-surface text-mauve',
                       )}
                     >
                       {milestone.done ? (

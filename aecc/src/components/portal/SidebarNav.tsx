@@ -53,7 +53,7 @@ export function SidebarNav({
                           ? 'bg-ivory text-plum shadow-soft'
                           : 'text-rose-soft hover:bg-white/10 hover:text-white'
                         : isActive
-                          ? 'bg-plum text-white'
+                          ? 'bg-plum-accent text-white'
                           : 'text-ink-muted hover:bg-blush hover:text-plum',
                     )}
                   >

@@ -61,7 +61,7 @@ export function ChallengeAnswerForm({
                 <label
                   htmlFor={`answer-${index}`}
                   className={cn(
-                    'flex cursor-pointer items-center gap-3 rounded-control border border-line bg-white px-4 py-3 text-small text-ink transition',
+                    'flex cursor-pointer items-center gap-3 rounded-control border border-line bg-surface px-4 py-3 text-small text-ink transition',
                     'hover:border-rose peer-checked:border-plum peer-checked:bg-plum-50 peer-checked:font-semibold peer-checked:text-plum',
                     'peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-rose',
                   )}

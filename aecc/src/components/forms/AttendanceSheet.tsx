@@ -117,7 +117,7 @@ export function AttendanceSheet({
                           <label
                             htmlFor={`${row.id}-${option}`}
                             className={cn(
-                              'inline-flex cursor-pointer items-center rounded-pill border border-line bg-white px-3 py-1 text-caption font-semibold text-ink-muted transition hover:border-rose peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-rose',
+                              'inline-flex cursor-pointer items-center rounded-pill border border-line bg-surface px-3 py-1 text-caption font-semibold text-ink-muted transition hover:border-rose peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-rose',
                               OPTION_STYLE[option],
                             )}
                           >
@@ -164,7 +164,7 @@ export function AttendanceSheet({
                     <label
                       htmlFor={`m-${row.id}-${option}`}
                       className={cn(
-                        'flex cursor-pointer items-center justify-center rounded-control border border-line bg-white px-3 py-2 text-caption font-semibold text-ink-muted transition',
+                        'flex cursor-pointer items-center justify-center rounded-control border border-line bg-surface px-3 py-2 text-caption font-semibold text-ink-muted transition',
                         OPTION_STYLE[option],
                       )}
                     >

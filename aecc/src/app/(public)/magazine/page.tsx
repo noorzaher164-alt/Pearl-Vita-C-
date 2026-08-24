@@ -113,7 +113,7 @@ export default async function MagazineHomePage() {
                   <li key={issue.id}>
                     <Link
                       href={`/magazine/issues/${issue.number}`}
-                      className="group flex gap-3 rounded-card border border-line bg-white p-3 transition hover:border-rose"
+                      className="group flex gap-3 rounded-card border border-line bg-surface p-3 transition hover:border-rose"
                     >
                       <span className="h-16 w-14 shrink-0 overflow-hidden rounded-control bg-blush">
                         {issue.cover_image ? (

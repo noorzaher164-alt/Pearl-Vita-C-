@@ -77,7 +77,7 @@ export function PublicNav({
                   aria-current={isActive(link.href) ? 'page' : undefined}
                   className={cn(
                     'block rounded-control px-4 py-3 text-small font-medium transition',
-                    isActive(link.href) ? 'bg-plum text-white' : 'text-ink-muted hover:bg-blush',
+                    isActive(link.href) ? 'bg-plum-accent text-white' : 'text-ink-muted hover:bg-blush',
                   )}
                 >
                   {link.label}

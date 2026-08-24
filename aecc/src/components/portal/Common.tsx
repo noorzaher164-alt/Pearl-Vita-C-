@@ -215,9 +215,9 @@ export function QuickAction({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-control border border-line bg-white px-4 py-3 transition hover:border-rose hover:shadow-soft"
+      className="group flex items-center gap-3 rounded-control border border-line bg-surface px-4 py-3 transition hover:border-rose hover:shadow-soft"
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-plum-50 text-plum transition group-hover:bg-plum group-hover:text-white">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-control bg-plum-50 text-plum transition group-hover:bg-plum-accent group-hover:text-white">
         <NavIcon name={icon} className="h-[18px] w-[18px]" />
       </span>
       <span className="min-w-0 flex-1 truncate text-small font-semibold text-plum">{label}</span>

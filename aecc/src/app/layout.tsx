@@ -83,6 +83,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${display.variable} ${ui.variable} ${displayAr.variable} ${uiAr.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="min-h-dvh bg-ivory text-ink antialiased">{children}</body>
     </html>
   );

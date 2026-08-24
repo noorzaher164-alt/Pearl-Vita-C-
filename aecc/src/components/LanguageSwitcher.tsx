@@ -26,7 +26,7 @@ export function LanguageSwitcher({
       action={setLocale}
       className={cn(
         'inline-flex items-center gap-1 rounded-pill border p-1',
-        tone === 'light' ? 'border-line bg-white' : 'border-white/20 bg-white/10',
+        tone === 'light' ? 'border-line bg-surface' : 'border-white/20 bg-white/10',
         className,
       )}
       aria-label={d.a11y.languageSwitcher}
@@ -54,7 +54,7 @@ export function LanguageSwitcher({
               'rounded-pill px-3 py-1 text-caption font-semibold transition',
               active
                 ? tone === 'light'
-                  ? 'bg-plum text-white'
+                  ? 'bg-plum-accent text-white'
                   : 'bg-ivory text-plum'
                 : tone === 'light'
                   ? 'text-ink-muted hover:bg-blush hover:text-plum'

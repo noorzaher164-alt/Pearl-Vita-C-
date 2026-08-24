@@ -37,7 +37,7 @@ export function IssueForm({
 
         <fieldset>
           <legend className="field-label">{d.magazine.assignArticles}</legend>
-          <div className="max-h-64 overflow-y-auto rounded-control border border-line bg-white p-3">
+          <div className="max-h-64 overflow-y-auto rounded-control border border-line bg-surface p-3">
             {articles.length === 0 ? (
               <p className="text-caption text-ink-muted">{d.magazine.noArticles}</p>
             ) : (

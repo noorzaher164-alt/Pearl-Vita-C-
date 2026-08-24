@@ -2,15 +2,22 @@ import type { Config } from 'tailwindcss';
 
 /**
  * AECC — Al Eman Chemistry Club
- * Every value here comes from the AECC Master Brand & Website Guide (2026–2027).
- * No framework default palette is exposed: the stock Tailwind colours are replaced
- * entirely so no blue/slate/indigo can leak into a component.
+ * Colours reference CSS custom properties so dark mode works automatically.
+ * The --c-* variables are space-separated RGB channels; the <alpha-value>
+ * placeholder lets Tailwind opacity modifiers (bg-plum/50) still work.
+ *
+ * `white` and `black` stay literal so sidebar overlays (bg-white/10 on the
+ * dark plum sidebar) never change.
  */
+
+function cv(name: string) {
+  return `rgb(var(--c-${name}) / <alpha-value>)`;
+}
+
 const config: Config = {
   content: ['./src/**/*.{ts,tsx,mdx}'],
+  darkMode: 'class',
   theme: {
-    // Replacing (not extending) `colors` guarantees the acceptance-checklist rule
-    // "no default framework blue remains".
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
@@ -19,60 +26,60 @@ const config: Config = {
       black: '#241019',
 
       plum: {
-        DEFAULT: '#48132F',
-        dark: '#3C0824',
-        // tints derived only from the approved plum, for washes and hovers
-        50: '#F6EAEF',
-        100: '#EBD3DE',
-        200: '#D2A7BC',
-        300: '#B27B98',
-        400: '#8B4E71',
-        500: '#48132F',
-        600: '#3C0824',
-        700: '#2F061C',
+        DEFAULT: cv('plum'),
+        dark: cv('plum-dark'),
+        accent: cv('plum-accent'),
+        50: cv('plum-50'),
+        100: cv('plum-100'),
+        200: cv('plum-200'),
+        300: cv('plum-300'),
+        400: cv('plum-400'),
+        500: cv('plum-500'),
+        600: cv('plum-600'),
+        700: cv('plum-700'),
       },
       rose: {
-        DEFAULT: '#9F656B',
-        soft: '#D7A7A5',
-        gold: '#CB8C78',
-        50: '#FBF1F0',
-        100: '#F4E1DF',
-        200: '#E7C6C4',
-        300: '#D7A7A5',
-        400: '#BE868A',
-        500: '#9F656B',
-        600: '#845158',
+        DEFAULT: cv('rose'),
+        soft: cv('rose-soft'),
+        gold: cv('rose-gold'),
+        50: cv('rose-50'),
+        100: cv('rose-100'),
+        200: cv('rose-200'),
+        300: cv('rose-300'),
+        400: cv('rose-400'),
+        500: cv('rose-500'),
+        600: cv('rose-600'),
       },
-      berry: '#764E61',
+      berry: cv('berry'),
       mauve: {
-        DEFAULT: '#AF949E',
-        light: '#CBB8BF',
-        dark: '#8C7280',
+        DEFAULT: cv('mauve'),
+        light: cv('mauve-light'),
+        dark: cv('mauve-dark'),
       },
       ivory: {
-        DEFAULT: '#FBEAE6',
-        deep: '#F6DED9',
+        DEFAULT: cv('ivory'),
+        deep: cv('ivory-deep'),
       },
       blush: {
-        DEFAULT: '#FDF5EF',
-        deep: '#FAEDE5',
+        DEFAULT: cv('blush'),
+        deep: cv('blush-deep'),
       },
+      surface: cv('surface'),
       ink: {
-        DEFAULT: '#2D1A1E',
-        muted: '#5E4650',
-        faint: '#8A6B70',
+        DEFAULT: cv('ink'),
+        muted: cv('ink-muted'),
+        faint: cv('ink-faint'),
       },
       line: {
-        DEFAULT: 'rgba(72,19,47,0.12)',
-        strong: 'rgba(72,19,47,0.22)',
-        gold: 'rgba(203,140,120,0.45)',
+        DEFAULT: 'var(--c-line)',
+        strong: 'var(--c-line-strong)',
+        gold: 'var(--c-line-gold)',
       },
 
-      // Muted semantic set — used only where meaning demands it.
-      success: { DEFAULT: '#4F6B57', soft: '#E7EFE8', ink: '#33463A' },
-      warning: { DEFAULT: '#B58551', soft: '#FBEFE0', ink: '#7A5730' },
-      danger: { DEFAULT: '#9B4A4A', soft: '#F8E6E4', ink: '#6B2F2F' },
-      info: { DEFAULT: '#6E5A72', soft: '#F1EBF0', ink: '#4A3B4E' },
+      success: { DEFAULT: cv('success'), soft: cv('success-soft'), ink: cv('success-ink') },
+      warning: { DEFAULT: cv('warning'), soft: cv('warning-soft'), ink: cv('warning-ink') },
+      danger: { DEFAULT: cv('danger'), soft: cv('danger-soft'), ink: cv('danger-ink') },
+      info: { DEFAULT: cv('info'), soft: cv('info-soft'), ink: cv('info-ink') },
     },
 
     fontFamily: {
@@ -83,7 +90,6 @@ const config: Config = {
       mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
     },
 
-    // Guide §3 type scale, expressed as size/line-height pairs.
     fontSize: {
       caption: ['0.75rem', { lineHeight: '1.125rem' }],
       small: ['0.875rem', { lineHeight: '1.375rem' }],
@@ -96,7 +102,6 @@ const config: Config = {
       metric: ['2rem', { lineHeight: '2.375rem' }],
     },
 
-    // Guide §4: 4/8/12/16/24/32/48/64 — no arbitrary spacing.
     spacing: {
       0: '0px',
       px: '1px',
@@ -159,7 +164,7 @@ const config: Config = {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
-        'sheen': {
+        sheen: {
           '0%,100%': { opacity: '0.35' },
           '50%': { opacity: '0.6' },
         },

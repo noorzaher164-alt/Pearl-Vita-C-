@@ -5,6 +5,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoLockup } from '@/components/brand/Logo';
 import { MobileNav } from '@/components/portal/MobileNav';
 import { SidebarNav } from '@/components/portal/SidebarNav';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Avatar, Pill } from '@/components/ui';
 import { requireViewer } from '@/lib/auth/current-user';
 import { roleLabel, roleTone } from '@/lib/domain/labels';
@@ -48,7 +49,7 @@ export default async function PortalLayout({ children }: { children: React.React
     <div className="flex min-h-dvh flex-col bg-ivory lg:flex-row">
       <a
         href="#portal-main"
-        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-plum focus:px-4 focus:py-2 focus:text-small focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-plum-accent focus:px-4 focus:py-2 focus:text-small focus:text-white"
       >
         {d.a11y.skipToContent}
       </a>
@@ -125,10 +126,11 @@ export default async function PortalLayout({ children }: { children: React.React
               <Pill tone={roleTone(viewer.role)} className="hidden sm:inline-flex">
                 {roleLabel(viewer.role, d)}
               </Pill>
+              <ThemeToggle />
               <LanguageSwitcher locale={locale} d={d} />
               <Link
                 href="/portal/profile"
-                className="grid h-10 w-10 place-items-center rounded-pill border border-line bg-white transition hover:border-rose lg:hidden"
+                className="grid h-10 w-10 place-items-center rounded-pill border border-line bg-surface transition hover:border-rose lg:hidden"
                 aria-label={d.nav.profile}
               >
                 <UserRound className="h-[18px] w-[18px] text-plum" aria-hidden="true" strokeWidth={1.75} />

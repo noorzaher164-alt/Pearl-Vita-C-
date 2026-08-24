@@ -69,7 +69,7 @@ export function TaskBoard({
               <h2 id={`col-${column}`} className="text-small font-semibold text-plum">
                 {label[column]}
               </h2>
-              <span className="ms-auto rounded-pill bg-white px-2 py-0.5 text-caption text-ink-muted tabular-nums">
+              <span className="ms-auto rounded-pill bg-surface px-2 py-0.5 text-caption text-ink-muted tabular-nums">
                 {items.length}
               </span>
             </header>
@@ -80,7 +80,7 @@ export function TaskBoard({
                 return (
                   <li
                     key={task.id}
-                    className="rounded-control border border-line bg-white p-4 shadow-soft transition hover:shadow-card"
+                    className="rounded-control border border-line bg-surface p-4 shadow-soft transition hover:shadow-card"
                   >
                     <p className="text-small font-semibold leading-snug text-plum">{task.title}</p>
                     {task.description ? (

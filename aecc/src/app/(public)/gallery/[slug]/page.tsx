@@ -44,7 +44,7 @@ export default async function PublicAlbumPage({ params }: { params: Promise<{ sl
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {album.images.map((image) => (
           <li key={image.id}>
-            <figure className="overflow-hidden rounded-card border border-line bg-white shadow-card">
+            <figure className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
               <div className="aspect-[4/3] bg-blush">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

@@ -37,7 +37,7 @@ export default async function LoginPage({
           {PREVIEW_ACCOUNTS.map((account) => (
             <li
               key={account.username}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-white px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-surface px-3 py-2"
             >
               <span className="text-caption font-semibold text-plum">
                 {roleLabel(account.roleKey, d)}

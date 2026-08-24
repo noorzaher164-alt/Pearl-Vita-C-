@@ -158,7 +158,7 @@ export type PillTone =
   | 'neutral';
 
 const PILL: Record<PillTone, string> = {
-  plum: 'bg-plum text-white',
+  plum: 'bg-plum-accent text-white',
   rose: 'bg-rose-100 text-rose-600 border-rose-200',
   gold: 'bg-[#F9EDE6] text-[#8A5540] border-[#E8CDBF]',
   mauve: 'bg-[#F2EBEE] text-mauve-dark border-[#E2D4DA]',
@@ -244,12 +244,12 @@ export function AvatarStack({
     <span className="flex items-center">
       {shown.map((person, index) => (
         <span key={index} className={index === 0 ? '' : '-ms-2'}>
-          <Avatar name={person.name} src={person.avatar} size={size} className="ring-2 ring-white" />
+          <Avatar name={person.name} src={person.avatar} size={size} className="ring-2 ring-surface" />
         </span>
       ))}
       {rest > 0 ? (
         <span
-          className="-ms-2 grid place-items-center rounded-pill border border-line bg-blush text-caption font-semibold text-ink-muted ring-2 ring-white"
+          className="-ms-2 grid place-items-center rounded-pill border border-line bg-blush text-caption font-semibold text-ink-muted ring-2 ring-surface"
           style={{ width: size, height: size }}
         >
           +{rest}
@@ -505,7 +505,7 @@ export function LinkTabs({
             className={cn(
               'inline-flex shrink-0 items-center gap-2 rounded-control px-4 py-2 text-small font-semibold transition',
               active
-                ? 'bg-plum text-white shadow-soft'
+                ? 'bg-plum-accent text-white shadow-soft'
                 : 'text-ink-muted hover:bg-blush hover:text-plum',
             )}
           >
@@ -514,7 +514,7 @@ export function LinkTabs({
               <span
                 className={cn(
                   'rounded-pill px-2 py-0.5 text-caption tabular-nums',
-                  active ? 'bg-white/20 text-white' : 'bg-ivory text-ink-muted',
+                  active ? 'bg-white/20 text-white' : 'bg-surface text-ink-muted',
                 )}
               >
                 {item.count}

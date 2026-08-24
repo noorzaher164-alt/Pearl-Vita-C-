@@ -4,6 +4,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Logo, LogoLockup } from '@/components/brand/Logo';
 import { SparkRule } from '@/components/brand/Motifs';
 import { PublicNav } from '@/components/public/PublicNav';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { currentViewer } from '@/lib/auth/current-user';
 import { getT } from '@/lib/i18n/server';
 
@@ -25,7 +26,7 @@ export default async function PublicLayout({ children }: { children: React.React
     <div className="flex min-h-dvh flex-col bg-ivory">
       <a
         href="#public-main"
-        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-plum focus:px-4 focus:py-2 focus:text-small focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[60] focus:rounded-control focus:bg-plum-accent focus:px-4 focus:py-2 focus:text-small focus:text-white"
       >
         {d.a11y.skipToContent}
       </a>
@@ -45,6 +46,7 @@ export default async function PublicLayout({ children }: { children: React.React
           <PublicNav links={links} label={d.a11y.mainNavigation} openLabel={d.a11y.openMenu} closeLabel={d.a11y.closeMenu} />
 
           <div className="ms-auto flex items-center gap-2">
+            <ThemeToggle />
             <LanguageSwitcher locale={locale} d={d} className="hidden sm:inline-flex" />
             <Link href={viewer ? '/portal' : '/login'} className="btn btn-primary btn-sm">
               <LogIn className="h-4 w-4 rtl-flip" aria-hidden="true" strokeWidth={1.75} />
