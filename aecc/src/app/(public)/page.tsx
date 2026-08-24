@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, FlaskConical, Leaf, PenLine } from 'lucide-react';
+import { ArrowRight, Atom, BookOpen, Brain, Eye, FlaskConical, Leaf, Lightbulb, PenLine, Pencil, TestTubes } from 'lucide-react';
 import { ArticleCard } from '@/components/magazine/ArticleCard';
 import { Logo } from '@/components/brand/Logo';
 import { ChemistryField, SparkRule } from '@/components/brand/Motifs';
@@ -131,6 +131,95 @@ export default async function PublicHomePage() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Projects showcase */}
+      <section className="shell py-16 md:py-20" aria-labelledby="home-projects">
+        <div className="mb-10 text-center">
+          <p className="eyebrow mb-3">{d.publicSite.projects}</p>
+          <h2 id="home-projects" className="font-brand text-h1 text-plum">
+            {d.publicSite.projectsShowcaseTitle}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-ink-muted">
+            {d.publicSite.projectsShowcaseBody}
+          </p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { icon: <TestTubes />, title: d.publicSite.projectShowcase1Title, body: d.publicSite.projectShowcase1Body },
+            { icon: <Leaf />, title: d.publicSite.projectShowcase2Title, body: d.publicSite.projectShowcase2Body },
+            { icon: <Atom />, title: d.publicSite.projectShowcase3Title, body: d.publicSite.projectShowcase3Body },
+          ].map((project) => (
+            <Card key={project.title} className="p-6">
+              <span className="mb-4 grid h-11 w-11 place-items-center rounded-control bg-rose-50 text-rose [&>svg]:h-5 [&>svg]:w-5">
+                {project.icon}
+              </span>
+              <h3 className="font-brand text-h3 text-plum">{project.title}</h3>
+              <p className="mt-2 text-small leading-relaxed text-ink-muted">{project.body}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Ideas & suggestions */}
+      <section className="border-y border-line bg-blush py-16 md:py-20" aria-labelledby="home-ideas">
+        <div className="shell">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
+            <div>
+              <p className="eyebrow mb-3"><Lightbulb className="inline h-4 w-4 -translate-y-px" aria-hidden="true" /> {d.publicSite.ideasTitle}</p>
+              <h2 id="home-ideas" className="font-brand text-h1 text-plum">
+                {d.publicSite.ideasTitle}
+              </h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-ink-muted">
+                {d.publicSite.ideasBody}
+              </p>
+            </div>
+            <div>
+              <h3 className="eyebrow mb-6">{d.publicSite.ideasHow}</h3>
+              <ol className="grid gap-4">
+                {[d.publicSite.ideasStep1, d.publicSite.ideasStep2, d.publicSite.ideasStep3].map((step, i) => (
+                  <li key={i} className="flex items-start gap-4">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-plum-accent font-brand text-small text-white">
+                      {i + 1}
+                    </span>
+                    <p className="pt-1 text-small leading-relaxed text-ink">{step}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How to study chemistry */}
+      <section className="shell py-16 md:py-20" aria-labelledby="home-study">
+        <div className="mb-10 text-center">
+          <p className="eyebrow mb-3">{d.publicSite.studyChemTitle}</p>
+          <h2 id="home-study" className="font-brand text-h1 text-plum">
+            {d.publicSite.studyChemTitle}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[1.0625rem] leading-relaxed text-ink-muted">
+            {d.publicSite.studyChemBody}
+          </p>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          {[
+            { icon: <Brain />, title: d.publicSite.studyTip1Title, body: d.publicSite.studyTip1Body },
+            { icon: <Pencil />, title: d.publicSite.studyTip2Title, body: d.publicSite.studyTip2Body },
+            { icon: <Eye />, title: d.publicSite.studyTip3Title, body: d.publicSite.studyTip3Body },
+            { icon: <FlaskConical />, title: d.publicSite.studyTip4Title, body: d.publicSite.studyTip4Body },
+          ].map((tip) => (
+            <Card key={tip.title} className="flex items-start gap-4 p-6">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-plum-50 text-plum [&>svg]:h-5 [&>svg]:w-5">
+                {tip.icon}
+              </span>
+              <div>
+                <h3 className="font-brand text-h3 text-plum">{tip.title}</h3>
+                <p className="mt-2 text-small leading-relaxed text-ink-muted">{tip.body}</p>
+              </div>
+            </Card>
+          ))}
         </div>
       </section>
 
