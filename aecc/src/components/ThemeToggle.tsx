@@ -21,20 +21,23 @@ export function ThemeToggle({ className }: { className?: string }) {
   }
 
   if (!mounted) {
-    return <span className={cn('btn btn-icon btn-ghost btn-sm', className)} />;
+    return <span className={cn('grid h-10 w-10 place-items-center rounded-pill border border-line bg-surface', className)} />;
   }
 
   return (
     <button
       type="button"
       onClick={toggle}
-      className={cn('btn btn-icon btn-ghost btn-sm', className)}
+      className={cn(
+        'grid h-10 w-10 place-items-center rounded-pill border border-line bg-surface transition hover:border-rose hover:shadow-soft',
+        className,
+      )}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {dark ? (
-        <Sun className="h-[18px] w-[18px]" aria-hidden="true" strokeWidth={1.75} />
+        <Sun className="h-[18px] w-[18px] text-amber-500" aria-hidden="true" strokeWidth={1.75} />
       ) : (
-        <Moon className="h-[18px] w-[18px]" aria-hidden="true" strokeWidth={1.75} />
+        <Moon className="h-[18px] w-[18px] text-plum" aria-hidden="true" strokeWidth={1.75} />
       )}
     </button>
   );
