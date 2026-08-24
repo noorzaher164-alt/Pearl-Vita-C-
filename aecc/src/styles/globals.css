@@ -17,8 +17,8 @@
   --aecc-rose-gold: #cb8c78;
   --aecc-mauve: #af949e;
   --aecc-blush: #fdf5ef;
-  --aecc-ink: #3b2732;
-  --aecc-muted: #765f69;
+  --aecc-ink: #2D1A1E;
+  --aecc-muted: #5E4650;
 
   --radius-card: 18px;
   --radius-control: 12px;
@@ -44,6 +44,7 @@
     font-family: var(--font-ui), Manrope, Arial, system-ui, sans-serif;
     font-size: 1rem;
     line-height: 1.625rem;
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -58,7 +59,7 @@
   h3,
   h4 {
     color: var(--aecc-plum);
-    font-weight: 600;
+    font-weight: 700;
     text-wrap: balance;
   }
 
@@ -125,7 +126,7 @@
     line-height: 1rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--aecc-mauve);
   }
   html[lang='ar'] .eyebrow {

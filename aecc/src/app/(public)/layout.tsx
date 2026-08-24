@@ -30,7 +30,7 @@ export default async function PublicLayout({ children }: { children: React.React
         {d.a11y.skipToContent}
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-ivory/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-line bg-blush/85 backdrop-blur-md">
         <div className="shell flex items-center gap-4 py-3">
           <Link href="/" className="shrink-0">
             <LogoLockup
@@ -38,7 +38,7 @@ export default async function PublicLayout({ children }: { children: React.React
               alt={d.a11y.logoAlt}
               title={d.brand.name}
               subtitle={d.brand.school}
-              size={44}
+              size={56}
             />
           </Link>
 

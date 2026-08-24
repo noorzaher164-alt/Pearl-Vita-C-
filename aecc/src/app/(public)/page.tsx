@@ -37,6 +37,11 @@ export default async function PublicHomePage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
+        <div
+          className="decor pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+          style={{ backgroundImage: "url('/media/hero-bg.jpg')" }}
+          aria-hidden="true"
+        />
         <ChemistryField className="opacity-70" />
         <div className="shell relative grid items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.1fr_1fr]">
           <div>
@@ -60,7 +65,7 @@ export default async function PublicHomePage() {
           </div>
 
           <div className="mx-auto hidden w-fit lg:block">
-            <Logo locale={locale} size={340} variant="lg" alt={d.a11y.logoAlt} priority />
+            <Logo locale={locale} size={400} variant="lg" alt={d.a11y.logoAlt} priority />
           </div>
         </div>
       </section>

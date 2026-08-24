@@ -58,9 +58,9 @@ const config: Config = {
         deep: '#FAEDE5',
       },
       ink: {
-        DEFAULT: '#3B2732',
-        muted: '#765F69',
-        faint: '#9C8992',
+        DEFAULT: '#2D1A1E',
+        muted: '#5E4650',
+        faint: '#8A6B70',
       },
       line: {
         DEFAULT: 'rgba(72,19,47,0.12)',
