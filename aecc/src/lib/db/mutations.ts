@@ -652,6 +652,7 @@ export async function createTask(input: {
       due_date: input.dueDate,
       created_by: input.actorId,
       created_at: new Date().toISOString(),
+      completed_at: null,
     });
     for (const userId of input.assigneeIds) {
       database.task_assignees.push({ task_id: newId, user_id: userId });
@@ -664,7 +665,10 @@ export async function createTask(input: {
 export async function setTaskStatus(actorId: ID, taskId: ID, status: TaskStatus): Promise<void> {
   await write((database) => {
     const task = database.tasks.find((t) => t.id === taskId);
-    if (task) task.status = status;
+    if (task) {
+      task.status = status;
+      task.completed_at = status === 'done' ? new Date().toISOString() : null;
+    }
   });
 }
 

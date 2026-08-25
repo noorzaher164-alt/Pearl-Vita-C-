@@ -318,6 +318,7 @@ export interface Task {
   due_date: ISODate | null;
   created_by: ID;
   created_at: ISODate;
+  completed_at: ISODate | null;
 }
 
 export interface TaskAssignee {

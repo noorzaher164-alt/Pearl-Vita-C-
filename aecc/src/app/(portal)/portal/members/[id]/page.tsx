@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   ArrowLeft,
-
-
+  CheckCircle2,
+  Circle,
+  ClipboardList,
   Lock,
   Mail,
   Pencil,
@@ -35,6 +36,7 @@ import {
   getMemberProjects,
   listCertificates,
   listPointTransactions,
+  listStaffTasks,
   listTasks,
   getAdminNotes,
 } from '@/lib/db/queries';
@@ -64,7 +66,9 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const canSeeNotes = viewer.permissions.can('members:notes');
   const canSeeContact = viewer.isStaff || isOwnProfile;
 
-  const [committee, points, badges, attendance, projects, tasks, certificates, adminNotes] =
+  const showStaffTasks = viewer.isStaff && isOwnProfile;
+
+  const [committee, points, badges, attendance, projects, tasks, certificates, adminNotes, staffTasks] =
     await Promise.all([
       member.committee_id ? getCommittee(member.committee_id) : Promise.resolve(null),
       listPointTransactions(member.id, 12),
@@ -74,6 +78,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       listTasks({ userId: member.id }),
       listCertificates(member.id),
       canSeeNotes ? getAdminNotes(member.id) : Promise.resolve(null),
+      showStaffTasks ? listStaffTasks(member.id) : Promise.resolve([]),
     ]);
 
   const status = memberStatus(member.status, d);
@@ -93,13 +98,13 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
 
       {/* Identity header */}
       <Card className="mb-6 overflow-hidden">
-        <div className="h-20 bg-plum-veil" aria-hidden="true" />
+        <div className="h-24 bg-gradient-to-r from-plum/80 to-plum-veil" aria-hidden="true" />
         <div className="px-6 pb-6">
-          <div className="-mt-10 flex flex-wrap items-end justify-between gap-4">
-            <div className="flex items-end gap-4">
-              <Avatar name={name} src={member.avatar_url} size={88} className="ring-4 ring-white" />
-              <div className="pb-1">
-                <h1 className="font-brand text-h2 text-plum">{name}</h1>
+          <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <Avatar name={name} src={member.avatar_url} size={88} className="shrink-0 ring-4 ring-white dark:ring-neutral-800" />
+              <div className="min-w-0 pb-1">
+                <h1 className="break-words font-brand text-h2 text-plum">{name}</h1>
                 <Meta
                   className="mt-1"
                   items={[member.grade, committeeName(committee, locale) || d.committees.noCommittee]}
@@ -354,6 +359,87 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
               </div>
             </Card>
           </div>
+
+          {/* Staff / Teacher supervisory tasks */}
+          {showStaffTasks && staffTasks.length > 0 ? (
+            <Card>
+              <CardHeader
+                title={
+                  <span className="inline-flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 text-plum" aria-hidden="true" strokeWidth={1.75} />
+                    {d.members.staffTasksTab}
+                  </span>
+                }
+                subtitle={d.members.staffTasksHint}
+              />
+              <div className="mt-2">
+                <TableShell className="shadow-none">
+                  <table className="aecc-table">
+                    <caption className="sr-only">{d.members.staffTasksTab}</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">{d.tasks.title}</th>
+                        <th scope="col">{d.common.status}</th>
+                        <th scope="col">{d.tasks.priority}</th>
+                        <th scope="col">{d.tasks.dueDate}</th>
+                        <th scope="col">{d.tasks.completedAt}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {staffTasks.map((task) => {
+                        const state = taskStatus(task.status, d);
+                        const isDone = task.status === 'done';
+                        return (
+                          <tr key={task.id}>
+                            <td className="max-w-[200px]">
+                              <span className="block truncate text-small text-ink">
+                                {pick(locale, task as unknown as Record<string, unknown>, 'title')}
+                              </span>
+                              {task.assignees.length > 0 ? (
+                                <span className="mt-0.5 block truncate text-caption text-ink-faint">
+                                  {d.tasks.assignee}: {task.assignees.map((a) => memberName(a, locale)).join(', ')}
+                                </span>
+                              ) : null}
+                            </td>
+                            <td><Pill tone={state.tone}>{state.label}</Pill></td>
+                            <td className="whitespace-nowrap text-caption text-ink-muted">{d.tasks[`priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}` as 'priorityLow' | 'priorityMedium' | 'priorityHigh']}</td>
+                            <td className="whitespace-nowrap text-ink-muted">{task.due_date ? formatDate(task.due_date, locale) : '—'}</td>
+                            <td>
+                              {isDone ? (
+                                <span className="inline-flex items-center gap-1.5 text-small text-emerald-600">
+                                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
+                                  {task.completed_at ? formatDate(task.completed_at, locale) : d.tasks.done}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 text-small text-ink-faint">
+                                  <Circle className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
+                                  {d.tasks.notCompleted}
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </TableShell>
+              </div>
+            </Card>
+          ) : showStaffTasks ? (
+            <Card>
+              <CardHeader
+                title={
+                  <span className="inline-flex items-center gap-2">
+                    <ClipboardList className="h-4 w-4 text-plum" aria-hidden="true" strokeWidth={1.75} />
+                    {d.members.staffTasksTab}
+                  </span>
+                }
+              />
+              <div className="p-6 pt-4">
+                <p className="text-small text-ink-muted">{d.tasks.noStaffTasks}</p>
+              </div>
+            </Card>
+          ) : null}
 
           <Card>
             <CardHeader title={d.members.certificatesTab} />

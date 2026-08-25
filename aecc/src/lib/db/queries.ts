@@ -520,6 +520,21 @@ export async function listTasks(filter: { userId?: ID; committeeId?: ID; project
   }));
 }
 
+export async function listStaffTasks(createdBy: ID): Promise<TaskView[]> {
+  const database = await db();
+  const rows = database.tasks.filter((t) => t.created_by === createdBy);
+  return rows.map((task) => ({
+    ...task,
+    assignees: database.task_assignees
+      .filter((a) => a.task_id === task.id)
+      .map((a) => toMemberView(database, a.user_id))
+      .filter((m): m is MemberView => m !== null),
+    committee: database.committees.find((c) => c.id === task.committee_id) ?? null,
+    project: database.projects.find((p) => p.id === task.project_id) ?? null,
+    event: database.events.find((e) => e.id === task.event_id) ?? null,
+  }));
+}
+
 /* -------------------------------------------------------------------------- */
 /* Projects                                                                   */
 /* -------------------------------------------------------------------------- */
