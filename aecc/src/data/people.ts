@@ -62,6 +62,22 @@ export const SEED_PEOPLE: SeedPerson[] = [
     bio_ar: 'معلمة علوم ومشرفة مشاركة، تُشرف على المجلة الإلكترونية والنشر الطلابي.',
     seedPoints: 0,
   },
+  {
+    id: 'u-031',
+    username: 'nourhan.zaher',
+    email: 'noorzaher164@gmail.com',
+    password: 'Admin2027',
+    role: 'admin',
+    committee: null,
+    name_en: 'Nourhan Zaher',
+    name_ar: 'نورهان زاهر',
+    grade: 'Chemistry Department',
+    status: 'active',
+    joined: '2024-09-01',
+    bio_en: 'Club administrator and platform manager.',
+    bio_ar: 'مسؤولة النادي ومديرة المنصة.',
+    seedPoints: 0,
+  },
 
   /* ------------------------------------------------------------- officers -- */
   {
@@ -519,6 +535,7 @@ export const SEED_PEOPLE: SeedPerson[] = [
 ];
 
 export const PREVIEW_ACCOUNTS = [
+  { username: 'nourhan.zaher', password: 'Admin2027', roleKey: 'admin' as RoleKey },
   { username: 'a.alharbi', password: 'Supervisor2027', roleKey: 'admin' as RoleKey },
   { username: 'sara.almutairi', password: 'President2027', roleKey: 'president' as RoleKey },
   { username: 'noura.alshehri', password: 'Leader2027', roleKey: 'committee_leader' as RoleKey },
