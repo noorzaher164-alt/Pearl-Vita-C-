@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ExternalLink, Eye, FileEdit, Newspaper, PenLine, Send, Star } from 'lucide-react';
+import { ExternalLink, Eye, FileEdit, Megaphone, Newspaper, PenLine, Send, Star, Trophy } from 'lucide-react';
 import { memberName } from '@/components/portal/Common';
-import { Card, CardHeader, EmptyState, LinkButton, MetricCard, PageHeader, Pill } from '@/components/ui';
+import { Card, CardHeader, EmptyState, LinkButton, MetricCard, PageHeader, Pill, SectionTitle } from '@/components/ui';
 import { requirePermission } from '@/lib/auth/current-user';
-import { listArticles, listCategories, listIssues } from '@/lib/db/queries';
+import { listAnnouncements, listArticles, listCategories, listIssues } from '@/lib/db/queries';
 import { accentTone, articleStatus } from '@/lib/domain/labels';
 import { fill, formatDate, formatNumber, pick } from '@/lib/i18n';
 import { getT } from '@/lib/i18n/server';
@@ -27,10 +27,11 @@ export default async function MagazineDashboardPage() {
   const { locale, d } = await getT();
 
   const canReview = viewer.permissions.can('magazine:review');
-  const [all, categories, issues] = await Promise.all([
+  const [all, categories, issues, announcements] = await Promise.all([
     listArticles(),
     listCategories(),
     listIssues(),
+    listAnnouncements({ id: viewer.id, role: viewer.role, committeeId: viewer.committee_id }),
   ]);
 
   // An author sees her own pipeline; an editor sees the whole desk.
@@ -260,6 +261,87 @@ export default async function MagazineDashboardPage() {
             <p className="text-caption text-ink-muted">{d.magazine.scienceWriterBadge}</p>
           </Card>
         </div>
+      </div>
+
+      {/* Department news & achievements */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <section aria-labelledby="mag-news">
+          <SectionTitle>
+            <span id="mag-news" className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-plum" strokeWidth={1.75} aria-hidden="true" />
+              {d.magazine.departmentNews}
+            </span>
+          </SectionTitle>
+          <Card className="p-2">
+            {announcements.length > 0 ? (
+              <ul className="divide-y divide-line">
+                {announcements.slice(0, 5).map((ann) => (
+                  <li key={ann.id} className="flex items-start gap-3 p-4">
+                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-pill bg-plum-50 text-plum">
+                      <Megaphone className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-small font-semibold text-plum">
+                        {pick(locale, ann as unknown as Record<string, unknown>, 'title')}
+                      </span>
+                      <span className="mt-1 block text-caption text-ink-faint">
+                        {formatDate(ann.published_at, locale)}
+                      </span>
+                    </span>
+                    <Pill tone={ann.level === 'urgent' ? 'danger' : ann.level === 'important' ? 'gold' : 'neutral'}>
+                      {ann.level === 'urgent' ? d.announcements.levelUrgent : ann.level === 'important' ? d.announcements.levelImportant : d.announcements.levelNormal}
+                    </Pill>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="p-6">
+                <EmptyState icon={<Megaphone />} title={d.magazine.noDepartmentNews} />
+              </div>
+            )}
+          </Card>
+        </section>
+
+        <section aria-labelledby="mag-achievements">
+          <SectionTitle>
+            <span id="mag-achievements" className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-plum" strokeWidth={1.75} aria-hidden="true" />
+              {d.magazine.departmentAchievements}
+            </span>
+          </SectionTitle>
+          <Card className="p-2">
+            {published.length > 0 ? (
+              <ul className="divide-y divide-line">
+                {published.slice(0, 5).map((article) => (
+                  <li key={article.id} className="flex items-start gap-3 p-4">
+                    <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-pill bg-rose-50 text-rose">
+                      <Trophy className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <Link
+                        href={`/portal/magazine/articles/${article.id}`}
+                        className="block text-small font-semibold text-plum transition hover:text-plum-dark"
+                      >
+                        {pick(locale, article as unknown as Record<string, unknown>, 'title')}
+                      </Link>
+                      <span className="mt-1 block text-caption text-ink-faint">
+                        {memberName(article.author, locale)}
+                        {article.published_at ? ` · ${formatDate(article.published_at, locale)}` : ''}
+                      </span>
+                    </span>
+                    {article.featured ? (
+                      <Pill tone="gold" icon={<Star />}>{d.magazine.featured}</Pill>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="p-6">
+                <EmptyState icon={<Trophy />} title={d.magazine.noDepartmentAchievements} />
+              </div>
+            )}
+          </Card>
+        </section>
       </div>
     </>
   );

@@ -7,7 +7,9 @@ import {
   ChartColumn,
   ClipboardCheck,
   Crown,
+  FileSearch,
   FlaskConical,
+  FolderKanban,
   History,
   Images,
   LayoutDashboard,
@@ -25,7 +27,9 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Swords,
   Trophy,
+  Upload,
   UserCog,
   Users,
 } from 'lucide-react';
@@ -67,6 +71,10 @@ const ICONS: Record<string, LucideIcon> = {
   crown: Crown,
   'calendar-range': CalendarRange,
   'pen-line': PenLine,
+  upload: Upload,
+  'file-search': FileSearch,
+  'folder-kanban': FolderKanban,
+  swords: Swords,
 };
 
 export function NavIcon({ name, className }: { name: string; className?: string }) {

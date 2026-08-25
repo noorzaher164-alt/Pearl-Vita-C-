@@ -225,6 +225,41 @@ export const en = {
     outOfMembers: 'of {total} members',
     joinedRecently: 'joined this month',
     thisTerm: 'this term',
+
+    // Supervisor capabilities
+    supervisorCapabilities: 'Supervisor capabilities',
+    capAddEvents: 'Add events',
+    capManageCompetitions: 'Manage competitions',
+    capUploadResources: 'Upload resources',
+    capRecordAchievements: 'Record achievements',
+    capReviewContent: 'Review student content',
+    capManageProjects: 'Manage projects',
+    capPublishAnnouncements: 'Publish announcements',
+    capIssueCertificates: 'Issue certificates',
+    capTrackAttendance: 'Track attendance & participation',
+
+    // Roles overview
+    rolesOverview: 'Club roles',
+    roleDescAdmin: 'Full platform access, manages members, events and all club operations.',
+    roleDescPresident: 'Leads the club, coordinates committees and represents the club externally.',
+    roleDescVicePresident: 'Supports the president and steps in when needed.',
+    roleDescLeader: 'Leads a committee, assigns tasks and tracks progress.',
+    roleDescMember: 'Participates in activities, earns points and contributes to the club.',
+
+    // Student portfolio
+    studentPortfolio: 'My chemistry portfolio',
+    passportProgress: 'Passport progress',
+    myStamps: 'My stamps',
+    myCompetitions: 'Competitions',
+    myProjects: 'My projects',
+    myPublishedArticles: 'Published articles',
+    myCertificates: 'My certificates',
+    myAchievements: 'My achievements',
+    noCompetitions: 'No competitions yet',
+    noProjectsYet: 'No projects yet',
+    noArticlesYet: 'No published articles yet',
+    noCertificatesYet: 'No certificates yet',
+    noAchievementsYet: 'No achievements yet',
   },
 
   members: {
@@ -687,6 +722,12 @@ export const en = {
     scienceWriterBadge: 'AECC Science Writer',
     noSubmissions: 'No submissions waiting',
     historyTitle: 'Editorial history',
+
+    // Department news & achievements
+    departmentNews: 'Latest department news',
+    departmentAchievements: 'Department achievements',
+    noDepartmentNews: 'No department news yet',
+    noDepartmentAchievements: 'No department achievements yet',
   },
 
   admin: {

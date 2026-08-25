@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Activity,
+  Award,
+  BookOpen,
   CalendarDays,
   ClipboardCheck,
   FlaskConical,
   ListChecks,
   Sparkles,
+  Stamp,
   Trophy,
   Users,
 } from 'lucide-react';
@@ -27,8 +30,11 @@ import {
   getClubStats,
   getLeaderboard,
   getMemberBadges,
+  getMemberProjects,
   getOpenChallenge,
   listAnnouncements,
+  listArticles,
+  listCertificates,
   listProjects,
   listTasks,
   listUpcomingEvents,
@@ -68,8 +74,20 @@ export default async function DashboardPage() {
     ? (await getLeaderboard('all')).find((entry) => entry.member.id === viewer.id)?.rank ?? null
     : null;
 
+  const [myProjects, myArticles, myCertificates] = showsAdminView
+    ? [[], [], []]
+    : await Promise.all([
+        getMemberProjects(viewer.id),
+        listArticles({ status: 'published', authorId: viewer.id }),
+        listCertificates(viewer.id),
+      ]);
+
   const activeProjects = projects.filter((p) => p.status === 'active' || p.status === 'review').slice(0, 3);
   const displayName = memberName(viewer, locale).split(' ')[0];
+
+  const passportStamps = showsAdminView ? 0 : (myBadges.length + myArticles.length + myCertificates.length + myProjects.length);
+  const passportTotal = 20;
+  const passportPercent = Math.min(Math.round((passportStamps / passportTotal) * 100), 100);
 
   return (
     <>
@@ -137,11 +155,16 @@ export default async function DashboardPage() {
               tone="gold"
             />
             <MetricCard
-              label={d.dashboard.myRank}
-              value={myRank ? `#${formatNumber(myRank, locale)}` : '—'}
-              hint={fill(d.dashboard.outOfMembers, { total: formatNumber(stats.totalMembers, locale) })}
-              icon={<Trophy strokeWidth={1.75} />}
+              label={d.dashboard.myStamps}
+              value={formatNumber(passportStamps, locale)}
+              icon={<Stamp strokeWidth={1.75} />}
               tone="rose"
+            />
+            <MetricCard
+              label={d.dashboard.myBadges}
+              value={formatNumber(myBadges.length, locale)}
+              icon={<Award strokeWidth={1.75} />}
+              tone="berry"
             />
             <MetricCard
               label={d.dashboard.myAttendance}
@@ -152,6 +175,148 @@ export default async function DashboardPage() {
           </>
         )}
       </section>
+
+      {/* Student portfolio section */}
+      {!showsAdminView ? (
+        <section className="mb-8" aria-labelledby="dash-portfolio">
+          <SectionTitle>
+            <span id="dash-portfolio">{d.dashboard.studentPortfolio}</span>
+          </SectionTitle>
+
+          {/* Passport progress */}
+          <Card className="mb-6 p-6">
+            <div className="flex items-center justify-between">
+              <h3 className="font-brand text-h3 text-plum">{d.dashboard.passportProgress}</h3>
+              <span className="font-brand text-small text-plum tabular-nums">{passportPercent}%</span>
+            </div>
+            <Progress value={passportPercent} className="mt-3" />
+            <p className="mt-2 text-caption text-ink-faint">
+              {formatNumber(passportStamps, locale)} / {formatNumber(passportTotal, locale)}
+            </p>
+          </Card>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Competitions */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-rose-50 text-rose">
+                  <NavIcon name="swords" className="h-4 w-4" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myCompetitions}</h3>
+              </div>
+              <p className="text-caption text-ink-muted">{d.dashboard.noCompetitions}</p>
+            </Card>
+
+            {/* Projects */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-plum-50 text-plum">
+                  <NavIcon name="flask-conical" className="h-4 w-4" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myProjects}</h3>
+              </div>
+              {myProjects.length > 0 ? (
+                <ul className="grid gap-2">
+                  {myProjects.slice(0, 3).map((project) => (
+                    <li key={project.id} className="text-small text-ink">
+                      {pick(locale, project as unknown as Record<string, unknown>, 'title')}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-caption text-ink-muted">{d.dashboard.noProjectsYet}</p>
+              )}
+            </Card>
+
+            {/* Published articles */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-plum-50 text-plum">
+                  <NavIcon name="newspaper" className="h-4 w-4" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myPublishedArticles}</h3>
+              </div>
+              {myArticles.length > 0 ? (
+                <ul className="grid gap-2">
+                  {myArticles.slice(0, 3).map((article) => (
+                    <li key={article.id}>
+                      <Link
+                        href={`/portal/magazine/articles/${article.id}`}
+                        className="text-small text-plum transition hover:text-plum-dark"
+                      >
+                        {pick(locale, article as unknown as Record<string, unknown>, 'title')}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-caption text-ink-muted">{d.dashboard.noArticlesYet}</p>
+              )}
+            </Card>
+
+            {/* Certificates */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-rose-50 text-rose">
+                  <NavIcon name="scroll-text" className="h-4 w-4" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myCertificates}</h3>
+              </div>
+              {myCertificates.length > 0 ? (
+                <ul className="grid gap-2">
+                  {myCertificates.slice(0, 3).map((cert) => (
+                    <li key={cert.id} className="text-small text-ink">
+                      {pick(locale, cert as unknown as Record<string, unknown>, 'title')}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-caption text-ink-muted">{d.dashboard.noCertificatesYet}</p>
+              )}
+            </Card>
+
+            {/* Achievements */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-[#F9EDE6] text-[#8A5540]">
+                  <NavIcon name="medal" className="h-4 w-4" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myAchievements}</h3>
+              </div>
+              {myBadges.length > 0 ? (
+                <ul className="grid gap-2">
+                  {myBadges.slice(0, 3).map(({ award, badge }) =>
+                    badge ? (
+                      <li key={award.id} className="flex items-center gap-2">
+                        <NavIcon name={badge.icon} className="h-4 w-4 text-plum" />
+                        <span className="text-small text-ink">
+                          {pick(locale, badge as unknown as Record<string, unknown>, 'name')}
+                        </span>
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
+              ) : (
+                <p className="text-caption text-ink-muted">{d.dashboard.noAchievementsYet}</p>
+              )}
+            </Card>
+
+            {/* Attendance card */}
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-control bg-plum-50 text-plum">
+                  <ClipboardCheck className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <h3 className="font-brand text-small text-plum">{d.dashboard.myAttendance}</h3>
+              </div>
+              <p className="font-brand text-metric text-plum tabular-nums">
+                {formatNumber(viewer.attendance_rate, locale)}%
+              </p>
+              <Progress value={viewer.attendance_rate} className="mt-2" />
+            </Card>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Primary column */}
@@ -317,6 +482,68 @@ export default async function DashboardPage() {
                   <QuickAction href="/portal/magazine/new" label={d.dashboard.qaAddArticle} icon="newspaper" />
                 ) : null}
               </div>
+            </section>
+          ) : null}
+
+          {showsAdminView ? (
+            <section aria-labelledby="dash-capabilities">
+              <SectionTitle>
+                <span id="dash-capabilities">{d.dashboard.supervisorCapabilities}</span>
+              </SectionTitle>
+              <Card className="p-5">
+                <ul className="grid grid-cols-1 gap-3">
+                  {[
+                    { icon: 'calendar-days', label: d.dashboard.capAddEvents, href: '/portal/events/new' },
+                    { icon: 'swords', label: d.dashboard.capManageCompetitions, href: '/portal/challenges' },
+                    { icon: 'upload', label: d.dashboard.capUploadResources, href: '/portal/resources' },
+                    { icon: 'medal', label: d.dashboard.capRecordAchievements, href: '/portal/achievements' },
+                    { icon: 'file-search', label: d.dashboard.capReviewContent, href: '/portal/magazine' },
+                    { icon: 'folder-kanban', label: d.dashboard.capManageProjects, href: '/portal/projects' },
+                    { icon: 'megaphone', label: d.dashboard.capPublishAnnouncements, href: '/portal/announcements/new' },
+                    { icon: 'scroll-text', label: d.dashboard.capIssueCertificates, href: '/portal/certificates' },
+                    { icon: 'clipboard-check', label: d.dashboard.capTrackAttendance, href: '/portal/attendance' },
+                  ].map((cap) => (
+                    <li key={cap.label}>
+                      <Link
+                        href={cap.href}
+                        className="flex items-center gap-3 rounded-control p-2 transition hover:bg-blush"
+                      >
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-control bg-plum-50 text-plum">
+                          <NavIcon name={cap.icon} className="h-4 w-4" />
+                        </span>
+                        <span className="text-small font-medium text-ink">{cap.label}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </section>
+          ) : null}
+
+          {showsAdminView ? (
+            <section aria-labelledby="dash-roles">
+              <SectionTitle>
+                <span id="dash-roles">{d.dashboard.rolesOverview}</span>
+              </SectionTitle>
+              <Card className="p-5">
+                <ul className="grid gap-4">
+                  {[
+                    { role: d.roles.admin, desc: d.dashboard.roleDescAdmin, tone: 'bg-plum-accent' },
+                    { role: d.roles.president, desc: d.dashboard.roleDescPresident, tone: 'bg-rose' },
+                    { role: d.roles.vice_president, desc: d.dashboard.roleDescVicePresident, tone: 'bg-mauve' },
+                    { role: d.roles.committee_leader, desc: d.dashboard.roleDescLeader, tone: 'bg-rose-gold' },
+                    { role: d.roles.member, desc: d.dashboard.roleDescMember, tone: 'bg-plum-50' },
+                  ].map((item) => (
+                    <li key={item.role} className="flex items-start gap-3">
+                      <span className={`mt-1 h-3 w-3 shrink-0 rounded-pill ${item.tone}`} />
+                      <span className="min-w-0">
+                        <span className="block text-small font-semibold text-plum">{item.role}</span>
+                        <span className="block text-caption text-ink-muted">{item.desc}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
             </section>
           ) : null}
 

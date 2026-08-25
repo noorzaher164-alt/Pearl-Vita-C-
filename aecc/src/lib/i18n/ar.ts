@@ -229,6 +229,41 @@ export const ar: Dictionary = {
     outOfMembers: 'من أصل {total} عضوة',
     joinedRecently: 'انضممن هذا الشهر',
     thisTerm: 'هذا الفصل',
+
+    // Supervisor capabilities
+    supervisorCapabilities: 'صلاحيات المشرفة',
+    capAddEvents: 'إضافة الفعاليات',
+    capManageCompetitions: 'إدارة المسابقات',
+    capUploadResources: 'رفع المصادر',
+    capRecordAchievements: 'تسجيل الإنجازات',
+    capReviewContent: 'مراجعة محتوى الطالبات',
+    capManageProjects: 'إدارة المشاريع',
+    capPublishAnnouncements: 'نشر الإعلانات',
+    capIssueCertificates: 'إصدار الشهادات',
+    capTrackAttendance: 'متابعة الحضور والمشاركة',
+
+    // Roles overview
+    rolesOverview: 'أدوار النادي',
+    roleDescAdmin: 'صلاحية كاملة على المنصة، تدير العضوات والفعاليات وجميع عمليات النادي.',
+    roleDescPresident: 'تقود النادي، تنسق بين اللجان وتمثل النادي خارجيًا.',
+    roleDescVicePresident: 'تدعم الرئيسة وتنوب عنها عند الحاجة.',
+    roleDescLeader: 'تقود لجنة، توزع المهام وتتابع الإنجاز.',
+    roleDescMember: 'تشارك في الأنشطة، تكسب النقاط وتساهم في النادي.',
+
+    // Student portfolio
+    studentPortfolio: 'ملفي الكيميائي',
+    passportProgress: 'تقدم الباسبور',
+    myStamps: 'أختامي',
+    myCompetitions: 'المسابقات',
+    myProjects: 'مشاريعي',
+    myPublishedArticles: 'المقالات المنشورة',
+    myCertificates: 'شهاداتي',
+    myAchievements: 'إنجازاتي',
+    noCompetitions: 'لا توجد مسابقات بعد',
+    noProjectsYet: 'لا توجد مشاريع بعد',
+    noArticlesYet: 'لا توجد مقالات منشورة بعد',
+    noCertificatesYet: 'لا توجد شهادات بعد',
+    noAchievementsYet: 'لا توجد إنجازات بعد',
   },
 
   members: {
@@ -689,6 +724,12 @@ export const ar: Dictionary = {
     scienceWriterBadge: 'كاتبة علمية في النادي',
     noSubmissions: 'لا توجد مشاركات بانتظار المراجعة',
     historyTitle: 'سجل التحرير',
+
+    // Department news & achievements
+    departmentNews: 'آخر أخبار القسم',
+    departmentAchievements: 'إنجازات القسم',
+    noDepartmentNews: 'لا توجد أخبار بعد',
+    noDepartmentAchievements: 'لا توجد إنجازات بعد',
   },
 
   admin: {
