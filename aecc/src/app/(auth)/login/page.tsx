@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { currentViewer } from '@/lib/auth/current-user';
@@ -27,6 +28,16 @@ export default async function LoginPage({
       </div>
 
       <LoginForm d={d} next={params.next} />
+
+      <p className="mt-4 text-center text-small text-ink-muted">
+        {d.auth.noAccount}{' '}
+        <Link
+          href="/sign-up"
+          className="font-semibold text-plum underline decoration-rose-gold/60 underline-offset-4 transition hover:text-plum-dark"
+        >
+          {d.auth.signUp}
+        </Link>
+      </p>
 
       {/* Preview credentials — present so the platform can be reviewed end to end.
           Remove this block before the club's accounts go live. */}

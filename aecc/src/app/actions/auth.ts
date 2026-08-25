@@ -59,6 +59,73 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   redirect(destination);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Sign-up                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export interface SignUpState {
+  error?: 'validation' | 'username_taken' | 'email_taken';
+  values?: { username?: string; email?: string; fullNameEn?: string; fullNameAr?: string; grade?: string };
+}
+
+const signUpSchema = z.object({
+  username: z.string().trim().min(3).max(64).regex(/^[a-z][a-z0-9._-]*$/i),
+  email: z.string().trim().email().max(200),
+  password: z.string().min(6).max(200),
+  confirmPassword: z.string().min(1),
+  fullNameEn: z.string().trim().min(2).max(120),
+  fullNameAr: z.string().trim().max(120).optional().default(''),
+  grade: z.enum(['Grade 10', 'Grade 11', 'Grade 12']),
+});
+
+export async function signUp(_prev: SignUpState, formData: FormData): Promise<SignUpState> {
+  const parsed = signUpSchema.safeParse({
+    username: formData.get('username'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+    confirmPassword: formData.get('confirmPassword'),
+    fullNameEn: formData.get('fullNameEn'),
+    fullNameAr: formData.get('fullNameAr') || '',
+    grade: formData.get('grade'),
+  });
+
+  if (!parsed.success) return { error: 'validation' };
+  const { username, email, password, confirmPassword, fullNameEn, fullNameAr, grade } = parsed.data;
+
+  if (password !== confirmPassword) {
+    return { error: 'validation', values: { username, email, fullNameEn, fullNameAr, grade } };
+  }
+
+  const database = await db();
+
+  if (database.users.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
+    return { error: 'username_taken', values: { username, email, fullNameEn, fullNameAr, grade } };
+  }
+  if (database.users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
+    return { error: 'email_taken', values: { username, email, fullNameEn, fullNameAr, grade } };
+  }
+
+  const { createUser } = await import('@/lib/db/mutations');
+  const userId = await createUser({
+    actorId: 'system',
+    username,
+    email,
+    password,
+    fullNameEn,
+    fullNameAr: fullNameAr || fullNameEn,
+    grade,
+    role: 'member',
+    committeeId: null,
+  });
+
+  const role: RoleKey = 'member';
+  const { token, maxAge } = createSessionToken({ sub: userId, username, role }, false);
+  const store = await cookies();
+  store.set(SESSION_COOKIE, token, { ...SESSION_COOKIE_OPTIONS, maxAge });
+
+  redirect('/portal');
+}
+
 export async function logout(): Promise<void> {
   const store = await cookies();
   store.delete(SESSION_COOKIE);
