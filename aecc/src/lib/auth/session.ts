@@ -44,6 +44,8 @@ declare global {
   var __aeccSessionSecret: string | undefined;
 }
 
+const PREVIEW_FALLBACK = 'aecc-preview-session-key-2026-pearl-vita-chemistry-club';
+
 function secret(): string {
   const fromEnv = process.env.AECC_SESSION_SECRET;
   if (fromEnv && fromEnv.length >= 32) return fromEnv;
@@ -52,10 +54,7 @@ function secret(): string {
     throw new Error('AECC_SESSION_SECRET must be at least 32 characters.');
   }
 
-  if (!globalThis.__aeccSessionSecret) {
-    globalThis.__aeccSessionSecret = randomBytes(32).toString('hex');
-  }
-  return globalThis.__aeccSessionSecret;
+  return PREVIEW_FALLBACK;
 }
 
 function sign(data: string): string {
