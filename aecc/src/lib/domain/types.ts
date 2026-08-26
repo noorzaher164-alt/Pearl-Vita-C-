@@ -649,6 +649,50 @@ export interface MagazineIssueArticle {
   sort_order: number;
 }
 
+export interface MagazineCompetition {
+  id: ID;
+  title_en: string;
+  title_ar: string;
+  description_en: string;
+  description_ar: string;
+  date: ISODate;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  prize_en: string;
+  prize_ar: string;
+}
+
+export interface MagazineTopStudent {
+  id: ID;
+  user_id: ID;
+  committee_id: ID | null;
+  month: number;
+  year: number;
+  reason_en: string;
+  reason_ar: string;
+}
+
+export interface MagazineAchievement {
+  id: ID;
+  title_en: string;
+  title_ar: string;
+  description_en: string;
+  description_ar: string;
+  student_ids: ID[];
+  date: ISODate;
+  kind: 'achievement' | 'winner';
+}
+
+export interface MagazineValueOfMonth {
+  id: ID;
+  committee_id: ID | null;
+  month: number;
+  year: number;
+  value_en: string;
+  value_ar: string;
+  description_en: string;
+  description_ar: string;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Oversight                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -710,6 +754,10 @@ export interface Database {
   magazine_submissions: MagazineSubmissionEvent[];
   magazine_issues: MagazineIssue[];
   magazine_issue_articles: MagazineIssueArticle[];
+  magazine_competitions: MagazineCompetition[];
+  magazine_top_students: MagazineTopStudent[];
+  magazine_achievements: MagazineAchievement[];
+  magazine_value_of_month: MagazineValueOfMonth[];
   audit_logs: AuditLog[];
   club_settings: ClubSetting[];
 }

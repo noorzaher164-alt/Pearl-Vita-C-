@@ -869,6 +869,42 @@ export async function listSubmissionHistory(articleId: ID) {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Magazine extras: competitions, top students, achievements, value of month  */
+/* -------------------------------------------------------------------------- */
+
+export async function listCompetitions() {
+  const database = await db();
+  return database.magazine_competitions
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export async function listTopStudents(month?: number, year?: number) {
+  const database = await db();
+  return database.magazine_top_students
+    .filter((s) => (month !== undefined ? s.month === month && s.year === year : true))
+    .map((s) => ({ ...s, member: toMemberView(database, s.user_id) }));
+}
+
+export async function listAchievements() {
+  const database = await db();
+  return database.magazine_achievements
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map((a) => ({
+      ...a,
+      students: a.student_ids.map((id) => toMemberView(database, id)).filter(Boolean),
+    }));
+}
+
+export async function listValueOfMonth() {
+  const database = await db();
+  return database.magazine_value_of_month
+    .slice()
+    .sort((a, b) => b.year * 100 + b.month - (a.year * 100 + a.month));
+}
+
+/* -------------------------------------------------------------------------- */
 /* Audit, settings & activity feed                                            */
 /* -------------------------------------------------------------------------- */
 

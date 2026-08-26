@@ -20,11 +20,15 @@ import type {
   GalleryImage,
   Idea,
   IdeaVote,
+  MagazineAchievement,
   MagazineArticle,
   MagazineAuthor,
+  MagazineCompetition,
   MagazineIssue,
   MagazineIssueArticle,
   MagazineSubmissionEvent,
+  MagazineTopStudent,
+  MagazineValueOfMonth,
   PointReason,
   PointTransaction,
   Profile,
@@ -1262,6 +1266,117 @@ export async function createSeedDatabase(): Promise<Database> {
     });
   });
 
+  /* --------------------------------------------- magazine extras (new sections) -- */
+  const magazine_competitions: MagazineCompetition[] = [
+    {
+      id: 'mcomp-001',
+      title_en: 'Chemistry Olympiad — Regional Qualifier',
+      title_ar: 'أولمبياد الكيمياء — التصفيات الإقليمية',
+      description_en: 'Represent the school in the regional chemistry olympiad. Top three students advance to the national round.',
+      description_ar: 'تمثيل المدرسة في أولمبياد الكيمياء الإقليمي. أفضل ثلاث طالبات يتأهلن للمرحلة الوطنية.',
+      date: isoDay(30),
+      status: 'upcoming',
+      prize_en: 'Gold, Silver, Bronze medals + national qualification',
+      prize_ar: 'ميداليات ذهبية وفضية وبرونزية + التأهل الوطني',
+    },
+    {
+      id: 'mcomp-002',
+      title_en: 'Best Scientific Poster Design',
+      title_ar: 'أفضل تصميم ملصق علمي',
+      description_en: 'Design a poster explaining a chemical concept creatively. Judged on accuracy, design, and clarity.',
+      description_ar: 'تصميم ملصق يشرح مفهومًا كيميائيًا بإبداع. يُقيَّم على الدقة والتصميم والوضوح.',
+      date: isoDay(14),
+      status: 'upcoming',
+      prize_en: 'Certificate of Excellence + featured in the magazine',
+      prize_ar: 'شهادة تميّز + نشر في المجلة',
+    },
+    {
+      id: 'mcomp-003',
+      title_en: 'Green Chemistry Innovation Challenge',
+      title_ar: 'تحدي الابتكار في الكيمياء الخضراء',
+      description_en: 'Propose a practical solution that uses green chemistry to solve an everyday problem.',
+      description_ar: 'اقتراح حل عملي يستخدم الكيمياء الخضراء لحل مشكلة يومية.',
+      date: isoDay(-10),
+      status: 'completed',
+      prize_en: '1st, 2nd, 3rd place trophies',
+      prize_ar: 'كؤوس المركز الأول والثاني والثالث',
+    },
+  ];
+
+  const magazine_top_students: MagazineTopStudent[] = [
+    { id: 'mts-001', user_id: 'u-003', committee_id: null, month: 8, year: 2026, reason_en: 'Outstanding performance in chemistry research and lab work', reason_ar: 'أداء متميز في البحث الكيميائي والعمل المخبري' },
+    { id: 'mts-002', user_id: 'u-009', committee_id: null, month: 8, year: 2026, reason_en: 'Top scorer in the monthly chemistry quiz', reason_ar: 'أعلى درجة في اختبار الكيمياء الشهري' },
+    { id: 'mts-003', user_id: 'u-016', committee_id: null, month: 8, year: 2026, reason_en: 'Best scientific article contributor this month', reason_ar: 'أفضل مساهمة في المقالات العلمية هذا الشهر' },
+    { id: 'mts-004', user_id: 'u-020', committee_id: null, month: 7, year: 2026, reason_en: 'Won first place in the periodic table challenge', reason_ar: 'فازت بالمركز الأول في تحدي الجدول الدوري' },
+    { id: 'mts-005', user_id: 'u-013', committee_id: null, month: 7, year: 2026, reason_en: 'Exceptional leadership in the green chemistry project', reason_ar: 'قيادة استثنائية في مشروع الكيمياء الخضراء' },
+  ];
+
+  const magazine_achievements: MagazineAchievement[] = [
+    {
+      id: 'mach-001',
+      title_en: 'Regional Chemistry Olympiad — Gold Medal',
+      title_ar: 'أولمبياد الكيمياء الإقليمي — ميدالية ذهبية',
+      description_en: 'Sara Al-Mutairi won the gold medal at the 2026 Regional Chemistry Olympiad, qualifying for the national round.',
+      description_ar: 'فازت سارة المطيري بالميدالية الذهبية في أولمبياد الكيمياء الإقليمي ٢٠٢٦ وتأهلت للمرحلة الوطنية.',
+      student_ids: ['u-003'],
+      date: isoDay(-15),
+      kind: 'winner',
+    },
+    {
+      id: 'mach-002',
+      title_en: 'Green Chemistry Innovation — First Place',
+      title_ar: 'ابتكار الكيمياء الخضراء — المركز الأول',
+      description_en: 'Layla Al-Zahrani\'s biodegradable packaging project won first place in the Green Chemistry Innovation Challenge.',
+      description_ar: 'فاز مشروع ليلى الزهراني للتغليف القابل للتحلل بالمركز الأول في تحدي ابتكار الكيمياء الخضراء.',
+      student_ids: ['u-013'],
+      date: isoDay(-10),
+      kind: 'winner',
+    },
+    {
+      id: 'mach-003',
+      title_en: 'Best Research Paper — Science Week',
+      title_ar: 'أفضل ورقة بحثية — أسبوع العلوم',
+      description_en: 'The club\'s research team presented the best paper on water purification using natural zeolites.',
+      description_ar: 'قدّم فريق البحث في النادي أفضل ورقة بحثية عن تنقية المياه باستخدام الزيوليت الطبيعي.',
+      student_ids: ['u-009', 'u-016', 'u-024'],
+      date: isoDay(-25),
+      kind: 'achievement',
+    },
+    {
+      id: 'mach-004',
+      title_en: 'Chemistry Video Contest — Runner Up',
+      title_ar: 'مسابقة فيديو الكيمياء — المركز الثاني',
+      description_en: 'Maryam Al-Dosari and Noura Al-Shammari created an outstanding video explaining catalysis.',
+      description_ar: 'أعدّت مريم الدوسري ونورة الشمري فيديو متميّزًا يشرح التحفيز الكيميائي.',
+      student_ids: ['u-010', 'u-011'],
+      date: isoDay(-20),
+      kind: 'winner',
+    },
+  ];
+
+  const magazine_value_of_month: MagazineValueOfMonth[] = [
+    {
+      id: 'mvm-001',
+      committee_id: null,
+      month: 8,
+      year: 2026,
+      value_en: 'Curiosity',
+      value_ar: 'حب الاستطلاع',
+      description_en: 'This month we celebrate curiosity — the driving force behind every scientific discovery. Ask questions, explore the unknown, and never stop wondering.',
+      description_ar: 'نحتفي هذا الشهر بحب الاستطلاع — القوة الدافعة وراء كل اكتشاف علمي. اسألي وتساءلي واستكشفي المجهول.',
+    },
+    {
+      id: 'mvm-002',
+      committee_id: null,
+      month: 7,
+      year: 2026,
+      value_en: 'Precision',
+      value_ar: 'الدقة',
+      description_en: 'Last month\'s value was precision — in measurements, in writing, and in thinking. Great chemistry starts with careful observation.',
+      description_ar: 'كانت قيمة الشهر الماضي الدقة — في القياسات والكتابة والتفكير. الكيمياء الرائعة تبدأ بالملاحظة الدقيقة.',
+    },
+  ];
+
   /* ------------------------------------------------------------ audit logs -- */
   const audit_logs: AuditLog[] = [
     { id: 'al-001', actor_id: 'u-001', action: 'points.award', entity: 'point_transactions', entity_id: 'pt-0001', summary_en: 'Awarded 50 points to Sara Al-Mutairi for winning the regional qualifier', summary_ar: 'منح ٥٠ نقطة لسارة المطيري لفوزها في التصفيات الإقليمية', reason: 'Competition result', created_at: isoAt(-30, 13) },
@@ -1323,6 +1438,10 @@ export async function createSeedDatabase(): Promise<Database> {
     magazine_submissions,
     magazine_issues,
     magazine_issue_articles,
+    magazine_competitions,
+    magazine_top_students,
+    magazine_achievements,
+    magazine_value_of_month,
     audit_logs,
     club_settings,
   };
