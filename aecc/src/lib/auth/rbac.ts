@@ -15,7 +15,6 @@ const MEMBER_PERMISSIONS: Permission[] = [
   'events:register',
   'attendance:read',
   'points:read_own',
-  'tasks:read',
   'projects:read',
   'challenges:read',
   'challenges:submit',
@@ -33,7 +32,6 @@ const MEMBER_PERMISSIONS: Permission[] = [
 const COMMITTEE_LEADER_PERMISSIONS: Permission[] = [
   ...MEMBER_PERMISSIONS,
   'committees:write_own',
-  'tasks:write_own',
   'attendance:write',
   'points:read',
 ];
@@ -43,6 +41,7 @@ const VICE_PRESIDENT_PERMISSIONS: Permission[] = [
   'members:write',
   'committees:write',
   'events:write',
+  'tasks:read',
   'tasks:write',
   'projects:write',
   'challenges:write',

@@ -68,7 +68,8 @@ export default async function DashboardPage() {
   ]);
 
   const showsAdminView = viewer.isStaff;
-  const myTasks = showsAdminView ? [] : (await listTasks({ userId: viewer.id })).filter((t) => t.status !== 'done');
+  const canSeeTasks = viewer.permissions.can('tasks:read');
+  const myTasks = !showsAdminView && canSeeTasks ? (await listTasks({ userId: viewer.id })).filter((t) => t.status !== 'done') : [];
   const myBadges = showsAdminView ? [] : await getMemberBadges(viewer.id);
   const myRank = leaderboard.length
     ? (await getLeaderboard('all')).find((entry) => entry.member.id === viewer.id)?.rank ?? null
@@ -371,7 +372,7 @@ export default async function DashboardPage() {
                 )}
               </Card>
             </section>
-          ) : (
+          ) : canSeeTasks ? (
             <section aria-labelledby="dash-tasks">
               <SectionTitle
                 action={
@@ -410,7 +411,7 @@ export default async function DashboardPage() {
                 <EmptyState title={d.dashboard.noActiveTasks} icon={<ListChecks />} />
               )}
             </section>
-          )}
+          ) : null}
 
           <section aria-labelledby="dash-activity">
             <SectionTitle>

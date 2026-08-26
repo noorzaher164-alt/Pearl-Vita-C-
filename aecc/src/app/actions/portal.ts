@@ -228,9 +228,12 @@ export async function reversePointsAction(formData: FormData): Promise<void> {
 /* ------------------------------------------------------------------- tasks -- */
 
 export async function createTaskAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
-  const viewer = await requirePermission(['tasks:write', 'tasks:write_own']);
+  const viewer = await requirePermission('tasks:write');
   const titleEn = String(formData.get('titleEn') ?? '').trim();
   if (titleEn.length < 3) return { error: 'validation' };
+
+  const assigneeIds = formData.getAll('assignees').map(String).filter(Boolean);
+  if (assigneeIds.length > 0 && viewer.role !== 'admin') return { error: 'forbidden' };
 
   await createTask({
     actorId: viewer.id,
@@ -241,7 +244,7 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
     projectId: String(formData.get('projectId') ?? '') || null,
     priority: (String(formData.get('priority') ?? 'medium') as 'low' | 'medium' | 'high') ?? 'medium',
     dueDate: String(formData.get('dueDate') ?? '') || null,
-    assigneeIds: formData.getAll('assignees').map(String).filter(Boolean),
+    assigneeIds,
   });
 
   revalidatePath('/portal/tasks');
@@ -250,7 +253,7 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
 }
 
 export async function moveTaskAction(formData: FormData): Promise<void> {
-  const viewer = await requirePermission(['tasks:write', 'tasks:write_own']);
+  const viewer = await requirePermission('tasks:write');
   const taskId = String(formData.get('taskId') ?? '');
   const status = String(formData.get('status') ?? '') as TaskStatus;
   const valid: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];

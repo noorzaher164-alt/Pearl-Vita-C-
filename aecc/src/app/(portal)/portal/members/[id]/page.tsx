@@ -70,6 +70,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const canSeeContact = viewer.isStaff || isOwnProfile;
 
   const showStaffTasks = viewer.isStaff && isOwnProfile;
+  const canAssignTasks = viewer.role === 'admin';
 
   const [committee, points, badges, attendance, projects, tasks, certificates, adminNotes, staffTasks, allMembers] =
     await Promise.all([
@@ -345,28 +346,30 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
               </div>
             </Card>
 
-            <Card>
-              <CardHeader title={d.members.tasksTab} />
-              <div className="p-6 pt-4">
-                {openTasks.length > 0 ? (
-                  <ul className="grid gap-3">
-                    {openTasks.slice(0, 6).map((task) => {
-                      const state = taskStatus(task.status, d);
-                      return (
-                        <li key={task.id} className="flex items-center justify-between gap-3">
-                          <span className="min-w-0 flex-1 truncate text-small text-ink">
-                            {pick(locale, task as unknown as Record<string, unknown>, 'title')}
-                          </span>
-                          <Pill tone={state.tone}>{state.label}</Pill>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <p className="text-small text-ink-muted">{d.tasks.noTasks}</p>
-                )}
-              </div>
-            </Card>
+            {viewer.permissions.can('tasks:read') ? (
+              <Card>
+                <CardHeader title={d.members.tasksTab} />
+                <div className="p-6 pt-4">
+                  {openTasks.length > 0 ? (
+                    <ul className="grid gap-3">
+                      {openTasks.slice(0, 6).map((task) => {
+                        const state = taskStatus(task.status, d);
+                        return (
+                          <li key={task.id} className="flex items-center justify-between gap-3">
+                            <span className="min-w-0 flex-1 truncate text-small text-ink">
+                              {pick(locale, task as unknown as Record<string, unknown>, 'title')}
+                            </span>
+                            <Pill tone={state.tone}>{state.label}</Pill>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="text-small text-ink-muted">{d.tasks.noTasks}</p>
+                  )}
+                </div>
+              </Card>
+            ) : null}
           </div>
 
           {/* Staff / Teacher supervisory tasks */}
@@ -382,9 +385,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 subtitle={d.members.staffTasksHint}
               />
 
-              <div className="p-6 pt-4">
-                <QuickAssignTask d={d} members={memberOptions} />
-              </div>
+              {canAssignTasks ? (
+                <div className="p-6 pt-4">
+                  <QuickAssignTask d={d} members={memberOptions} />
+                </div>
+              ) : null}
 
               {staffTasks.length > 0 ? (
                 <div className="mt-2">

@@ -31,7 +31,7 @@ export default async function TasksPage({
     listCommittees(),
   ]);
 
-  const canWrite = viewer.permissions.canAny(['tasks:write', 'tasks:write_own']);
+  const canWrite = viewer.permissions.can('tasks:write');
   const query = (extra: Record<string, string>) => {
     const search = new URLSearchParams({
       view,
