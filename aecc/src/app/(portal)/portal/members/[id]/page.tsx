@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { AvatarUpload } from '@/components/forms/AvatarUpload';
+import { QuickAssignTask } from '@/components/forms/QuickAssignTask';
 import { NavIcon } from '@/components/portal/NavIcon';
 import { committeeName, memberName } from '@/components/portal/Common';
 import {
@@ -37,6 +38,7 @@ import {
   getMemberProjects,
   listCertificates,
   listPointTransactions,
+  listMembers,
   listStaffTasks,
   listTasks,
   getAdminNotes,
@@ -69,7 +71,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
 
   const showStaffTasks = viewer.isStaff && isOwnProfile;
 
-  const [committee, points, badges, attendance, projects, tasks, certificates, adminNotes, staffTasks] =
+  const [committee, points, badges, attendance, projects, tasks, certificates, adminNotes, staffTasks, allMembers] =
     await Promise.all([
       member.committee_id ? getCommittee(member.committee_id) : Promise.resolve(null),
       listPointTransactions(member.id, 12),
@@ -80,12 +82,14 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       listCertificates(member.id),
       canSeeNotes ? getAdminNotes(member.id) : Promise.resolve(null),
       showStaffTasks ? listStaffTasks(member.id) : Promise.resolve([]),
+      showStaffTasks ? listMembers() : Promise.resolve([]),
     ]);
 
   const status = memberStatus(member.status, d);
   const name = memberName(member, locale);
   const bio = pick(locale, member as unknown as Record<string, unknown>, 'bio');
   const openTasks = tasks.filter((t) => t.status !== 'done');
+  const memberOptions = allMembers.map((m) => ({ id: m.id, name: memberName(m, locale) }));
 
   return (
     <>
@@ -366,7 +370,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
           </div>
 
           {/* Staff / Teacher supervisory tasks */}
-          {showStaffTasks && staffTasks.length > 0 ? (
+          {showStaffTasks ? (
             <Card>
               <CardHeader
                 title={
@@ -377,72 +381,69 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 }
                 subtitle={d.members.staffTasksHint}
               />
-              <div className="mt-2">
-                <TableShell className="shadow-none">
-                  <table className="aecc-table">
-                    <caption className="sr-only">{d.members.staffTasksTab}</caption>
-                    <thead>
-                      <tr>
-                        <th scope="col">{d.tasks.title}</th>
-                        <th scope="col">{d.common.status}</th>
-                        <th scope="col">{d.tasks.priority}</th>
-                        <th scope="col">{d.tasks.dueDate}</th>
-                        <th scope="col">{d.tasks.completedAt}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {staffTasks.map((task) => {
-                        const state = taskStatus(task.status, d);
-                        const isDone = task.status === 'done';
-                        return (
-                          <tr key={task.id}>
-                            <td className="max-w-[200px]">
-                              <span className="block truncate text-small text-ink">
-                                {pick(locale, task as unknown as Record<string, unknown>, 'title')}
-                              </span>
-                              {task.assignees.length > 0 ? (
-                                <span className="mt-0.5 block truncate text-caption text-ink-faint">
-                                  {d.tasks.assignee}: {task.assignees.map((a) => memberName(a, locale)).join(', ')}
-                                </span>
-                              ) : null}
-                            </td>
-                            <td><Pill tone={state.tone}>{state.label}</Pill></td>
-                            <td className="whitespace-nowrap text-caption text-ink-muted">{d.tasks[`priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}` as 'priorityLow' | 'priorityMedium' | 'priorityHigh']}</td>
-                            <td className="whitespace-nowrap text-ink-muted">{task.due_date ? formatDate(task.due_date, locale) : '—'}</td>
-                            <td>
-                              {isDone ? (
-                                <span className="inline-flex items-center gap-1.5 text-small text-emerald-600">
-                                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
-                                  {task.completed_at ? formatDate(task.completed_at, locale) : d.tasks.done}
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 text-small text-ink-faint">
-                                  <Circle className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
-                                  {d.tasks.notCompleted}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </TableShell>
-              </div>
-            </Card>
-          ) : showStaffTasks ? (
-            <Card>
-              <CardHeader
-                title={
-                  <span className="inline-flex items-center gap-2">
-                    <ClipboardList className="h-4 w-4 text-plum" aria-hidden="true" strokeWidth={1.75} />
-                    {d.members.staffTasksTab}
-                  </span>
-                }
-              />
+
               <div className="p-6 pt-4">
-                <p className="text-small text-ink-muted">{d.tasks.noStaffTasks}</p>
+                <QuickAssignTask d={d} members={memberOptions} />
               </div>
+
+              {staffTasks.length > 0 ? (
+                <div className="mt-2">
+                  <TableShell className="shadow-none">
+                    <table className="aecc-table">
+                      <caption className="sr-only">{d.members.staffTasksTab}</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">{d.tasks.title}</th>
+                          <th scope="col">{d.common.status}</th>
+                          <th scope="col">{d.tasks.priority}</th>
+                          <th scope="col">{d.tasks.dueDate}</th>
+                          <th scope="col">{d.tasks.completedAt}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {staffTasks.map((task) => {
+                          const state = taskStatus(task.status, d);
+                          const isDone = task.status === 'done';
+                          return (
+                            <tr key={task.id}>
+                              <td className="max-w-[200px]">
+                                <span className="block truncate text-small text-ink">
+                                  {pick(locale, task as unknown as Record<string, unknown>, 'title')}
+                                </span>
+                                {task.assignees.length > 0 ? (
+                                  <span className="mt-0.5 block truncate text-caption text-ink-faint">
+                                    {d.tasks.assignee}: {task.assignees.map((a) => memberName(a, locale)).join(', ')}
+                                  </span>
+                                ) : null}
+                              </td>
+                              <td><Pill tone={state.tone}>{state.label}</Pill></td>
+                              <td className="whitespace-nowrap text-caption text-ink-muted">{d.tasks[`priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}` as 'priorityLow' | 'priorityMedium' | 'priorityHigh']}</td>
+                              <td className="whitespace-nowrap text-ink-muted">{task.due_date ? formatDate(task.due_date, locale) : '—'}</td>
+                              <td>
+                                {isDone ? (
+                                  <span className="inline-flex items-center gap-1.5 text-small text-emerald-600">
+                                    <CheckCircle2 className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
+                                    {task.completed_at ? formatDate(task.completed_at, locale) : d.tasks.done}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 text-small text-ink-faint">
+                                    <Circle className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
+                                    {d.tasks.notCompleted}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </TableShell>
+                </div>
+              ) : (
+                <div className="px-6 pb-6">
+                  <p className="text-small text-ink-muted">{d.tasks.noStaffTasks}</p>
+                </div>
+              )}
             </Card>
           ) : null}
 

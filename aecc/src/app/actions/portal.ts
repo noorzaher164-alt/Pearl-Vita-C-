@@ -245,6 +245,7 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
   });
 
   revalidatePath('/portal/tasks');
+  revalidatePath('/portal/members');
   return { ok: true };
 }
 

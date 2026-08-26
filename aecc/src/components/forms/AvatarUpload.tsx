@@ -48,6 +48,7 @@ export function AvatarUpload({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(currentSrc);
+  const [imgError, setImgError] = useState(false);
   const [dataUrl, setDataUrl] = useState('');
   const [state, formAction] = useActionState<ActionResult, FormData>(updateAvatarAction, {});
 
@@ -56,11 +57,13 @@ export function AvatarUpload({
     if (!file) return;
     const resized = await resizeImage(file, 200);
     setPreview(resized);
+    setImgError(false);
     setDataUrl(resized);
   }
 
   function handleRemove() {
     setPreview(null);
+    setImgError(false);
     setDataUrl('__remove__');
     if (inputRef.current) inputRef.current.value = '';
   }
@@ -72,6 +75,8 @@ export function AvatarUpload({
     .slice(0, 2)
     .toUpperCase();
 
+  const showImage = preview && !imgError;
+
   return (
     <form action={formAction} className="flex flex-col items-center gap-3">
       <input type="hidden" name="userId" value={userId} />
@@ -79,12 +84,19 @@ export function AvatarUpload({
 
       <div className="group relative">
         <span
-          className="inline-grid shrink-0 place-items-center overflow-hidden rounded-pill border border-line bg-blush"
+          className="inline-grid shrink-0 place-items-center overflow-hidden rounded-pill border border-line bg-blush ring-4 ring-white dark:ring-neutral-800"
           style={{ width: size, height: size }}
         >
-          {preview ? (
+          {showImage ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="" width={size} height={size} className="h-full w-full object-cover" />
+            <img
+              src={preview}
+              alt=""
+              width={size}
+              height={size}
+              className="h-full w-full object-cover"
+              onError={() => setImgError(true)}
+            />
           ) : (
             <span className="font-brand text-plum" style={{ fontSize: Math.round(size * 0.34) }}>
               {initials}
@@ -119,7 +131,7 @@ export function AvatarUpload({
         >
           {d.settings.changeAvatar}
         </button>
-        {preview ? (
+        {showImage ? (
           <button
             type="button"
             onClick={handleRemove}
