@@ -799,6 +799,10 @@ export const ar: Dictionary = {
     notifyEvents: 'الفعاليات الجديدة وتذكيرات التسجيل',
     notifyPoints: 'النقاط الممنوحة لي',
     notifyMagazine: 'تحديثات مراجعة المجلة',
+    changeAvatar: 'تغيير الصورة',
+    removeAvatar: 'إزالة الصورة',
+    avatarTooLarge: 'الصورة كبيرة جدًا. يرجى استخدام صورة أصغر.',
+    avatarUpdated: 'تم تحديث الصورة بنجاح.',
   },
 
   publicSite: {

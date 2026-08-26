@@ -797,6 +797,10 @@ export const en = {
     notifyEvents: 'New events and registration reminders',
     notifyPoints: 'Points awarded to me',
     notifyMagazine: 'Magazine review updates',
+    changeAvatar: 'Change photo',
+    removeAvatar: 'Remove photo',
+    avatarTooLarge: 'Image is too large. Please use a smaller photo.',
+    avatarUpdated: 'Photo updated successfully.',
   },
 
   publicSite: {

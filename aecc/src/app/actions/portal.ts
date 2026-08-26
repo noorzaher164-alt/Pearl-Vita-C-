@@ -11,6 +11,7 @@ import {
   assignRole,
   awardBadge,
   awardPoints,
+  updateAvatar,
   cancelRegistration,
   changeOwnPassword,
   createAnnouncement,
@@ -681,6 +682,31 @@ export async function changePasswordAction(_prev: ActionResult, formData: FormDa
   if (!ok) return { error: 'wrong_current' };
 
   await changeOwnPassword(viewer.id, next);
+  return { ok: true };
+}
+
+const MAX_AVATAR_BYTES = 150_000;
+
+export async function updateAvatarAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const viewer = await requireViewer();
+  const dataUrl = String(formData.get('avatarDataUrl') ?? '');
+  const targetId = String(formData.get('userId') ?? viewer.id);
+
+  const isOwnProfile = targetId === viewer.id;
+  if (!isOwnProfile && !viewer.permissions.can('members:write')) {
+    return { error: 'forbidden' };
+  }
+
+  if (!dataUrl) {
+    await updateAvatar(targetId, null);
+  } else {
+    if (!dataUrl.startsWith('data:image/')) return { error: 'validation' };
+    if (dataUrl.length > MAX_AVATAR_BYTES) return { error: 'too_large' };
+    await updateAvatar(targetId, dataUrl);
+  }
+
+  revalidatePath(`/portal/members/${targetId}`);
+  revalidatePath('/portal/members');
   return { ok: true };
 }
 

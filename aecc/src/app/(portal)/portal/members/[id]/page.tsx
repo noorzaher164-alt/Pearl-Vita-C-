@@ -12,6 +12,7 @@ import {
   ScrollText,
   Sparkles,
 } from 'lucide-react';
+import { AvatarUpload } from '@/components/forms/AvatarUpload';
 import { NavIcon } from '@/components/portal/NavIcon';
 import { committeeName, memberName } from '@/components/portal/Common';
 import {
@@ -102,7 +103,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
         <div className="px-6 pb-6">
           <div className="-mt-12 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-              <Avatar name={name} src={member.avatar_url} size={88} className="shrink-0 ring-4 ring-white dark:ring-neutral-800" />
+              {isOwnProfile ? (
+                <AvatarUpload d={d} userId={member.id} currentSrc={member.avatar_url} name={name} size={88} />
+              ) : (
+                <Avatar name={name} src={member.avatar_url} size={88} className="shrink-0 ring-4 ring-white dark:ring-neutral-800" />
+              )}
               <div className="min-w-0 pb-1">
                 <h1 className="break-words font-brand text-h2 text-plum">{name}</h1>
                 <Meta

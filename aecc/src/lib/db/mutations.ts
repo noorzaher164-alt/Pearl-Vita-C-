@@ -132,6 +132,13 @@ export async function createUser(input: CreateUserInput): Promise<ID> {
   return userId;
 }
 
+export async function updateAvatar(userId: ID, avatarUrl: string | null): Promise<void> {
+  await write((database) => {
+    const profile = database.profiles.find((p) => p.user_id === userId);
+    if (profile) profile.avatar_url = avatarUrl;
+  });
+}
+
 export async function updateMemberProfile(
   actorId: ID,
   userId: ID,
