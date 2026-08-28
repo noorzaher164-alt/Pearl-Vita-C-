@@ -1,6 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FlaskConical, Heart, Lightbulb, Sparkles, Star, Users } from 'lucide-react';
+import {
+  Crown,
+  FlaskConical,
+  Heart,
+  Lightbulb,
+  Network,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+} from 'lucide-react';
 import { committeeName, memberName } from '@/components/portal/Common';
 import { Avatar, Card, CardHeader, PageHeader } from '@/components/ui';
 import { requireViewer } from '@/lib/auth/current-user';
@@ -23,6 +33,14 @@ export default async function AboutPage() {
   const studentMembers = allMembers.filter(
     (m) => m.role !== 'admin' && m.role !== 'president' && m.role !== 'vice_president',
   );
+
+  const managementRoles = [
+    { icon: Shield, role: d.about.roleGeneralSupervisor },
+    { icon: Crown, role: d.about.rolePresident },
+    { icon: Star, role: d.about.roleVicePresident },
+    { icon: Users, role: d.about.roleSecretary },
+    { icon: Network, role: d.about.roleRelationsOfficer },
+  ];
 
   const values = [
     { icon: Lightbulb, title: d.about.valueCuriosity, desc: d.about.valueCuriosityDesc },
@@ -75,6 +93,26 @@ export default async function AboutPage() {
         </div>
       </Card>
 
+      {/* Management Hierarchy */}
+      <Card className="mb-8">
+        <CardHeader title={d.about.managementTitle} />
+        <div className="p-6 pt-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {managementRoles.map((item) => (
+              <div
+                key={item.role}
+                className="flex items-center gap-3 rounded-card border border-line bg-blush p-4"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-pill bg-plum/10">
+                  <item.icon className="h-5 w-5 text-plum" strokeWidth={1.75} />
+                </span>
+                <p className="font-brand text-small font-semibold text-plum">{item.role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
       {/* Org Chart — Supervisors */}
       <Card className="mb-8">
         <CardHeader title={d.about.orgChart} />
@@ -112,6 +150,7 @@ export default async function AboutPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {committees.map((c) => {
               const cName = committeeName(c, locale);
+              const desc = pick(locale, c as unknown as Record<string, unknown>, 'description');
               return (
                 <Link
                   key={c.id}
@@ -119,7 +158,12 @@ export default async function AboutPage() {
                   className="rounded-card border border-line bg-surface p-4 transition hover:border-rose hover:shadow-card"
                 >
                   <p className="font-brand text-body font-semibold text-plum">{cName}</p>
-                  <p className="mt-1 text-caption text-ink-muted">
+                  {desc ? (
+                    <p className="mt-1 line-clamp-2 text-caption leading-relaxed text-ink-muted">
+                      {desc}
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-caption text-rose">
                     {c.members.length} {d.about.membersSection}
                     {c.leader ? ` · ${d.committees.leader}: ${memberName(c.leader, locale)}` : ''}
                   </p>

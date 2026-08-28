@@ -145,12 +145,12 @@ export interface MemberView {
 /* -------------------------------------------------------------------------- */
 
 export type CommitteeSlug =
-  | 'experiments'
-  | 'research-innovation'
-  | 'media'
-  | 'events'
-  | 'sustainability'
-  | 'education';
+  | 'experiments-innovation'
+  | 'media-design'
+  | 'content-education'
+  | 'chemistry-community'
+  | 'competitions-events'
+  | 'research-projects';
 
 export interface Committee {
   id: ID;
