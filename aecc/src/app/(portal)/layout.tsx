@@ -176,7 +176,7 @@ export default async function PortalLayout({ children }: { children: React.React
         </header>
 
         <main id="portal-main" className="flex-1 px-4 py-8 md:px-8 md:py-10">
-          <div className="mx-auto w-full max-w-shell">{children}</div>
+          <div className="page-enter mx-auto w-full max-w-shell">{children}</div>
         </main>
 
         <footer className="border-t border-line px-4 py-6 text-caption text-ink-faint md:px-8">

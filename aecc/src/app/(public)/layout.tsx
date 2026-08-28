@@ -56,7 +56,7 @@ export default async function PublicLayout({ children }: { children: React.React
         </div>
       </header>
 
-      <main id="public-main" className="flex-1">
+      <main id="public-main" className="page-enter flex-1">
         {children}
       </main>
 
