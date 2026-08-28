@@ -536,6 +536,16 @@ export async function listStaffTasks(createdBy: ID): Promise<TaskView[]> {
   }));
 }
 
+export async function countOpenTasks(userId: ID): Promise<number> {
+  const database = await db();
+  const myTaskIds = new Set(
+    database.task_assignees.filter((a) => a.user_id === userId).map((a) => a.task_id),
+  );
+  return database.tasks.filter(
+    (t) => myTaskIds.has(t.id) && t.status !== 'done',
+  ).length;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Projects                                                                   */
 /* -------------------------------------------------------------------------- */
