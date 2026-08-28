@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ExternalLink, LogOut, Settings, UserRound } from 'lucide-react';
+import { ClipboardList, ExternalLink, LogOut, Settings, UserRound } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoLockup } from '@/components/brand/Logo';
@@ -9,7 +9,7 @@ import { SidebarNav } from '@/components/portal/SidebarNav';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Avatar, Pill } from '@/components/ui';
 import { requireViewer } from '@/lib/auth/current-user';
-import { listNotifications, countUnreadNotifications } from '@/lib/db/queries';
+import { listNotifications, countUnreadNotifications, countOpenTasks } from '@/lib/db/queries';
 import { roleLabel, roleTone } from '@/lib/domain/labels';
 import { getT } from '@/lib/i18n/server';
 import { navigationFor } from '@/lib/navigation';
@@ -20,9 +20,10 @@ export default async function PortalLayout({ children }: { children: React.React
   const { locale, d } = await getT();
   const groups = navigationFor(viewer.role, d);
   const displayName = pick(locale, viewer as unknown as Record<string, unknown>, 'full_name');
-  const [rawNotifications, unreadCount] = await Promise.all([
+  const [rawNotifications, unreadCount, openTaskCount] = await Promise.all([
     listNotifications(viewer.id),
     countUnreadNotifications(viewer.id),
+    countOpenTasks(viewer.id),
   ]);
   const notifications = rawNotifications.slice(0, 20).map((n) => ({
     id: n.id,
@@ -140,6 +141,18 @@ export default async function PortalLayout({ children }: { children: React.React
               <Pill tone={roleTone(viewer.role)} className="hidden sm:inline-flex">
                 {roleLabel(viewer.role, d)}
               </Pill>
+              <Link
+                href="/portal/tasks"
+                className="relative grid h-10 w-10 place-items-center rounded-pill border border-line bg-surface transition hover:border-rose"
+                aria-label={d.nav.tasks}
+              >
+                <ClipboardList className="h-[18px] w-[18px] text-plum" aria-hidden="true" strokeWidth={1.75} />
+                {openTaskCount > 0 && (
+                  <span className="absolute -end-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-pill bg-plum px-1 text-[10px] font-bold text-white">
+                    {openTaskCount > 99 ? '99+' : openTaskCount}
+                  </span>
+                )}
+              </Link>
               <NotificationBell
                 notifications={notifications}
                 unreadCount={unreadCount}
