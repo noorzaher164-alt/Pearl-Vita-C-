@@ -4,10 +4,12 @@ import { logout } from '@/app/actions/auth';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoLockup } from '@/components/brand/Logo';
 import { MobileNav } from '@/components/portal/MobileNav';
+import { NotificationBell } from '@/components/portal/NotificationBell';
 import { SidebarNav } from '@/components/portal/SidebarNav';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Avatar, Pill } from '@/components/ui';
 import { requireViewer } from '@/lib/auth/current-user';
+import { listNotifications, countUnreadNotifications } from '@/lib/db/queries';
 import { roleLabel, roleTone } from '@/lib/domain/labels';
 import { getT } from '@/lib/i18n/server';
 import { navigationFor } from '@/lib/navigation';
@@ -18,6 +20,18 @@ export default async function PortalLayout({ children }: { children: React.React
   const { locale, d } = await getT();
   const groups = navigationFor(viewer.role, d);
   const displayName = pick(locale, viewer as unknown as Record<string, unknown>, 'full_name');
+  const [rawNotifications, unreadCount] = await Promise.all([
+    listNotifications(viewer.id),
+    countUnreadNotifications(viewer.id),
+  ]);
+  const notifications = rawNotifications.slice(0, 20).map((n) => ({
+    id: n.id,
+    title: locale === 'ar' ? n.title_ar : n.title_en,
+    body: locale === 'ar' ? n.body_ar : n.body_en,
+    link: n.link,
+    read: n.read,
+    created_at: n.created_at,
+  }));
 
   const brandLockup = (
     <LogoLockup
@@ -126,6 +140,15 @@ export default async function PortalLayout({ children }: { children: React.React
               <Pill tone={roleTone(viewer.role)} className="hidden sm:inline-flex">
                 {roleLabel(viewer.role, d)}
               </Pill>
+              <NotificationBell
+                notifications={notifications}
+                unreadCount={unreadCount}
+                labels={{
+                  title: d.settings.notifications,
+                  empty: d.settings.noNotifications,
+                  markAllRead: d.settings.markAllRead,
+                }}
+              />
               <ThemeToggle />
               <LanguageSwitcher locale={locale} d={d} />
               <Link

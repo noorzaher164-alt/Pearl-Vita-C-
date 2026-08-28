@@ -715,6 +715,25 @@ export interface ClubSetting {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Notifications                                                              */
+/* -------------------------------------------------------------------------- */
+
+export type NotificationType = 'task_assigned' | 'certificate_issued' | 'announcement' | 'general';
+
+export interface Notification {
+  id: ID;
+  user_id: ID;
+  type: NotificationType;
+  title_en: string;
+  title_ar: string;
+  body_en: string;
+  body_ar: string;
+  link: string | null;
+  read: boolean;
+  created_at: ISODate;
+}
+
+/* -------------------------------------------------------------------------- */
 /* The complete database shape                                                */
 /* -------------------------------------------------------------------------- */
 
@@ -760,4 +779,5 @@ export interface Database {
   magazine_value_of_month: MagazineValueOfMonth[];
   audit_logs: AuditLog[];
   club_settings: ClubSetting[];
+  notifications: Notification[];
 }

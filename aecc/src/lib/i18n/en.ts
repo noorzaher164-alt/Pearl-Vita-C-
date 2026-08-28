@@ -875,6 +875,8 @@ export const en = {
     passwordTooShort: 'Use at least 8 characters.',
     passwordUpdated: 'Your password has been updated.',
     notifications: 'Notifications',
+    noNotifications: 'No notifications',
+    markAllRead: 'Mark all read',
     notifyEvents: 'New events and registration reminders',
     notifyPoints: 'Points awarded to me',
     notifyMagazine: 'Magazine review updates',
@@ -921,6 +923,20 @@ export const en = {
     activityCommunity: 'Community & sustainability',
     activityCommunityBody:
       'Campaigns and exhibitions that bring chemistry to the school and the wider community.',
+    activityCompetitions: 'Competitions & events',
+    activityCompetitionsBody:
+      'Members represent the school in chemistry olympiads, science fairs, and inter-school competitions at local and national levels.',
+    activityMedia: 'Media & design',
+    activityMediaBody:
+      'The creative team behind the club — designing posters, managing social media, and documenting all our activities through photography and video.',
+    committeesTitle: 'Our committees',
+    committeesBody:
+      'Pearl Vita C is organised into six specialised committees, each led by a student leader and guided by a supervisor.',
+    howToJoinTitle: 'How to get involved',
+    howToJoinStep1: 'Attend an open club meeting at the start of the term.',
+    howToJoinStep2: 'Choose the committee that matches your interests.',
+    howToJoinStep3: 'Start participating in activities, experiments, and events.',
+    howToJoinStep4: 'Earn points, badges, and certificates for your contributions.',
     projectsTitle: 'Selected projects',
     achievementsTitle: 'Achievements',
     galleryTitle: 'From the club',

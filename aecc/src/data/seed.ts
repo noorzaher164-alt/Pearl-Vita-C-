@@ -28,6 +28,7 @@ import type {
   MagazineSubmissionEvent,
   MagazineTopStudent,
   MagazineValueOfMonth,
+  Notification,
   PointReason,
   PointTransaction,
   Profile,
@@ -329,6 +330,7 @@ export async function createSeedDatabase(): Promise<Database> {
   const magazine_achievements: MagazineAchievement[] = [];
   const magazine_value_of_month: MagazineValueOfMonth[] = [];
 
+  const notifications: Notification[] = [];
   const audit_logs: AuditLog[] = [];
 
   const club_settings = [
@@ -384,6 +386,7 @@ export async function createSeedDatabase(): Promise<Database> {
     magazine_top_students,
     magazine_achievements,
     magazine_value_of_month,
+    notifications,
     audit_logs,
     club_settings,
   };
