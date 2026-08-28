@@ -905,7 +905,7 @@ export const en = {
     exploreMagazine: 'Read the magazine',
     aboutTitle: 'About the club',
     aboutBody:
-      'Pearl Vita C is the chemistry club of Al Eman Secondary School. Our members participate in leadership, run experiments, lead research projects, publish an electronic science magazine, and connect chemistry to the community and the State of Qatar.',
+      'AECC is the chemistry club of Al Eman Secondary School. Our members participate in leadership, run experiments, lead research projects, publish an electronic science magazine, and connect chemistry to the community and the State of Qatar.',
     visionBody:
       'A school community where every student participates in leadership, engages with chemistry in real-world contexts, and contributes to building a brighter future for her school and the State of Qatar.',
     missionBody:
@@ -931,7 +931,7 @@ export const en = {
       'The creative team behind the club — designing posters, managing social media, and documenting all our activities through photography and video.',
     committeesTitle: 'Our committees',
     committeesBody:
-      'Pearl Vita C is organised into six specialised committees, each led by a student leader and guided by a supervisor.',
+      'AECC is organised into six specialised committees, each led by a student leader and guided by a supervisor.',
     howToJoinTitle: 'How to get involved',
     howToJoinStep1: 'Attend an open club meeting at the start of the term.',
     howToJoinStep2: 'Choose the committee that matches your interests.',

@@ -334,8 +334,8 @@ export async function createSeedDatabase(): Promise<Database> {
   const audit_logs: AuditLog[] = [];
 
   const club_settings = [
-    { key: 'club_name_en', value: 'Pearl Vita C' },
-    { key: 'club_name_ar', value: 'بيرل فيتا سي' },
+    { key: 'club_name_en', value: 'AECC' },
+    { key: 'club_name_ar', value: 'نادي الإيمان للكيمياء' },
     { key: 'school_name_en', value: 'Al Eman Secondary School' },
     { key: 'school_name_ar', value: 'مدرسة الإيمان الثانوية' },
     { key: 'academic_year', value: '2026–2027' },
