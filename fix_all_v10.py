@@ -209,15 +209,13 @@ def apply_header_footer(doc):
         for child in list(hdr_copy):
             header._element.append(child)
 
-        # FOOTER
+        # FOOTER - clear it (footer image is an anchor drawing in the header)
         footer = section.footer
         footer.is_linked_to_previous = False
         for el in list(footer._element):
             footer._element.remove(el)
-
-        ftr_copy = copy.deepcopy(_tmpl_ftr_element)
-        for child in list(ftr_copy):
-            footer._element.append(child)
+        empty_p = etree.SubElement(footer._element, qn('w:p'))
+        etree.SubElement(empty_p, qn('w:pPr'))
 
         # MARGINS
         section.header_distance = Twips(500)
