@@ -67,55 +67,87 @@ export default async function MembersPage({
         }
       />
 
-      {/* Organizational Structure */}
-      <Card className="mb-8">
+      {/* Organizational Structure — top-down hierarchy */}
+      <Card className="mb-8 overflow-x-auto">
         <CardHeader title={d.about.orgChart} />
-        <div className="p-6 pt-4">
-          <h3 className="mb-3 text-small font-semibold uppercase tracking-wider text-mauve">
-            {d.about.managementTitle}
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {([
-              { icon: Shield, role: d.about.roleGeneralSupervisor },
-              { icon: Crown, role: d.about.rolePresident },
-              { icon: Star, role: d.about.roleVicePresident },
-              { icon: Users, role: d.about.roleSecretary },
-              { icon: Network, role: d.about.roleRelationsOfficer },
-            ] as const).map((item) => (
-              <div
-                key={item.role}
-                className="flex items-center gap-3 rounded-card border border-line bg-blush p-3"
-              >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-plum/10">
-                  <item.icon className="h-4 w-4 text-plum" strokeWidth={1.75} />
-                </span>
-                <p className="text-caption font-semibold text-plum">{item.role}</p>
-              </div>
-            ))}
-          </div>
+        <div className="px-6 pb-8 pt-4">
+          <div className="flex flex-col items-center gap-0">
+            {/* Level 1 — General Supervisor */}
+            <div className="flex flex-col items-center gap-3 rounded-card border-2 border-plum bg-plum/5 px-6 py-4 shadow-soft">
+              <span className="grid h-10 w-10 place-items-center rounded-pill bg-plum">
+                <Shield className="h-5 w-5 text-white" strokeWidth={1.75} />
+              </span>
+              <p className="text-small font-bold text-plum">{d.about.roleGeneralSupervisor}</p>
+            </div>
 
-          <h3 className="mb-3 mt-6 text-small font-semibold uppercase tracking-wider text-mauve">
-            {d.about.committeesSection}
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {committees.map((c) => {
-              const cName = committeeName(c, locale);
-              const desc = pick(locale, c as unknown as Record<string, unknown>, 'description');
-              return (
-                <Link
-                  key={c.id}
-                  href={`/portal/committees/${c.slug}`}
-                  className="rounded-card border border-line bg-surface p-3 transition hover:border-rose hover:shadow-card"
-                >
-                  <p className="text-small font-semibold text-plum">{cName}</p>
-                  {desc ? (
-                    <p className="mt-1 line-clamp-2 text-caption leading-relaxed text-ink-muted">
-                      {desc}
-                    </p>
-                  ) : null}
-                </Link>
-              );
-            })}
+            {/* Connector line */}
+            <div className="h-8 w-px bg-plum/30" />
+
+            {/* Level 2 — President */}
+            <div className="flex flex-col items-center gap-2 rounded-card border-2 border-rose bg-rose/5 px-6 py-3 shadow-soft">
+              <span className="grid h-9 w-9 place-items-center rounded-pill bg-rose">
+                <Crown className="h-4 w-4 text-white" strokeWidth={1.75} />
+              </span>
+              <p className="text-small font-bold text-plum">{d.about.rolePresident}</p>
+            </div>
+
+            {/* Connector line */}
+            <div className="h-8 w-px bg-plum/30" />
+
+            {/* Level 3 — VP, Secretary, Relations */}
+            <div className="relative flex items-start justify-center gap-6 sm:gap-10">
+              {/* Horizontal connector bar */}
+              <div className="absolute top-0 hidden h-px w-[calc(100%-4rem)] bg-plum/30 sm:block" />
+              {([
+                { icon: Star, role: d.about.roleVicePresident },
+                { icon: Users, role: d.about.roleSecretary },
+                { icon: Network, role: d.about.roleRelationsOfficer },
+              ] as const).map((item) => (
+                <div key={item.role} className="flex flex-col items-center">
+                  <div className="hidden h-5 w-px bg-plum/30 sm:block" />
+                  <div className="flex flex-col items-center gap-2 rounded-card border border-line bg-blush px-4 py-3 shadow-soft">
+                    <span className="grid h-8 w-8 place-items-center rounded-pill bg-plum/10">
+                      <item.icon className="h-4 w-4 text-plum" strokeWidth={1.75} />
+                    </span>
+                    <p className="max-w-[7rem] text-center text-caption font-semibold text-plum">{item.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Connector line to committees */}
+            <div className="h-8 w-px bg-plum/30" />
+            <div className="mb-1 text-small font-semibold uppercase tracking-wider text-mauve">
+              {d.about.committeesSection}
+            </div>
+            <div className="h-4 w-px bg-plum/30" />
+
+            {/* Level 4 — Committees */}
+            <div className="relative w-full">
+              {/* Horizontal connector bar */}
+              <div className="mx-auto hidden h-px bg-plum/30 sm:block" style={{ width: '80%' }} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {committees.map((c) => {
+                  const cName = committeeName(c, locale);
+                  const desc = pick(locale, c as unknown as Record<string, unknown>, 'description');
+                  return (
+                    <Link
+                      key={c.id}
+                      href={`/portal/committees/${c.slug}`}
+                      className="flex flex-col items-center rounded-card border border-line bg-surface p-4 text-center transition hover:border-rose hover:shadow-card"
+                    >
+                      <div className="hidden h-4 w-px bg-plum/30 sm:block" />
+                      <p className="text-small font-semibold text-plum">{cName}</p>
+                      {desc ? (
+                        <p className="mt-1 line-clamp-2 text-caption leading-relaxed text-ink-muted">
+                          {desc}
+                        </p>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </Card>
