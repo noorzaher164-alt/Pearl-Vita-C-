@@ -17,6 +17,7 @@ import type {
   MagazineCategory,
   MagazineIssue,
   MemberView,
+  Notification,
   PointTransaction,
   Project,
   Resource,
@@ -902,6 +903,22 @@ export async function listValueOfMonth() {
   return database.magazine_value_of_month
     .slice()
     .sort((a, b) => b.year * 100 + b.month - (a.year * 100 + a.month));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Notifications                                                              */
+/* -------------------------------------------------------------------------- */
+
+export async function listNotifications(userId: ID): Promise<Notification[]> {
+  const database = await db();
+  return database.notifications
+    .filter((n) => n.user_id === userId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+export async function countUnreadNotifications(userId: ID): Promise<number> {
+  const database = await db();
+  return database.notifications.filter((n) => n.user_id === userId && !n.read).length;
 }
 
 /* -------------------------------------------------------------------------- */

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Search, UserPlus, Users } from 'lucide-react';
+import { Crown, Network, Search, Shield, Star, UserPlus, Users } from 'lucide-react';
 import { MemberLine, committeeName, memberName } from '@/components/portal/Common';
 import {
   Avatar,
   Card,
+  CardHeader,
   EmptyState,
   LinkButton,
   Meta,
@@ -65,6 +66,59 @@ export default async function MembersPage({
           ) : null
         }
       />
+
+      {/* Organizational Structure */}
+      <Card className="mb-8">
+        <CardHeader title={d.about.orgChart} />
+        <div className="p-6 pt-4">
+          <h3 className="mb-3 text-small font-semibold uppercase tracking-wider text-mauve">
+            {d.about.managementTitle}
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {([
+              { icon: Shield, role: d.about.roleGeneralSupervisor },
+              { icon: Crown, role: d.about.rolePresident },
+              { icon: Star, role: d.about.roleVicePresident },
+              { icon: Users, role: d.about.roleSecretary },
+              { icon: Network, role: d.about.roleRelationsOfficer },
+            ] as const).map((item) => (
+              <div
+                key={item.role}
+                className="flex items-center gap-3 rounded-card border border-line bg-blush p-3"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-pill bg-plum/10">
+                  <item.icon className="h-4 w-4 text-plum" strokeWidth={1.75} />
+                </span>
+                <p className="text-caption font-semibold text-plum">{item.role}</p>
+              </div>
+            ))}
+          </div>
+
+          <h3 className="mb-3 mt-6 text-small font-semibold uppercase tracking-wider text-mauve">
+            {d.about.committeesSection}
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {committees.map((c) => {
+              const cName = committeeName(c, locale);
+              const desc = pick(locale, c as unknown as Record<string, unknown>, 'description');
+              return (
+                <Link
+                  key={c.id}
+                  href={`/portal/committees/${c.slug}`}
+                  className="rounded-card border border-line bg-surface p-3 transition hover:border-rose hover:shadow-card"
+                >
+                  <p className="text-small font-semibold text-plum">{cName}</p>
+                  {desc ? (
+                    <p className="mt-1 line-clamp-2 text-caption leading-relaxed text-ink-muted">
+                      {desc}
+                    </p>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
 
       {/* Filters — a GET form so every filtered view is a shareable URL and works
           without JavaScript. */}

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { Download, ScrollText } from 'lucide-react';
+import { ScrollText } from 'lucide-react';
 import { CertificateForm } from '@/components/forms/CertificateForm';
 import { memberName } from '@/components/portal/Common';
-import { Card, EmptyState, InlineAlert, PageHeader, Pill } from '@/components/ui';
+import { Card, EmptyState, PageHeader, Pill } from '@/components/ui';
+import { CertificatePrintButton } from '@/components/portal/CertificatePrintButton';
 import { requirePermission } from '@/lib/auth/current-user';
 import { listCertificates, listEvents, listMembers } from '@/lib/db/queries';
 import { certificateKind } from '@/lib/domain/labels';
@@ -18,11 +19,12 @@ export default async function CertificatesPage() {
   const canSeeAll = viewer.permissions.can('certificates:read');
   const canIssue = viewer.permissions.can('certificates:issue');
 
-  // A member only ever receives her own certificate records.
   const certificates = await listCertificates(canSeeAll ? undefined : viewer.id);
   const [members, events] = canIssue
     ? await Promise.all([listMembers({ studentsOnly: true }), listEvents()])
     : [[], []];
+
+  const viewerName = (locale === 'ar' ? viewer.full_name_ar : viewer.full_name_en) || viewer.full_name_en;
 
   return (
     <>
@@ -32,16 +34,14 @@ export default async function CertificatesPage() {
         subtitle={d.certificates.subtitle}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className={canIssue ? 'lg:col-span-2' : 'lg:col-span-3'}>
+      <div className={canIssue ? 'grid gap-6 lg:grid-cols-3' : ''}>
+        <div className={canIssue ? 'lg:col-span-2' : ''}>
           {certificates.length === 0 ? (
             <EmptyState icon={<ScrollText />} title={d.certificates.noCertificates} />
           ) : (
             <ul className="grid gap-4">
               {certificates.map((certificate) => (
                 <Card as="li" key={certificate.id} className="overflow-hidden">
-                  {/* A certificate record rendered in the AECC award language — the
-                      same layout the printable PDF template will follow. */}
                   <div className="border-s-[3px] border-s-rose-gold bg-[#FBF2EC] p-6">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="min-w-0">
@@ -61,15 +61,21 @@ export default async function CertificatesPage() {
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-2">
                         <Pill tone="gold">{d.certificates.issuedOn}</Pill>
-                        <button
-                          type="button"
-                          className="btn btn-outline btn-sm"
-                          disabled
-                          title={d.certificates.pdfPending}
-                        >
-                          <Download className="h-4 w-4" aria-hidden="true" strokeWidth={1.75} />
-                          {d.certificates.downloadPdf}
-                        </button>
+                        <CertificatePrintButton
+                          certificate={{
+                            recipientName: memberName(certificate.member, locale),
+                            grade: certificate.member?.grade ?? '',
+                            reason: pick(locale, certificate as unknown as Record<string, unknown>, 'title') ?? '',
+                            kind: certificate.kind,
+                            kindLabel: certificateKind(certificate.kind, d),
+                            serial: certificate.serial,
+                            date: formatDate(certificate.issued_on, locale),
+                            coordinatorName: d.about.coordinatorName,
+                            teacherName: certificate.issuer ? memberName(certificate.issuer, locale) : viewerName,
+                          }}
+                          d={d}
+                          locale={locale}
+                        />
                       </div>
                     </div>
                   </div>
@@ -77,21 +83,23 @@ export default async function CertificatesPage() {
               ))}
             </ul>
           )}
-
-          <div className="mt-6">
-            <InlineAlert tone="info">{d.certificates.pdfPending}</InlineAlert>
-          </div>
         </div>
 
         {canIssue ? (
           <div>
             <CertificateForm
               d={d}
-              members={members.map((m) => ({ id: m.id, name: memberName(m, locale) }))}
+              locale={locale}
+              members={members.map((m) => ({
+                id: m.id,
+                name: memberName(m, locale),
+                grade: m.grade,
+              }))}
               events={events.map((e) => ({
                 id: e.id,
-                title: pick(locale, e as unknown as Record<string, unknown>, 'title'),
+                title: pick(locale, e as unknown as Record<string, unknown>, 'title') ?? '',
               }))}
+              viewerName={viewerName}
             />
           </div>
         ) : null}

@@ -40,6 +40,9 @@ import {
   transitionArticle,
   updateMemberProfile,
   updateSetting,
+  createNotification,
+  markNotificationRead,
+  markAllNotificationsRead,
 } from '@/lib/db/mutations';
 import { createArticleDraft } from '@/lib/db/mutations';
 import type { ArticleStatus, AttendanceStatus, IdeaStatus, RoleKey, TaskStatus } from '@/lib/domain/types';
@@ -235,10 +238,11 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
   const assigneeIds = formData.getAll('assignees').map(String).filter(Boolean);
   if (assigneeIds.length > 0 && viewer.role !== 'admin') return { error: 'forbidden' };
 
+  const titleAr = String(formData.get('titleAr') ?? '').trim();
   await createTask({
     actorId: viewer.id,
     titleEn,
-    titleAr: String(formData.get('titleAr') ?? '').trim(),
+    titleAr,
     descriptionEn: String(formData.get('descriptionEn') ?? '').trim(),
     committeeId: String(formData.get('committeeId') ?? '') || viewer.committee_id,
     projectId: String(formData.get('projectId') ?? '') || null,
@@ -246,6 +250,18 @@ export async function createTaskAction(_prev: ActionResult, formData: FormData):
     dueDate: String(formData.get('dueDate') ?? '') || null,
     assigneeIds,
   });
+
+  for (const uid of assigneeIds) {
+    await createNotification({
+      userId: uid,
+      type: 'task_assigned',
+      titleEn: 'New task assigned',
+      titleAr: 'تم تعيين مهمة جديدة',
+      bodyEn: `You have been assigned the task "${titleEn}"`,
+      bodyAr: `تم تعيينك في المهمة «${titleAr || titleEn}»`,
+      link: '/portal/tasks',
+    });
+  }
 
   revalidatePath('/portal/tasks');
   revalidatePath('/portal/members');
@@ -722,4 +738,20 @@ export async function updateSettingAction(formData: FormData): Promise<void> {
 
   await updateSetting(viewer.id, key, value);
   revalidatePath('/portal/admin/club-settings');
+}
+
+/* ------------------------------------------------------------- notifications -- */
+
+export async function markNotificationReadAction(formData: FormData): Promise<void> {
+  const viewer = await requireViewer();
+  const notificationId = String(formData.get('notificationId') ?? '');
+  if (!notificationId) return;
+  await markNotificationRead(notificationId, viewer.id);
+  revalidatePath('/portal');
+}
+
+export async function markAllNotificationsReadAction(): Promise<void> {
+  const viewer = await requireViewer();
+  await markAllNotificationsRead(viewer.id);
+  revalidatePath('/portal');
 }

@@ -9,6 +9,7 @@ import type {
   ChallengeStatus,
   ID,
   IdeaStatus,
+  NotificationType,
   RoleKey,
   TaskPriority,
   TaskStatus,
@@ -1224,6 +1225,58 @@ export async function issueCertificate(input: {
     summaryAr: `إصدار شهادة «${input.titleAr || input.titleEn}»`,
   });
   return id;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Settings                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* Notifications                                                              */
+/* -------------------------------------------------------------------------- */
+
+export async function createNotification(input: {
+  userId: ID;
+  type: NotificationType;
+  titleEn: string;
+  titleAr: string;
+  bodyEn: string;
+  bodyAr: string;
+  link: string | null;
+}): Promise<ID> {
+  return write((database) => {
+    const id = nextId(database.notifications, 'n', 4);
+    database.notifications.push({
+      id,
+      user_id: input.userId,
+      type: input.type,
+      title_en: input.titleEn,
+      title_ar: input.titleAr,
+      body_en: input.bodyEn,
+      body_ar: input.bodyAr,
+      link: input.link,
+      read: false,
+      created_at: new Date().toISOString(),
+    });
+    return id;
+  });
+}
+
+export async function markNotificationRead(notificationId: ID, userId: ID): Promise<void> {
+  await write((database) => {
+    const notification = database.notifications.find(
+      (n) => n.id === notificationId && n.user_id === userId,
+    );
+    if (notification) notification.read = true;
+  });
+}
+
+export async function markAllNotificationsRead(userId: ID): Promise<void> {
+  await write((database) => {
+    for (const n of database.notifications) {
+      if (n.user_id === userId) n.read = true;
+    }
+  });
 }
 
 /* -------------------------------------------------------------------------- */
