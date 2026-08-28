@@ -221,6 +221,14 @@
     background-clip: content-box;
   }
 
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -275,6 +283,13 @@
     border: 1px solid var(--c-line);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
+    transition:
+      box-shadow 220ms cubic-bezier(.32,.72,.32,1),
+      transform 220ms cubic-bezier(.32,.72,.32,1),
+      border-color 180ms cubic-bezier(.32,.72,.32,1);
+  }
+  .aecc-card:hover {
+    box-shadow: 0 14px 42px rgba(75, 22, 50, 0.1);
   }
 
   .aecc-panel {
@@ -527,6 +542,9 @@
   .aecc-table tbody tr:last-child td {
     border-bottom: 0;
   }
+  .aecc-table tbody tr {
+    transition: background-color 150ms cubic-bezier(.32,.72,.32,1);
+  }
   .aecc-table tbody tr:hover td {
     background: rgba(var(--c-blush), 0.75);
   }
@@ -609,6 +627,38 @@
     pointer-events: none;
     user-select: none;
   }
+
+  /* --- Page entrance animation ------------------------------------------- */
+
+  .page-enter {
+    animation: slide-up 350ms cubic-bezier(.32,.72,.32,1) both;
+  }
+
+  /* --- Skeleton shimmer -------------------------------------------------- */
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(var(--c-plum), 0.06) 25%,
+      rgba(var(--c-plum), 0.12) 50%,
+      rgba(var(--c-plum), 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: var(--radius-control);
+  }
+
+  /* --- Stagger delays for lists ----------------------------------------- */
+
+  .stagger > :nth-child(1) { animation-delay: 0ms; }
+  .stagger > :nth-child(2) { animation-delay: 40ms; }
+  .stagger > :nth-child(3) { animation-delay: 80ms; }
+  .stagger > :nth-child(4) { animation-delay: 120ms; }
+  .stagger > :nth-child(5) { animation-delay: 160ms; }
+  .stagger > :nth-child(6) { animation-delay: 200ms; }
+  .stagger > :nth-child(7) { animation-delay: 240ms; }
+  .stagger > :nth-child(8) { animation-delay: 280ms; }
+  .stagger > :nth-child(n+9) { animation-delay: 320ms; }
 }
 
 @layer utilities {

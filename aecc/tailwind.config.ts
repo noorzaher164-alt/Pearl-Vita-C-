@@ -168,11 +168,20 @@ const config: Config = {
           '0%,100%': { opacity: '0.35' },
           '50%': { opacity: '0.6' },
         },
+        'slide-up': {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          to: { backgroundPosition: '200% center' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 220ms cubic-bezier(.32,.72,.32,1) both',
         'fade-in': 'fade-in 180ms ease-out both',
         sheen: 'sheen 6s ease-in-out infinite',
+        'slide-up': 'slide-up 350ms cubic-bezier(.32,.72,.32,1) both',
+        shimmer: 'shimmer 1.8s ease-in-out infinite',
       },
       backgroundImage: {
         'plum-veil': 'linear-gradient(135deg, #48132F 0%, #3C0824 58%, #5A2440 100%)',

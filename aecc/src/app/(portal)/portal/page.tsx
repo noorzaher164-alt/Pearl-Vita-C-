@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
       {/* KPI row — admin sees the club, a member sees herself. */}
       <section
-        className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        className="stagger mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
         aria-label={showsAdminView ? d.dashboard.adminSubtitle : d.dashboard.memberSubtitle}
       >
         {showsAdminView ? (

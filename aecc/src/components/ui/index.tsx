@@ -330,7 +330,7 @@ export function MetricCard({
   }[tone];
 
   return (
-    <Card className="p-6">
+    <Card className="animate-fade-up p-6">
       <div className="flex items-start justify-between gap-3">
         <p className="text-small text-ink-muted">{label}</p>
         {icon ? (
