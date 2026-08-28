@@ -75,7 +75,7 @@ const signUpSchema = z.object({
   confirmPassword: z.string().min(1),
   fullNameEn: z.string().trim().min(2).max(120),
   fullNameAr: z.string().trim().max(120).optional().default(''),
-  grade: z.enum(['Grade 10', 'Grade 11', 'Grade 12']),
+  grade: z.enum(['Grade 10', 'Grade 11', 'Grade 12', 'Teacher']),
 });
 
 export async function signUp(_prev: SignUpState, formData: FormData): Promise<SignUpState> {
