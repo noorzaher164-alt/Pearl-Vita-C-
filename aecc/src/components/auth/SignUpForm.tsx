@@ -103,6 +103,7 @@ export function SignUpForm({ d }: { d: Dictionary }) {
           <option value="Grade 10">{d.auth.grade10}</option>
           <option value="Grade 11">{d.auth.grade11}</option>
           <option value="Grade 12">{d.auth.grade12}</option>
+          <option value="Teacher">{d.auth.teacher}</option>
         </Select>
       </Field>
 

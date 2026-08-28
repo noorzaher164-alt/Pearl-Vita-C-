@@ -216,6 +216,7 @@ export const en = {
     grade10: 'Grade 10',
     grade11: 'Grade 11',
     grade12: 'Grade 12',
+    teacher: 'Teacher',
     confirmPassword: 'Confirm password',
     confirmPasswordPlaceholder: 'Re-enter your password',
     passwordsMismatch: 'Passwords do not match.',

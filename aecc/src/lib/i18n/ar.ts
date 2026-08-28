@@ -220,6 +220,7 @@ export const ar: Dictionary = {
     grade10: 'الصف العاشر',
     grade11: 'الصف الحادي عشر',
     grade12: 'الصف الثاني عشر',
+    teacher: 'معلمة',
     confirmPassword: 'تأكيد كلمة المرور',
     confirmPasswordPlaceholder: 'أعيدي إدخال كلمة المرور',
     passwordsMismatch: 'كلمتا المرور غير متطابقتين.',
