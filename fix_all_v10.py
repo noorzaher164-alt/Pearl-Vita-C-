@@ -242,15 +242,6 @@ def do_docx(path):
                 if c and new_data:
                     entries[name] = new_data
                     date_changed = True
-                else:
-                    try:
-                        txt = entries[name].decode('utf-8')
-                        new_txt, c2 = fix_text(txt)
-                        if c2:
-                            entries[name] = new_txt.encode('utf-8')
-                            date_changed = True
-                    except UnicodeDecodeError:
-                        pass
 
         if date_changed:
             with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as zout:
