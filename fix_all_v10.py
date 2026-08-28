@@ -216,12 +216,16 @@ def apply_header_footer(doc):
             footer._element.remove(el)
 
         ftr_copy = copy.deepcopy(_tmpl_ftr_element)
+        # Remove page number content from footer
+        for p in list(ftr_copy.iter(f'{{{W}}}p')):
+            for run in list(p.iter(f'{{{W}}}r')):
+                p.remove(run)
         for child in list(ftr_copy):
             footer._element.append(child)
 
         # MARGINS
         section.header_distance = Twips(500)
-        section.footer_distance = Twips(720)
+        section.footer_distance = Twips(200)
         if section.top_margin is not None and section.top_margin < Twips(1750):
             section.top_margin = Twips(1750)
         if section.bottom_margin is not None and section.bottom_margin < Twips(1440):
