@@ -16,7 +16,7 @@ import { createSeedDatabase } from '@/data/seed';
  */
 
 const DATA_FILE = join(process.cwd(), '.data', 'aecc.json');
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 interface Persisted {
   version: number;
